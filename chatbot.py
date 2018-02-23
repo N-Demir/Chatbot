@@ -35,7 +35,7 @@ class Chatbot:
       # TODO: Change name of moviebot? keep plus?
       #############################################################################
 
-      greeting_message = ("Hi! I'm MovieBot! I'm going to recommend a movie to you. \n"
+      greeting_message = ("Hi! I'm " + self.name + "! I'm going to recommend a movie to you. \n"
       "First I will ask you about your taste in movies. Tell me about a movie that you have seen.")
 
       #############################################################################
