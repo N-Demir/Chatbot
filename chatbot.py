@@ -84,7 +84,7 @@ class Chatbot:
               response = "Sorry, I don't understand. Tell me about a movie that you have seen."
           else:
               if isMovie(movie_title):
-                  
+                pass
 
 
       return response
@@ -146,7 +146,11 @@ class Chatbot:
       # TODO: Implement the distance function between vectors u and v]
       # Note: you can also think of this as computing a similarity measure
 
-      pass
+      dotProd = np.dot(u, v)
+      lenU = np.linalg.norm(u)
+      lenV = np.linalg.norm(v)
+      distance = float(dotProd) / (lenU * lenV)
+      return distance
 
 
     def recommend(self, u):
