@@ -79,6 +79,7 @@ class Chatbot:
         #CREATIVE SECTION
         response = 'processed %s in creative mode!!' % input
       else:
+        #STARTER SECTION
         # Process Movie title
         movie_tag = self.processTitle(input)
         # Get the flag indicating success of process Title
@@ -93,7 +94,7 @@ class Chatbot:
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen"
         else:
-          return "Please tell me about one movie at a time. Go ahead." 
+          return "Please tell me about one movie at a time. Go ahead."
       return response
 
     def processTitle(self, input):
@@ -113,11 +114,17 @@ class Chatbot:
           return ("", 2)
 
     def isMovie(self, movie_title):
-        if movie_title in self.titles:
-            #TODO: Check?
+        arr = np.array(self.titles)
+        indices = np.where(arr == movie_title)
+
+        if len(indices[0]) != 0:
             return True
         else:
             return False
+
+        #print "INDICESSSS: " + str(indices)
+        #return True
+
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
