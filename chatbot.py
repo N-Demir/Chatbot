@@ -4,7 +4,7 @@
 # PA6, CS124, Stanford, Winter 2018
 # v.1.0.2
 # Original Python code by Ignacio Cases (@cases)
-###################################################################### 
+######################################################################
 import csv
 import math
 
@@ -83,7 +83,9 @@ class Chatbot:
           if movie_title == "":
               response = "Sorry, I don't understand. Tell me about a movie that you have seen."
           else:
-              
+              if isMovie(movie_title):
+                  
+
 
       return response
 
