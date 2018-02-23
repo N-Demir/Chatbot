@@ -88,8 +88,8 @@ class Chatbot:
         if movie_flag == -1: # No movies found
             return "Sorry, I don't understand. Tell me about a movie that you have seen."
         elif movie_flag == 1:
-            if isMovie(movie_title): # Good movie!!
-              response = "he"
+            if self.isMovie(movie): # Good movie!!
+              response = "I love " + movie + "!"
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen"
         else:
