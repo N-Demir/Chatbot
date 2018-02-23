@@ -23,9 +23,7 @@ class Chatbot:
       self.name = 'moviebot'
       self.is_turbo = is_turbo
       self.read_data()
-
-      #Globals TODO:Is this where they go in python? -ND
-
+      self.binarize()
 
     #############################################################################
     # 1. WARM UP REPL
@@ -81,9 +79,18 @@ class Chatbot:
         response = 'processed %s in creative mode!!' % input
       else:
           #STARTER SECTION
-        response = 'processed %s in starter mode' % input
+          movie_title = self.processTitle(input)
+          if movie_title == "":
+              response = "Sorry, I don't understand. Tell me about a movie that you have seen."
+          else:
+              
 
       return response
+
+    def processTitle(self, input):
+        #TODO: fill out
+        # movies should be clearly in quotations and match our database
+        return "" #return nothing if title couldn't be found
 
 
     #############################################################################
@@ -99,23 +106,16 @@ class Chatbot:
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
 
-      self.binarize()
-
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
       #TODO: This takes a whole, should we change it?
-      #print self.threshold
-
       #Threshold for binarizing movie rating matrix
       threshold = 3
-      maxRating = 5
 
-      #binarized_matrix = [[np.sign(i - threshold) for i in line] for line in self.ratings]
-      #binarized_matrix = [[int(i - threshold)/maxRating for i in line] for line in self.ratings]
-      #binarized_matrix = [[-1 if i - threshold < 0 else 0 if i == 0.0 else 1 for i in line] for line in self.ratings]
       binarized_matrix = [[0 if i == 0 else -1 if i - threshold <= 0 else 1 for i in line] for line in self.ratings]
       self.ratings = binarized_matrix
-      #check it works, TODO: remove:
+
+      #TODO: test harness. REMOVE
       """
       for i in range(len(self.ratings)):
           for j in range(len(self.ratings[i])):
@@ -134,7 +134,7 @@ class Chatbot:
                   if binarized != 1:
                       print "1 - MISTAKE"
       """
-      
+
     def distance(self, u, v):
       """Calculates a given distance function between vectors u and v"""
       # TODO: Implement the distance function between vectors u and v]
