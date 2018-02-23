@@ -9,6 +9,9 @@ import csv
 import math
 import re
 
+# For time testing
+import time
+
 import numpy as np
 
 from movielens import ratings
@@ -233,14 +236,14 @@ class Chatbot:
       if posCount >= negCount: return 'pos'
       else: return 'neg'
 
-    def distance(self, u, v):
+    def distance(self, u, lenU, v, lenV):
       """Calculates a given distance function between vectors u and v"""
       # TODO: Implement the distance function between vectors u and v]
       # Note: you can also think of this as computing a similarity measure
 
       dotProd = np.dot(u, v)
-      lenU = np.linalg.norm(u)
-      lenV = np.linalg.norm(v)
+      #lenU = np.linalg.norm(u)
+      #lenV = np.linalg.norm(v)
       if lenU != 0 and lenV != 0:
         return float(dotProd) / (lenU * lenV)
       else: return 0
@@ -259,26 +262,38 @@ class Chatbot:
 
       # Create list of indexes of movies that we have for simplicity
       rated_movies = [tup[0] for tup in u]
+
+      # Pre-calcute vector lengths
+      rated_vec_lengths = [np.linalg.norm(self.ratings[i]) for i in rated_movies]
+
       # Later to speed up we can pre load the movie rows of things we already rated
+
+      # Time testing
+      start_time = time.time()
 
       # Estimated user ratings
       est_ratings = []
+      print len(self.titles)
+
       for i in range(len(self.titles)):
         # Only consider movies not already rated by u
         if not i in rated_movies:
           # Get the movie-vec from the matrix
           movie_vec = self.ratings[i]
+          # Pre compute movie_vec length
+          movie_vec_len = np.linalg.norm(movie_vec)
 
           est_rating = 0
           # Loop over the movies rated by u and use item-item collab filtering
-          for user_rating in u:
+          for inx, user_rating in enumerate(u):
             # Get the vector for the users movie
             usr_movie_vec = self.ratings[user_rating[0]]
             # Users rating
             rating = user_rating[1]
-            #print rating
 
-            est_rating += self.distance(movie_vec, usr_movie_vec) * rating
+            
+
+            est_rating += self.distance(movie_vec, movie_vec_len, usr_movie_vec, rated_vec_lengths[inx]) * rating
 
           # Add new estimated rating
           #print 'est: %s' % (est_rating)
@@ -288,6 +303,9 @@ class Chatbot:
 
       # Later allow for not just top rated movie
       movie_to_recomend = self.titles[sorted_movies[0][0]][0]
+
+      print "Recommend took", time.time() - start_time, "to run"
+
       # Print top 50
       for i in range(50):
         print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
