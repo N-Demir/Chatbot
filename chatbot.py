@@ -24,6 +24,9 @@ class Chatbot:
       self.is_turbo = is_turbo
       self.read_data()
 
+      #Globals TODO:Is this where they go in python? -ND
+
+
     #############################################################################
     # 1. WARM UP REPL
     #############################################################################
@@ -31,10 +34,11 @@ class Chatbot:
     def greeting(self):
       """chatbot greeting message"""
       #############################################################################
-      # TODO: Write a short greeting message                                      #
+      # TODO: Change name of moviebot? keep plus?
       #############################################################################
 
-      greeting_message = 'How can I help you?'
+      greeting_message = ("Hi! I'm MovieBot! I'm going to recommend a movie to you. \n"
+      "First I will ask you about your taste in movies. Tell me about a movie that you have seen.")
 
       #############################################################################
       #                             END OF YOUR CODE                              #
@@ -73,8 +77,10 @@ class Chatbot:
       # highly recommended                                                        #
       #############################################################################
       if self.is_turbo == True:
+          #CREATIVE SECTION
         response = 'processed %s in creative mode!!' % input
       else:
+          #STARTER SECTION
         response = 'processed %s in starter mode' % input
 
       return response
@@ -93,13 +99,42 @@ class Chatbot:
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
 
+      self.binarize()
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
+      #TODO: This takes a whole, should we change it?
+      #print self.threshold
 
-      pass
+      #Threshold for binarizing movie rating matrix
+      threshold = 3
+      maxRating = 5
 
+      #binarized_matrix = [[np.sign(i - threshold) for i in line] for line in self.ratings]
+      #binarized_matrix = [[int(i - threshold)/maxRating for i in line] for line in self.ratings]
+      #binarized_matrix = [[-1 if i - threshold < 0 else 0 if i == 0.0 else 1 for i in line] for line in self.ratings]
+      binarized_matrix = [[0 if i == 0 else -1 if i - threshold <= 0 else 1 for i in line] for line in self.ratings]
+      self.ratings = binarized_matrix
+      #check it works, TODO: remove:
+      """
+      for i in range(len(self.ratings)):
+          for j in range(len(self.ratings[i])):
+              original = self.ratings[i][j]
+              binarized = binarized_matrix[i][j]
+              #print "Original: " + str(original) + " Binarized: " + str(binarized)
+              if original == 0:
+                  if binarized != 0:
+                      print "0 - MISTAKE"
 
+              if original == 3:
+                  if binarized != -1:
+                      print "3 - MISTAKE"
+
+              if original == 3.5:
+                  if binarized != 1:
+                      print "1 - MISTAKE"
+      """
+      
     def distance(self, u, v):
       """Calculates a given distance function between vectors u and v"""
       # TODO: Implement the distance function between vectors u and v]
