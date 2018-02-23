@@ -37,7 +37,7 @@ class Chatbot:
       # TODO: Change name of moviebot? keep plus?
       #############################################################################
 
-      greeting_message = ("Hi! I'm MovieBot! I'm going to recommend a movie to you. \n"
+      greeting_message = ("Hi! I'm " + self.name + "! I'm going to recommend a movie to you. \n"
       "First I will ask you about your taste in movies. Tell me about a movie that you have seen.")
 
       #############################################################################
@@ -134,7 +134,7 @@ class Chatbot:
                   if binarized != 1:
                       print "1 - MISTAKE"
       """
-      
+
     def distance(self, u, v):
       """Calculates a given distance function between vectors u and v"""
       # TODO: Implement the distance function between vectors u and v]
