@@ -23,8 +23,12 @@ class Chatbot:
     def __init__(self, is_turbo=False):
       self.name = 'moviebot'
       self.is_turbo = is_turbo
+      self.sentiment = {}
       self.read_data()
       self.binarize()
+
+      inputString = "I thought the \"Titanic\" was the best movie I have seen"
+      print(self.sentimentClass(inputString))
 
     #############################################################################
     # 1. WARM UP REPL
@@ -143,7 +147,6 @@ class Chatbot:
       """Modifies the ratings matrix to make all of the ratings binary"""
       #TODO: This takes a whole, should we change it?
       #Threshold for binarizing movie rating matrix
-      # Hi
       threshold = 3
 
       binarized_matrix = [[0 if i == 0 else -1 if i - threshold <= 0 else 1 for i in line] for line in self.ratings]
@@ -168,6 +171,19 @@ class Chatbot:
                   if binarized != 1:
                       print "1 - MISTAKE"
       """
+    
+    def sentimentClass(self, inputString):
+      posCount = 0.0
+      negCount = 0.0
+      inputString = re.sub(r'\".*\"', '', inputString)
+      inputString = re.sub(r' +', ' ', inputString)
+      inputWords = inputString.split(' ')
+      for word in inputWords:
+        if word in self.sentiment:
+          if self.sentiment[word] == 'pos': posCount += 1
+          elif self.sentiment[word] == 'neg': negCount += 1
+      if posCount >= negCount: return 'pos'
+      else: return 'neg'
 
     def distance(self, u, v):
       """Calculates a given distance function between vectors u and v"""
@@ -177,8 +193,9 @@ class Chatbot:
       dotProd = np.dot(u, v)
       lenU = np.linalg.norm(u)
       lenV = np.linalg.norm(v)
-      distance = float(dotProd) / (lenU * lenV)
-      return distance
+      if lenU != 0 and lenV != 0:
+        return float(dotProd) / (lenU * lenV)
+      else: return 0
 
 
     def recommend(self, u):
