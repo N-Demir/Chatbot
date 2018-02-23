@@ -175,6 +175,7 @@ class Chatbot:
     def sentimentClass(self, inputString):
       posCount = 0.0
       negCount = 0.0
+      inputString.lower()
       inputString = re.sub(r'\".*\"', '', inputString)
       inputString = re.sub(r' +', ' ', inputString)
       inputWords = inputString.split(' ')
