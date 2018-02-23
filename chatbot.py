@@ -27,7 +27,6 @@ class Chatbot:
       self.read_data()
       self.binarize()
 
-      
 
     #############################################################################
     # 1. WARM UP REPL
@@ -117,9 +116,7 @@ class Chatbot:
           return ("", 2)
 
     def isMovie(self, movie_title):
-        arr = np.array(self.titles)
-        indices = np.where(arr == movie_title)
-
+        indices = np.where(self.titles == movie_title)
         if len(indices[0]) != 0:
             return True
         else:
@@ -137,6 +134,9 @@ class Chatbot:
       self.titles, self.ratings = ratings()
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
+
+      #Added for efficiency? -ND
+      self.titles = np.array(self.titles)
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
