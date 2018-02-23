@@ -84,7 +84,7 @@ class Chatbot:
               response = "Sorry, I don't understand. Tell me about a movie that you have seen."
           else:
               if isMovie(movie_title):
-                  
+                  #TODO:Find sentiment?
 
 
       return response
@@ -95,8 +95,11 @@ class Chatbot:
         return "" #return nothing if title couldn't be found
 
     def isMovie(self, movie_title):
-        #TODO: fillout
-        return False
+        if movie_title in self.titles:
+            #TODO: Check?
+            return True
+        else:
+            return False
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
