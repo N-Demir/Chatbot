@@ -197,7 +197,7 @@ class Chatbot:
       temp = []
       negate = False
       for word in inputString:
-          print "Word: " + word
+          #print "Word: " + word
           if word in self.negations:
               temp.append(word)
               if negate:
@@ -229,7 +229,7 @@ class Chatbot:
               if self.sentiment[word] == 'pos': posCount += 1
               elif self.sentiment[word] == 'neg': negCount += 1
         #DEBUGGING TODO:REMOVE
-        print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
+        #print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
       if posCount >= negCount: return 'pos'
       else: return 'neg'
 
