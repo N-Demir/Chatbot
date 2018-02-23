@@ -94,9 +94,9 @@ class Chatbot:
             movie_index = self.isMovie(movie)
             if movie_index != -1: # Good movie!!
               #response = "I love " + movie + "!"
-              response = "I love " + self.titles[movie_index][0][0] + "!"
+              response = "I love " + self.titles[movie_index][0][0] + "! Can you tell me about another movie you have seen?"
             else: # Unknown movie
-              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen"
+              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
           return "Please tell me about one movie at a time. Go ahead."
       return response
