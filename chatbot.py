@@ -83,23 +83,29 @@ class Chatbot:
           if movie_title == "":
               response = "Sorry, I don't understand. Tell me about a movie that you have seen."
           else:
-              if isMovie(movie_title):
-                pass
-
+              if self.isMovie(movie_title):
+                  return "WEEEE"
 
       return response
 
     def processTitle(self, input):
         #TODO: fill out
         # movies should be clearly in quotations and match our database
-        return "" #return nothing if title couldn't be found
+        #return "" #return nothing if title couldn't be found
+        return ""
 
     def isMovie(self, movie_title):
-        if movie_title in self.titles:
-            #TODO: Check?
+        arr = np.array(self.titles)
+        indices = np.where(arr == movie_title)
+
+        if len(indices[0]) != 0:
             return True
         else:
             return False
+
+        #print "INDICESSSS: " + str(indices)
+        #return True
+
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
