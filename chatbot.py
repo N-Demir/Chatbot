@@ -115,6 +115,7 @@ class Chatbot:
       """Modifies the ratings matrix to make all of the ratings binary"""
       #TODO: This takes a whole, should we change it?
       #Threshold for binarizing movie rating matrix
+      # Hi
       threshold = 3
 
       binarized_matrix = [[0 if i == 0 else -1 if i - threshold <= 0 else 1 for i in line] for line in self.ratings]
