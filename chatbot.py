@@ -27,8 +27,7 @@ class Chatbot:
       self.read_data()
       self.binarize()
 
-      inputString = "I thought the \"Titanic\" was the best movie I have seen"
-      print(self.sentimentClass(inputString))
+      
 
     #############################################################################
     # 1. WARM UP REPL
@@ -126,10 +125,6 @@ class Chatbot:
         else:
             return False
 
-        #print "INDICESSSS: " + str(indices)
-        #return True
-
-
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
     #############################################################################
@@ -171,7 +166,7 @@ class Chatbot:
                   if binarized != 1:
                       print "1 - MISTAKE"
       """
-    
+
     def sentimentClass(self, inputString):
       posCount = 0.0
       negCount = 0.0
