@@ -108,7 +108,7 @@ class Chatbot:
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
           return "Please tell me about one movie at a time. Go ahead."
-      
+
       # Need to fix this, just for testing
       if len(self.usr_rating_vec) == 4:
         self.recommend(self.usr_rating_vec)
@@ -200,7 +200,10 @@ class Chatbot:
           print "Word: " + word
           if word in self.negations:
               temp.append(word)
-              negate = True
+              if negate:
+                  negate = False
+              else:
+                  negate = True
               continue
           elif word in self.punctuations:
               temp.append(word)
