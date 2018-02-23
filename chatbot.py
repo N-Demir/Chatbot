@@ -94,6 +94,9 @@ class Chatbot:
         # movies should be clearly in quotations and match our database
         return "" #return nothing if title couldn't be found
 
+    def isMovie(self, movie_title):
+        #TODO: fillout
+        return False
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
