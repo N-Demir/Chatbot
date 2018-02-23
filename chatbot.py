@@ -14,6 +14,8 @@ import numpy as np
 from movielens import ratings
 from random import randint
 
+from PorterStemmer import PorterStemmer
+
 class Chatbot:
     """Simple class to implement the chatbot for PA 6."""
 
@@ -26,6 +28,7 @@ class Chatbot:
       self.sentiment = {}
       self.read_data()
       self.binarize()
+      self.p = PorterStemmer()
 
 
     #############################################################################
@@ -168,6 +171,9 @@ class Chatbot:
                   if binarized != 1:
                       print "1 - MISTAKE"
       """
+
+    def stem(self, word):
+      return self.p.stem(word)
 
     def sentimentClass(self, inputString):
       posCount = 0.0
