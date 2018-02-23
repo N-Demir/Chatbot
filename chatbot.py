@@ -30,6 +30,11 @@ class Chatbot:
       self.binarize()
       self.p = PorterStemmer()
 
+      self.negations = open("data/negations.txt", "r").read().splitlines()
+      self.punctuations = open('data/punctuation.txt', "r").read().splitlines()
+
+
+      print str(self.negations)
 
     #############################################################################
     # 1. WARM UP REPL
@@ -97,7 +102,8 @@ class Chatbot:
             movie_index = self.isMovie(movie)
             if movie_index != -1: # Good movie!!
               #response = "I love " + movie + "!"
-              response = "I love " + self.titles[movie_index][0][0] + "! Can you tell me about another movie you have seen?"
+              #response = "I love " + self.titles[movie_index][0][0] + "!"
+              response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
@@ -180,12 +186,44 @@ class Chatbot:
       negCount = 0.0
       inputString.lower()
       inputString = re.sub(r'\".*\"', '', inputString)
-      inputString = re.sub(r' +', ' ', inputString)
-      inputWords = inputString.split(' ')
-      for word in inputWords:
-        if word in self.sentiment:
-          if self.sentiment[word] == 'pos': posCount += 1
-          elif self.sentiment[word] == 'neg': negCount += 1
+      inputString = inputString.split()
+
+      #negate things first
+      temp = []
+      negate = False
+      for word in inputString:
+          print "Word: " + word
+          if word in self.negations:
+              print "NEGATION"
+              temp.append(word)
+              negate = True
+              continue
+          elif word in self.punctuations:
+              print "PUNCTUATION"
+              temp.append(word)
+              negate = False
+              continue
+
+          #temp.add(word if !negate else "NOT_"+word)
+          if negate:
+              temp.append("NOT_" + word)
+          else:
+              temp.append(word)
+      inputString = temp
+
+      for word in inputString:
+        #print "Word: " + word
+        if "NOT_" in word:
+            word = word.replace("NOT_", "")
+            if word in self.sentiment:
+              if self.sentiment[word] == 'pos': negCount += 1
+              elif self.sentiment[word] == 'neg': posCount += 1
+        else:
+            if word in self.sentiment:
+              if self.sentiment[word] == 'pos': posCount += 1
+              elif self.sentiment[word] == 'neg': negCount += 1
+        #DEBUGGING TODO:REMOVE
+        print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
       if posCount >= negCount: return 'pos'
       else: return 'neg'
 
@@ -244,6 +282,8 @@ class Chatbot:
 
     def bot_name(self):
       return self.name
+
+
 
 
 if __name__ == '__main__':
