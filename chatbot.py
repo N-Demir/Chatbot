@@ -27,6 +27,8 @@ class Chatbot:
       self.read_data()
       self.binarize()
 
+      self.negations = set(self.readFile("data/negations.txt"))
+      self.punctuations = set(self.readFile("data/punctuation.txt"))
 
     #############################################################################
     # 1. WARM UP REPL
@@ -174,9 +176,35 @@ class Chatbot:
       negCount = 0.0
       inputString.lower()
       inputString = re.sub(r'\".*\"', '', inputString)
-      inputString = re.sub(r' +', ' ', inputString)
-      inputWords = inputString.split(' ')
+      #inputString = re.sub(r' +', ' ', inputString)
+      inputWords = inputString.split()
+
+      #TODO:REMOVE
+      print "INPUTWORDS: " + str(inputWords)
+
+      #negate things first
+      temp = []
+      negate = False
+      for word in inputString:
+          if word in self.negations:
+              temp.append(word)
+              negate = True
+              continue
+          elif word in self.punctuations:
+              temp.append(word)
+              negate = False
+              continue
+
+          #temp.add(word if !negate else "NOT_"+word)
+          if negate:
+              temp.append("NOT_" + word)
+          else:
+              temp.append(word)
+      inputWords = temp
+
       for word in inputWords:
+        if "NOT_" in word:
+            word.replace("NOT_", "")
         if word in self.sentiment:
           if self.sentiment[word] == 'pos': posCount += 1
           elif self.sentiment[word] == 'neg': negCount += 1
