@@ -24,6 +24,7 @@ class Chatbot:
       self.name = 'moviebot'
       self.is_turbo = is_turbo
       self.sentiment = {}
+      self.usr_rating_vec = []
       self.read_data()
       self.binarize()
 
@@ -93,12 +94,17 @@ class Chatbot:
         elif movie_flag == 1:
             movie_index = self.isMovie(movie)
             if movie_index != -1: # Good movie!!
-              #response = "I love " + movie + "!"
-              response = "I love " + self.titles[movie_index][0][0] + "!"
+              response = "I love " + str(self.titles[movie_index][0]) + "!"
+              self.usr_rating_vec.append((movie_index, 1))
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen"
         else:
           return "Please tell me about one movie at a time. Go ahead."
+      
+      # Need to fix this, just for testing
+      if len(self.usr_rating_vec) == 4:
+        self.recommend(self.usr_rating_vec)
+
       return response
 
     def processTitle(self, input):
@@ -120,7 +126,7 @@ class Chatbot:
     def isMovie(self, movie_title):
         indices = np.where(self.titles == movie_title)
         if len(indices[0]) != 0:
-            return indices[0]
+            return indices[0][0]
         else:
             return -1
 
@@ -197,12 +203,52 @@ class Chatbot:
 
 
     def recommend(self, u):
+      # Probably want to add a parameter rec_num to allow for multiple
+      # top recommendatoins
       """Generates a list of movies based on the input vector u using
       collaborative filtering"""
       # TODO: Implement a recommendation function that takes a user vector u
       # and outputs a list of movies recommended by the chatbot
 
-      pass
+      # Assume you is a sparse vector of the form
+      # [(movie index, movie rating), ...]
+
+      # Create list of indexes of movies that we have for simplicity
+      rated_movies = [tup[0] for tup in u]
+      # Later to speed up we can pre load the movie rows of things we already rated
+
+      # Estimated user ratings
+      est_ratings = []
+      for i in range(len(self.titles)):
+        # Only consider movies not already rated by u
+        if not i in rated_movies:
+          # Get the movie-vec from the matrix
+          movie_vec = self.ratings[i]
+
+          est_rating = 0
+          # Loop over the movies rated by u and use item-item collab filtering
+          for user_rating in u:
+            # Get the vector for the users movie
+            usr_movie_vec = self.ratings[user_rating[0]]
+            # Users rating
+            rating = user_rating[1]
+            #print rating
+
+            est_rating += self.distance(movie_vec, usr_movie_vec) * rating
+
+          # Add new estimated rating
+          #print 'est: %s' % (est_rating)
+          est_ratings.append((i, est_rating))
+
+      sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
+
+      # Later allow for not just top rated movie
+      movie_to_recomend = self.titles[sorted_movies[0][0]][0]
+      # Print top 50
+      for i in range(50):
+        print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
+
+      return movie_to_recomend
 
 
     #############################################################################
