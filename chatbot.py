@@ -7,6 +7,7 @@
 ######################################################################
 import csv
 import math
+import re
 
 import numpy as np
 
@@ -75,24 +76,41 @@ class Chatbot:
       # highly recommended                                                        #
       #############################################################################
       if self.is_turbo == True:
-          #CREATIVE SECTION
+        #CREATIVE SECTION
         response = 'processed %s in creative mode!!' % input
       else:
-          #STARTER SECTION
-          movie_title = self.processTitle(input)
-          if movie_title == "":
-              response = "Sorry, I don't understand. Tell me about a movie that you have seen."
-          else:
-              if isMovie(movie_title):
-                pass
-
-
+        # Process Movie title
+        movie_tag = self.processTitle(input)
+        # Get the flag indicating success of process Title
+        movie_flag = movie_tag[1]
+        # Movie found
+        movie = movie_tag[0]
+        if movie_flag == -1: # No movies found
+            return "Sorry, I don't understand. Tell me about a movie that you have seen."
+        elif movie_flag == 1:
+            if isMovie(movie_title): # Good movie!!
+              response = "he"
+            else: # Unknown movie
+              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen"
+        else:
+          return "Please tell me about one movie at a time. Go ahead." 
       return response
 
     def processTitle(self, input):
         #TODO: fill out
         # movies should be clearly in quotations and match our database
-        return "" #return nothing if title couldn't be found
+        movie_regex = r'"(.*?)"'
+
+        # Find all the entities
+        entities = re.findall(movie_regex, input)
+
+        # No movies found - flag -1
+        if len(entities) == 0:
+          return ("", -1)
+        elif len(entities) == 1: # One movie found - flag 1
+          return (entities[0], 1)
+        else: # Multiple movies found - flag 2
+          return ("", 2)
 
     def isMovie(self, movie_title):
         if movie_title in self.titles:
