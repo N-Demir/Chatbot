@@ -26,6 +26,8 @@ class Chatbot:
       self.read_data()
       self.binarize()
 
+      
+
     #############################################################################
     # 1. WARM UP REPL
     #############################################################################
@@ -121,10 +123,6 @@ class Chatbot:
             return True
         else:
             return False
-
-        #print "INDICESSSS: " + str(indices)
-        #return True
-
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
