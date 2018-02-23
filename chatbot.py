@@ -27,7 +27,6 @@ class Chatbot:
       self.read_data()
       self.binarize()
 
-      
 
     #############################################################################
     # 1. WARM UP REPL
@@ -92,8 +91,10 @@ class Chatbot:
         if movie_flag == -1: # No movies found
             return "Sorry, I don't understand. Tell me about a movie that you have seen."
         elif movie_flag == 1:
-            if self.isMovie(movie): # Good movie!!
-              response = "I love " + movie + "!"
+            movie_index = self.isMovie(movie)
+            if movie_index != -1: # Good movie!!
+              #response = "I love " + movie + "!"
+              response = "I love " + self.titles[movie_index][0][0] + "!"
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen"
         else:
@@ -117,13 +118,11 @@ class Chatbot:
           return ("", 2)
 
     def isMovie(self, movie_title):
-        arr = np.array(self.titles)
-        indices = np.where(arr == movie_title)
-
+        indices = np.where(self.titles == movie_title)
         if len(indices[0]) != 0:
-            return True
+            return indices[0]
         else:
-            return False
+            return -1
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
@@ -137,6 +136,9 @@ class Chatbot:
       self.titles, self.ratings = ratings()
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
+
+      #Added for efficiency? -ND
+      self.titles = np.array(self.titles)
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
