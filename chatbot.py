@@ -105,16 +105,33 @@ class Chatbot:
         elif movie_flag == 1:
             movie_index = self.isMovie(movie)
             if movie_index != -1: # Good movie!!
-              self.usr_rating_vec.append((movie_index, 1))
-              response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
+              pass
+              # Need to encorperate the sentiment
+              #self.usr_rating_vec.append((movie_index, 1))
+              #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
           return "Please tell me about one movie at a time. Go ahead."
 
-      # Need to fix this, just for testing
-      if len(self.usr_rating_vec) == 4:
-        self.recommend(self.usr_rating_vec)
+        #TODO: fill out
+        # We have recieved a valid movie so we have to extract sentiment,
+        # record the movie rating based on sentiment, and respond reflecting
+        # the sentiment.
+
+        sentiment = self.sentimentClass(input)
+        if sentiment == 'pos':
+          response = "You liked \"" + movie + "\". Thank you! Tell me about another movie you have seen."
+          self.usr_rating_vec.append((movie_index, 1))
+        elif sentiment == 'neg':
+          response = "You did not like " + movie + ". Thank you! Tell me about another movie you have seen."
+          self.usr_rating_vec.append((movie_index, -1))
+        else: # Unclear sentiment
+          response = "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
+
+        # Need to fix this, just for testing
+        if len(self.usr_rating_vec) == 4:
+          self.recommend(self.usr_rating_vec)
 
       return response
 
@@ -233,6 +250,8 @@ class Chatbot:
               elif self.sentiment[word] == 'neg': negCount += 1
         #DEBUGGING TODO:REMOVE
         #print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
+
+      #TODO: Catch no sentiment or unclear sentiment!
       if posCount >= negCount: return 'pos'
       else: return 'neg'
 
@@ -263,7 +282,7 @@ class Chatbot:
       # Create list of indexes of movies that we have for simplicity
       rated_movies = [tup[0] for tup in u]
 
-      # Pre-calcute vector lengths
+      # Pre-calcute vector lengths for movies rated by user
       rated_vec_lengths = [np.linalg.norm(self.ratings[i]) for i in rated_movies]
 
       # Later to speed up we can pre load the movie rows of things we already rated
@@ -273,8 +292,6 @@ class Chatbot:
 
       # Estimated user ratings
       est_ratings = []
-      print len(self.titles)
-
       for i in range(len(self.titles)):
         # Only consider movies not already rated by u
         if not i in rated_movies:
@@ -291,14 +308,13 @@ class Chatbot:
             # Users rating
             rating = user_rating[1]
 
-            
-
+            # Estimate the rating of movie i
             est_rating += self.distance(movie_vec, movie_vec_len, usr_movie_vec, rated_vec_lengths[inx]) * rating
 
           # Add new estimated rating
-          #print 'est: %s' % (est_rating)
           est_ratings.append((i, est_rating))
 
+      # Sort the estimated rating in reverse order
       sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
 
       # Later allow for not just top rated movie
