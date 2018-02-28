@@ -126,6 +126,8 @@ class Chatbot:
               elif sentiment == 'neg':
                 response = self.getNegResponse(movie)
                 self.usr_rating_vec.append((movie_index, -1))
+              elif sentiment == 'none':
+                response = self.getNoneResponse(movie)
               else: # Unclear sentiment
                 response = self.getUnclearResponse(movie)
 
@@ -164,6 +166,17 @@ class Chatbot:
             return "" #TODO: fill out
 
         return "ISSUE - negresponse" #TODO:REMOVE
+
+    def getNoneResponse(self, movie):
+        NUM_NONE_RESPONSES = 1
+        randInt = randint(1, NUM_NONE_RESPONSES)
+
+        if randInt == 1:
+            return "Ok, thank you! Tell me your opinion on \"" + movie + "\"."
+        elif randInt == 2:
+            return "" #TODO: fill out
+
+        return "ISSUE - noneResponse"
 
     def getUnclearResponse(self, movie):
         NUM_UNCLEAR_RESPONSES = 1
@@ -305,7 +318,8 @@ class Chatbot:
         # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
 
       #TODO: Catch no sentiment or unclear sentiment!
-      if posCount >= negCount: return 'pos'
+      if posCount == 0.0 and negCount == 0.0: return 'none'
+      elif posCount >= negCount: return 'pos'
       else: return 'neg'
 
     def distance(self, u, lenU, v, lenV):
