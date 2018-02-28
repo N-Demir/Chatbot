@@ -39,9 +39,6 @@ class Chatbot:
       self.negations = open("data/negations.txt", "r").read().splitlines()
       self.punctuations = open('data/punctuation.txt', "r").read().splitlines()
 
-
-      print str(self.negations)
-
     #############################################################################
     # 1. WARM UP REPL
     #############################################################################
