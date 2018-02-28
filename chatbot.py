@@ -13,6 +13,8 @@ import re
 import time
 
 import numpy as np
+import heapq
+
 
 from movielens import ratings
 from random import randint
@@ -130,7 +132,7 @@ class Chatbot:
           response = "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
 
         # Need to fix this, just for testing
-        if len(self.usr_rating_vec) == 4:
+        if len(self.usr_rating_vec) == 5:
           self.recommend(self.usr_rating_vec)
 
       return response
@@ -265,6 +267,7 @@ class Chatbot:
       #lenV = np.linalg.norm(v)
       if lenU != 0 and lenV != 0:
         return float(dotProd) / (lenU * lenV)
+        #return dotProd
       else: return 0
 
 
@@ -282,6 +285,7 @@ class Chatbot:
       # Create list of indexes of movies that we have for simplicity
       rated_movies = [tup[0] for tup in u]
 
+      '''
       # Pre-calcute vector lengths for movies rated by user
       rated_vec_lengths = [np.linalg.norm(self.ratings[i]) for i in rated_movies]
 
@@ -292,6 +296,7 @@ class Chatbot:
 
       # Estimated user ratings
       est_ratings = []
+      # Try with heap
       for i in range(len(self.titles)):
         # Only consider movies not already rated by u
         if not i in rated_movies:
@@ -312,19 +317,56 @@ class Chatbot:
             est_rating += self.distance(movie_vec, movie_vec_len, usr_movie_vec, rated_vec_lengths[inx]) * rating
 
           # Add new estimated rating
-          est_ratings.append((i, est_rating))
+          #est_ratings.append((i, est_rating))
+          # Invert rating for putting into heap
+          heapq.heappush(est_ratings, (est_rating * -1, i))
+      '''
+
+      # Something new!
+      # Create a matrix with the normalized movie vectors rated by usr as the rows
+      norm_usr_movies = np.array([np.array(self.ratings[i]) / (float(np.linalg.norm(self.ratings[i])) \
+                                          if float(np.linalg.norm(self.ratings[i])) != 0 else 1) for i in rated_movies])
+      # Ratings array
+      ratings_usr = np.array([tup[1] for tup in u])
+      # Sum vector of all [1,...,1]
+      ones = np.ones(len(rated_movies))
+
+      # Time testing
+      start_time = time.time()
+      est_ratings = []
+      for i in range(len(self.titles)):
+        if not i in rated_movies:
+          # Get the normalized movie vec we want to generate a rating for
+          movie_norm = float(np.linalg.norm(self.ratings[i]))
+          movie_vec = np.array(self.ratings[i]) / (movie_norm if movie_norm != 0 else 1) 
+
+          # Cosine similarity
+          cosine_sim = np.dot(norm_usr_movies, movie_vec)
+          # Element wise multiply by rating
+          rating_scaled = np.multiply(cosine_sim, ratings_usr)
+
+          # Sum all the elements by taking dot with [1,...,1]
+          est_rating = np.dot(rating_scaled, ones)
+
+          # Invert rating for putting into heap
+          heapq.heappush(est_ratings, (est_rating * -1, i))
+
+
 
       # Sort the estimated rating in reverse order
-      sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
+      #sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
 
       # Later allow for not just top rated movie
-      movie_to_recomend = self.titles[sorted_movies[0][0]][0]
+      #movie_to_recomend = self.titles[sorted_movies[0][0]][0]
+      movie_to_recomend = self.titles[est_ratings[0][1]][0]
 
       print "Recommend took", time.time() - start_time, "to run"
 
       # Print top 50
       for i in range(50):
-        print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
+        #print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
+        movie_i = heapq.heappop(est_ratings)
+        print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1) 
 
       return movie_to_recomend
 
