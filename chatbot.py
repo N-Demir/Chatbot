@@ -4,6 +4,10 @@
 # PA6, CS124, Stanford, Winter 2018
 # v.1.0.2
 # Original Python code by Ignacio Cases (@cases)
+#
+#TODOS: Remember what people said about previous movies, Fine grain sentiment?
+#
+#Dones:
 ######################################################################
 import csv
 import math
@@ -104,35 +108,67 @@ class Chatbot:
         elif movie_flag == 1:
             movie_index = self.isMovie(movie)
             if movie_index != -1: # Good movie!!
-              pass
               # Need to encorperate the sentiment
               #self.usr_rating_vec.append((movie_index, 1))
               #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
+
+              #TODO: fill out
+              # We have recieved a valid movie so we have to extract sentiment,
+              # record the movie rating based on sentiment, and respond reflecting
+              # the sentiment.
+
+              sentiment = self.sentimentClass(input)
+              if sentiment == 'pos':
+                response = self.getPosResponse(movie)
+                self.usr_rating_vec.append((movie_index, 1))
+              elif sentiment == 'neg':
+                response = self.getNegResponse(movie)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: # Unclear sentiment
+                response = self.getUnclearResponse(movie)
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
           return "Please tell me about one movie at a time. Go ahead."
-
-        #TODO: fill out
-        # We have recieved a valid movie so we have to extract sentiment,
-        # record the movie rating based on sentiment, and respond reflecting
-        # the sentiment.
-
-        sentiment = self.sentimentClass(input)
-        if sentiment == 'pos':
-          response = "You liked \"" + movie + "\". Thank you! Tell me about another movie you have seen."
-          self.usr_rating_vec.append((movie_index, 1))
-        elif sentiment == 'neg':
-          response = "You did not like " + movie + ". Thank you! Tell me about another movie you have seen."
-          self.usr_rating_vec.append((movie_index, -1))
-        else: # Unclear sentiment
-          response = "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
 
         # Need to fix this, just for testing
         if len(self.usr_rating_vec) == 5:
           self.recommend(self.usr_rating_vec)
 
       return response
+
+    def getPosResponse(self, movie):
+        NUM_POS_RESPONSES = 1
+        randInt = random.randint(1, NUM_POS_RESPONSES)
+
+        if randInt == 1:
+            return "You liked \"" + movie + "\". Thank you! Tell me about another movie you have seen."
+        elif randInt == 2:
+            return "" #TODO: fill out
+
+        return "ISSUE - posresponse" #TODO:REMOVE
+
+    def getNegResponse(self, movie):
+        NUM_NEG_RESPONSES = 1
+        randInt = random.randint(1, NUM_NEG_RESPONSES)
+
+        if randInt == 1:
+            return "You did not like " + movie + ". Thank you! Tell me about another movie you have seen."
+        elif randInt == 2:
+            return "" #TODO: fill out
+
+        return "ISSUE - negresponse" #TODO:REMOVE
+
+    def getUnclearResponse(self, movie):
+        NUM_UNCLEAR_RESPONSES = 1
+        randInt = random.randint(1, NUM_UNCLEAR_RESPONSES)
+
+        if randInt == 1:
+            return "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
+        elif randInt == 2:
+            return "" #TODO: fill out
+
+        return "ISSUE - unclearResponse" #TODO:REMOVE
 
     def processTitle(self, input):
         #TODO: fill out
