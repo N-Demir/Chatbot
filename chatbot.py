@@ -249,8 +249,10 @@ class Chatbot:
       """
 
     def stemLexicon(self):
+      stemmedLex = {}
       for word in self.sentiment:
-        self.sentiment[word] = self.stem(word)
+        stemmedLex[self.stem(word)] = self.sentiment[word]
+      self.sentiment = stemmedLex
 
     def stem(self, word):
       return self.p.stem(word)
@@ -262,11 +264,11 @@ class Chatbot:
       inputString = re.sub(r'\".*\"', '', inputString)
       inputString = inputString.split()
 
-      #negate things first
+      # negate things first
       temp = []
       negate = False
       for word in inputString:
-          #print "Word: " + word
+          # print "Word: " + word
           if word in self.negations:
               temp.append(word)
               if negate:
@@ -279,7 +281,7 @@ class Chatbot:
               negate = False
               continue
 
-          #temp.add(word if !negate else "NOT_"+word)
+          # temp.add(word if !negate else "NOT_"+word)
           if negate:
               temp.append("NOT_" + word)
           else:
@@ -287,18 +289,20 @@ class Chatbot:
       inputString = temp
 
       for word in inputString:
-        #print "Word: " + word
+        # print "Word: " + word
         if "NOT_" in word:
             word = word.replace("NOT_", "")
+            word = self.stem(word)
             if word in self.sentiment:
               if self.sentiment[word] == 'pos': negCount += 1
               elif self.sentiment[word] == 'neg': posCount += 1
         else:
+            word = self.stem(word)
             if word in self.sentiment:
               if self.sentiment[word] == 'pos': posCount += 1
               elif self.sentiment[word] == 'neg': negCount += 1
-        #DEBUGGING TODO:REMOVE
-        #print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
+        # DEBUGGING TODO:REMOVE
+        # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
 
       #TODO: Catch no sentiment or unclear sentiment!
       if posCount >= negCount: return 'pos'
