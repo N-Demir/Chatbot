@@ -338,7 +338,7 @@ class Chatbot:
         if not i in rated_movies:
           # Get the normalized movie vec we want to generate a rating for
           movie_norm = float(np.linalg.norm(self.ratings[i]))
-          movie_vec = np.array(self.ratings[i]) / (movie_norm if movie_norm != 0 else 1) 
+          movie_vec = np.array(self.ratings[i]) / (movie_norm if movie_norm != 0 else 1)
 
           # Cosine similarity
           cosine_sim = np.dot(norm_usr_movies, movie_vec)
@@ -366,7 +366,7 @@ class Chatbot:
       for i in range(50):
         #print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
         movie_i = heapq.heappop(est_ratings)
-        print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1) 
+        print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1)
 
       return movie_to_recomend
 
