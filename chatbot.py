@@ -126,20 +126,20 @@ class Chatbot:
                 self.usr_rating_vec.append((movie_index, -1))
               else: # Unclear sentiment
                 response = self.getUnclearResponse(movie)
+
+              # Need to fix this, just for testing
+              if len(self.usr_rating_vec) == 5:
+                self.recommend(self.usr_rating_vec)
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
           return "Please tell me about one movie at a time. Go ahead."
 
-        # Need to fix this, just for testing
-        if len(self.usr_rating_vec) == 5:
-          self.recommend(self.usr_rating_vec)
-
       return response
 
     def getPosResponse(self, movie):
         NUM_POS_RESPONSES = 1
-        randInt = random.randint(1, NUM_POS_RESPONSES)
+        randInt = randint(1, NUM_POS_RESPONSES)
 
         if randInt == 1:
             return "You liked \"" + movie + "\". Thank you! Tell me about another movie you have seen."
@@ -150,7 +150,7 @@ class Chatbot:
 
     def getNegResponse(self, movie):
         NUM_NEG_RESPONSES = 1
-        randInt = random.randint(1, NUM_NEG_RESPONSES)
+        randInt = randint(1, NUM_NEG_RESPONSES)
 
         if randInt == 1:
             return "You did not like " + movie + ". Thank you! Tell me about another movie you have seen."
@@ -161,7 +161,7 @@ class Chatbot:
 
     def getUnclearResponse(self, movie):
         NUM_UNCLEAR_RESPONSES = 1
-        randInt = random.randint(1, NUM_UNCLEAR_RESPONSES)
+        randInt = randint(1, NUM_UNCLEAR_RESPONSES)
 
         if randInt == 1:
             return "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
