@@ -36,6 +36,8 @@ class Chatbot:
       self.is_turbo = is_turbo
       self.sentiment = {}
       self.usr_rating_vec = []
+      self.numRatings = 5
+      self.numRecs = 3
       self.read_data()
       self.p = PorterStemmer()
       self.stemLexicon()
@@ -240,6 +242,9 @@ class Chatbot:
 
       #Added for efficiency? -ND
       self.titles = np.array(self.titles)
+
+    def restart(self):
+      self.usr_rating_vec = []
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
