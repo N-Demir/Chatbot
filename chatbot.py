@@ -134,15 +134,15 @@ class Chatbot:
                 response = self.getUnclearResponse(movie)
 
               # Need to fix this, just for testing
-              if len(self.usr_rating_vec) == 5:
-                self.recommend(self.usr_rating_vec)
+              #if len(self.usr_rating_vec) == 5:
+                #self.recommend(self.usr_rating_vec)
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
           return "Please tell me about one movie at a time. Go ahead."
 
       if (len(self.usr_rating_vec) == 5):
-        movie_recommend = self.recommended(self.usr_rating_vec)
+        movie_recommend = self.recommend(self.usr_rating_vec)
         recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
         recommend_response += movie_recommend
 
@@ -445,7 +445,7 @@ class Chatbot:
       # Note: we pop from the heap, may want to add back to keep list of ratings
       movie_to_recomend = '1) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
       movie_to_recomend += '2) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
-      movie_to_recomend += '3) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
+      movie_to_recomend += '3) ' + self.titles[heapq.heappop(est_ratings)[1]][0]
 
       print "Recommend took", time.time() - start_time, "to run"
 
