@@ -34,6 +34,7 @@ class Chatbot:
     def __init__(self, is_turbo=False):
       self.name = 'moviebot'
       self.is_turbo = is_turbo
+      self.is_repeat = False
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -96,6 +97,19 @@ class Chatbot:
       # calling other functions. Although modular code is not graded, it is       #
       # highly recommended                                                        #
       #############################################################################
+      if self.is_repeat == True:
+        if input == '1': 
+          return "Please type \":quit\""
+        elif input == '2':
+          self.is_repeat = False
+          self.numRatings += 3
+          return "Please tell me about another movie you've seen."
+        elif input == '3':
+          self.is_repeat = False
+          self.usr_rating_vec = []
+          return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
+        else:
+          return "I'm sorry, we don't understand your input. Please enter a number 1, 2, or 3."
       if self.is_turbo == True:
         #CREATIVE SECTION
         response = 'processed %s in creative mode!!' % input
@@ -141,13 +155,18 @@ class Chatbot:
         else:
           return "Please tell me about one movie at a time. Go ahead."
 
-      if (len(self.usr_rating_vec) == 5):
+      if (len(self.usr_rating_vec) == self.numRatings):
         movie_recommend = self.recommend(self.usr_rating_vec)
         recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
         recommend_response += movie_recommend
+        recommend_response += '\n'
+        recommend_response += 'Thank you for chatting with me today! Please choose one of the options below by typing 1, 2, or 3.\n'
+        recommend_response += '1. Quit\n'
+        recommend_response += '2. Add additional movie ratings for more recommendations.\n'
+        recommend_response += '3. Restart with new ratings for new recommendations.'
+        self.is_repeat = True
 
         # Return our response plus our recommendation
-        # TODO: Decide how to proceed
         return response + '\n' + recommend_response
 
       return response
@@ -242,9 +261,6 @@ class Chatbot:
 
       #Added for efficiency? -ND
       self.titles = np.array(self.titles)
-
-    def restart(self):
-      self.usr_rating_vec = []
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
