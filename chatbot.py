@@ -160,6 +160,7 @@ class Chatbot:
 
       if (len(self.usr_rating_vec) == self.numRatings):
         movie_recommend = self.recommend(self.usr_rating_vec)
+        # TODO: Make this a stand alone function
         recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
         recommend_response += movie_recommend
         recommend_response += '\n'
@@ -235,8 +236,7 @@ class Chatbot:
 
 
     def processTitle(self, input):
-        #TODO: fill out
-        # movies should be clearly in quotations and match our database
+        # TODO: Expand to allow for no quotation marks
         movie_regex = r'"(.*?)"'
 
         # Find all the entities
