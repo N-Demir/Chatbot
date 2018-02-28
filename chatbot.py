@@ -314,6 +314,8 @@ class Chatbot:
       # Note: you can also think of this as computing a similarity measure
 
       dotProd = np.dot(u, v)
+      # TODO: Remove these as if we use this function we will likely 
+      # pre-process these
       #lenU = np.linalg.norm(u)
       #lenV = np.linalg.norm(v)
       if lenU != 0 and lenV != 0:
@@ -330,12 +332,8 @@ class Chatbot:
       # TODO: Implement a recommendation function that takes a user vector u
       # and outputs a list of movies recommended by the chatbot
 
-      # Assume you is a sparse vector of the form
-      # [(movie index, movie rating), ...]
-
-      # Create list of indexes of movies that we have for simplicity
-      rated_movies = [tup[0] for tup in u]
-
+      
+      # TODO: Remove old implementation
       '''
       # Pre-calcute vector lengths for movies rated by user
       rated_vec_lengths = [np.linalg.norm(self.ratings[i]) for i in rated_movies]
@@ -373,17 +371,29 @@ class Chatbot:
           heapq.heappush(est_ratings, (est_rating * -1, i))
       '''
 
-      # Something new!
-      # Create a matrix with the normalized movie vectors rated by usr as the rows
+      # Sort the estimated rating in reverse order
+      #sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
+
+
+
+      # Assume you is a sparse vector of the form
+      # [(movie index, movie rating), ...]
+
+      # Create list of indexes of movies that we have for simplicity
+      rated_movies = [tup[0] for tup in u]
+
+      # Create a matrix with the (normalized movie vectors rated by usr) as the rows
       norm_usr_movies = np.array([np.array(self.ratings[i]) / (float(np.linalg.norm(self.ratings[i])) \
                                           if float(np.linalg.norm(self.ratings[i])) != 0 else 1) for i in rated_movies])
-      # Ratings array
+      # Usr ratings array
       ratings_usr = np.array([tup[1] for tup in u])
       # Sum vector of all [1,...,1]
       ones = np.ones(len(rated_movies))
 
+      # TODO: Remove test harness
       # Time testing
       start_time = time.time()
+
       est_ratings = []
       for i in range(len(self.titles)):
         if not i in rated_movies:
@@ -399,25 +409,25 @@ class Chatbot:
           # Sum all the elements by taking dot with [1,...,1]
           est_rating = np.dot(rating_scaled, ones)
 
-          # Invert rating for putting into heap
+          # Invert rating for putting into min-heap
+          # May want to consider using array rather than heap
           heapq.heappush(est_ratings, (est_rating * -1, i))
 
-
-
-      # Sort the estimated rating in reverse order
-      #sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
-
-      # Later allow for not just top rated movie
-      #movie_to_recomend = self.titles[sorted_movies[0][0]][0]
-      movie_to_recomend = self.titles[est_ratings[0][1]][0]
+      # Return a string with the top three movies
+      # Note: we pop from the heap, may want to add back to keep list of ratings
+      movie_to_recomend = '1) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
+      movie_to_recomend += '2) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
+      movie_to_recomend += '3) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
 
       print "Recommend took", time.time() - start_time, "to run"
 
+      '''
       # Print top 50
       for i in range(50):
         #print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
         movie_i = heapq.heappop(est_ratings)
         print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1)
+      '''
 
       return movie_to_recomend
 
