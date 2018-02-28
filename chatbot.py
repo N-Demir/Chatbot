@@ -139,6 +139,15 @@ class Chatbot:
         else:
           return "Please tell me about one movie at a time. Go ahead."
 
+      if (len(self.usr_rating_vec) == 5):
+        movie_recommend = self.recommended(self.usr_rating_vec)
+        recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
+        recommend_response += movie_recommend
+
+        # Return our response plus our recommendation
+        # TODO: Decide how to proceed
+        return response + '\n' + recommend_response
+
       return response
 
 
