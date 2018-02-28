@@ -110,8 +110,9 @@ class Chatbot:
         elif movie_flag == 1:
             # Movie found
             movie = movie_tag[0]
-            movie_index = self.isMovie(movie)
-            if movie_index != -1: # Good movie!!
+            movie_indexes = self.isMovie(movie)
+
+            if len(movie_indexes) != 0: # Good movie!!
               # Need to encorperate the sentiment
               #self.usr_rating_vec.append((movie_index, 1))
               #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
@@ -120,6 +121,13 @@ class Chatbot:
               # We have recieved a valid movie so we have to extract sentiment,
               # record the movie rating based on sentiment, and respond reflecting
               # the sentiment.
+
+
+              if len(movie_indexes) != 1:
+                  #TODO: GET STuck in while loop asking for choice
+                  movie_index = self.askForSelection(movie_indexes)
+              else:
+                  movie_index = movie_indexes[0]
 
               sentiment = self.sentimentClass(input)
               if sentiment == 'pos':
@@ -225,17 +233,31 @@ class Chatbot:
 
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
-        title_regex = r'^(an )|(the )|(a )'
+        title_regex = r'^((an )|(the )|(a ))'
         if re.search(title_regex, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
 
         #indices = np.where(re.search(re.compile(movie_title), self.titles) != None)
         indices = [i for i, v in enumerate(self.titles) if re.search(movie_title, v[0].lower())]
+
+        """
         if len(indices) != 0:
             print "Found movie: " + self.titles[indices[0]][0]
-            return indices[0]
+            print "Indices: " + str(indices)
+            return indices
         else:
             return -1
+        """
+        return indices
+
+    def askForSelection(self, movie_indexes):
+        print "I know of a few movies with that name. Which one were you referring to?"
+        while True:
+            for index in movie_indexes:
+                print str(index + 1) + ") " + self.titles[index][0]
+            inpt = raw_input()
+            print inpt
+
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
