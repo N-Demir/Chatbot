@@ -146,46 +146,46 @@ class Chatbot:
     ######                   RESPONSES                   ######
     ###########################################################
     def getPosResponse(self, movie):
-        NUM_POS_RESPONSES = 1
+        NUM_POS_RESPONSES = 2
         randInt = randint(1, NUM_POS_RESPONSES)
 
         if randInt == 1:
             return "You liked \"" + movie + "\". Thank you! Tell me about another movie you have seen."
         elif randInt == 2:
-            return "" #TODO: fill out
+            return "Ok, you enjoyed \"" + movie + "\". What about another movie?"
 
         return "ISSUE - posresponse" #TODO:REMOVE
 
     def getNegResponse(self, movie):
-        NUM_NEG_RESPONSES = 1
+        NUM_NEG_RESPONSES = 2
         randInt = randint(1, NUM_NEG_RESPONSES)
 
         if randInt == 1:
-            return "You did not like " + movie + ". Thank you! Tell me about another movie you have seen."
+            return "You did not like \"" + movie + "\". Thank you! Tell me about another movie you have seen."
         elif randInt == 2:
-            return "" #TODO: fill out
+            return "Ok, you disliked \"" + movie + "\". What about another movie?" #TODO: fill out
 
         return "ISSUE - negresponse" #TODO:REMOVE
 
     def getNoneResponse(self, movie):
-        NUM_NONE_RESPONSES = 1
+        NUM_NONE_RESPONSES = 2
         randInt = randint(1, NUM_NONE_RESPONSES)
 
         if randInt == 1:
             return "Ok, thank you! Tell me your opinion on \"" + movie + "\"."
         elif randInt == 2:
-            return "" #TODO: fill out
+            return "What did you think about \"" + movie + "\"?" #TODO: fill out
 
         return "ISSUE - noneResponse"
 
     def getUnclearResponse(self, movie):
-        NUM_UNCLEAR_RESPONSES = 1
+        NUM_UNCLEAR_RESPONSES = 2
         randInt = randint(1, NUM_UNCLEAR_RESPONSES)
 
         if randInt == 1:
             return "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
         elif randInt == 2:
-            return "" #TODO: fill out
+            return "I'm sorry, I can't quite tell what your opinion is on \"" + movie + "\". Can you tell me more?" #TODO: fill out
 
         return "ISSUE - unclearResponse" #TODO:REMOVE
     ###########################################################
