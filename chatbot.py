@@ -103,11 +103,11 @@ class Chatbot:
         movie_tag = self.processTitle(input)
         # Get the flag indicating success of process Title
         movie_flag = movie_tag[1]
-        # Movie found
-        movie = movie_tag[0]
         if movie_flag == -1: # No movies found
             return "Sorry, I don't understand. Tell me about a movie that you have seen."
         elif movie_flag == 1:
+            # Movie found
+            movie = movie_tag[0]
             movie_index = self.isMovie(movie)
             if movie_index != -1: # Good movie!!
               # Need to encorperate the sentiment
@@ -121,13 +121,13 @@ class Chatbot:
 
               sentiment = self.sentimentClass(input)
               if sentiment == 'pos':
-                response = self.getPosResponse(movie)
+                response = self.getPosResponse(movie_index)
                 self.usr_rating_vec.append((movie_index, 1))
               elif sentiment == 'neg':
-                response = self.getNegResponse(movie)
+                response = self.getNegResponse(movie_index)
                 self.usr_rating_vec.append((movie_index, -1))
               else: # Unclear sentiment
-                response = self.getUnclearResponse(movie)
+                response = self.getUnclearResponse(movie_index)
 
               # Need to fix this, just for testing
               if len(self.usr_rating_vec) == 5:
@@ -143,12 +143,12 @@ class Chatbot:
     ###########################################################
     ######                   RESPONSES                   ######
     ###########################################################
-    def getPosResponse(self, movie):
+    def getPosResponse(self, movie_index):
         NUM_POS_RESPONSES = 1
         randInt = randint(1, NUM_POS_RESPONSES)
 
         if randInt == 1:
-            return "You liked \"" + movie + "\". Thank you! Tell me about another movie you have seen."
+            return "You liked \"" + self.titles[movie_index][0] + "\". Thank you! Tell me about another movie you have seen."
         elif randInt == 2:
             return "" #TODO: fill out
 
@@ -159,7 +159,7 @@ class Chatbot:
         randInt = randint(1, NUM_NEG_RESPONSES)
 
         if randInt == 1:
-            return "You did not like " + movie + ". Thank you! Tell me about another movie you have seen."
+            return "You did not like " + self.titles[movie_index][0] + ". Thank you! Tell me about another movie you have seen."
         elif randInt == 2:
             return "" #TODO: fill out
 
@@ -170,7 +170,7 @@ class Chatbot:
         randInt = randint(1, NUM_UNCLEAR_RESPONSES)
 
         if randInt == 1:
-            return "I'm sorry, I'm not quite sure if you liked \"" + movie + "\" Tell me more about \"" + movie + "\"."
+            return "I'm sorry, I'm not quite sure if you liked \"" + self.titles[movie_index][0] + "\" Tell me more about \"" + movie + "\"."
         elif randInt == 2:
             return "" #TODO: fill out
 
@@ -205,9 +205,11 @@ class Chatbot:
         if re.search(title_regex, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
 
-        indices = np.where(re.search(movie_title, self_titles))
-        if len(indices[0]) != 0:
-            return indices[0][0]
+        #indices = np.where(re.search(re.compile(movie_title), self.titles) != None)
+        indices = [i for i, v in enumerate(self.titles) if re.search(movie_title, v[0].lower())]
+        if len(indices) != 0:
+            print "Found movie: " + self.titles[indices[0]][0]
+            return indices[0]
         else:
             return -1
 
@@ -225,7 +227,7 @@ class Chatbot:
       self.sentiment = dict(reader)
 
       #Added for efficiency? -ND
-      self.titles = np.array(self.titles)
+      #self.titles = np.array(self.titles)
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
