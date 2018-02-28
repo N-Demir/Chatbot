@@ -6,7 +6,7 @@
 # Original Python code by Ignacio Cases (@cases)
 #
 #TODOS: Remember what people said about previous movies, Fine grain sentiment?
-#
+# Add regex to negation file
 #Dones:
 ######################################################################
 import csv
@@ -197,7 +197,15 @@ class Chatbot:
           return ("", 2)
 
     def isMovie(self, movie_title):
-        indices = np.where(self.titles == movie_title)
+        #indices = np.where(self.titles == movie_title)
+
+        #Preprocess movie_titles: Lowercase; remove a, an, the at beg
+        movie_title = movie_title.lower()
+        title_regex = r'^(an )|(the )|(a )'
+        if re.search(title_regex, movie_title):
+            movie_title = re.sub(title_regex, "", movie_title)
+
+        indices = np.where(re.search(movie_title, self_titles))
         if len(indices[0]) != 0:
             return indices[0][0]
         else:
