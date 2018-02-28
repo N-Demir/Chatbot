@@ -137,6 +137,10 @@ class Chatbot:
 
       return response
 
+
+    ###########################################################
+    ######                   RESPONSES                   ######
+    ###########################################################
     def getPosResponse(self, movie):
         NUM_POS_RESPONSES = 1
         randInt = randint(1, NUM_POS_RESPONSES)
@@ -169,6 +173,10 @@ class Chatbot:
             return "" #TODO: fill out
 
         return "ISSUE - unclearResponse" #TODO:REMOVE
+    ###########################################################
+    ######                 END RESPONSES                 ######
+    ###########################################################
+
 
     def processTitle(self, input):
         #TODO: fill out
