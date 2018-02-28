@@ -6,7 +6,7 @@
 # Original Python code by Ignacio Cases (@cases)
 #
 #TODOS: Remember what people said about previous movies, Fine grain sentiment?
-# Add regex to negation file
+# Add regex to negation file, if multiple choices pop up from isMovie ask user 
 #Dones:
 ######################################################################
 import csv
