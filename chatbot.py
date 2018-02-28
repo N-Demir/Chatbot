@@ -33,8 +33,10 @@ class Chatbot:
       self.sentiment = {}
       self.usr_rating_vec = []
       self.read_data()
-      self.binarize()
       self.p = PorterStemmer()
+      self.stemLexicon()
+      self.binarize()
+
 
       self.negations = open("data/negations.txt", "r").read().splitlines()
       self.punctuations = open('data/punctuation.txt', "r").read().splitlines()
@@ -204,6 +206,10 @@ class Chatbot:
                   if binarized != 1:
                       print "1 - MISTAKE"
       """
+
+    def stemLexicon(self):
+      for word in self.sentiment:
+        self.sentiment[word] = self.stem(word)
 
     def stem(self, word):
       return self.p.stem(word)
