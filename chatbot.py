@@ -443,9 +443,13 @@ class Chatbot:
 
       # Return a string with the top three movies
       # Note: we pop from the heap, may want to add back to keep list of ratings
-      movie_to_recomend = '1) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
-      movie_to_recomend += '2) ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
-      movie_to_recomend += '3) ' + self.titles[heapq.heappop(est_ratings)[1]][0]
+      movie_to_recomend = ''
+      for i in range(self.numRecs):
+        movie_to_recomend += str(i + 1) + ') ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
+
+      # Remove the last \n
+      movie_to_recomend = movie_to_recomend[:-1]
+
 
       print "Recommend took", time.time() - start_time, "to run"
 
