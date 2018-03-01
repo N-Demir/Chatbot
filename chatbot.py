@@ -497,13 +497,17 @@ class Chatbot:
             title_words = re.findall(r'\w+', test_title)
 
             # Allow up to one error per word
-            if len(query_words) == len(title_words):
+            # Only consider words in length of query (i.e. allows for disambiguoizing)
+            #if len(query_words) == len(title_words):
+            if len(query_words) <= len(title_words):
               acceptable_error = True
               total_error = 0
-              for x in range(len(title_words)):
+              #for x in range(len(title_words)):
+              for x in range(len(query_words)):
                 distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
                 total_error += distance
-                if (distance > max_edit_word or (total_error > max_edit and max_edit != 1)):
+                if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
+                  if title_words[x] == 'Scream': print 'here'
                   acceptable_error = False
                   break
 
@@ -644,6 +648,8 @@ class Chatbot:
     def sentimentClass(self, inputString):
       posCount = 0.0
       negCount = 0.0
+      strongPosCount = 0.0
+      strongNegCount = 0.0
       inputString.lower()
       inputString = re.sub(r'\".*\"', '', inputString)
       inputString = inputString.split()
@@ -684,17 +690,18 @@ class Chatbot:
             if word in self.sentiment:
               added_sent = 1
               # For each intensier we double added score
-              added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
+              #added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
               if self.sentiment[word] == 'pos':
                 negCount += added_sent
+                strongNegCount += intensifier_count
               elif self.sentiment[word] == 'neg':
                 posCount += added_sent
+                strongPosCount += intensifier_count
 
               # No longer intensifying
               intensifier_count = 0
         else:
             # See if our word is an intensifier
-            print word
             for intens in self.intensifiers:
               # Match our word against intensifier regexes
               if re.compile(intens).match(word):
@@ -709,22 +716,35 @@ class Chatbot:
               # intensifiers double word score
               added_sent = 1
               if self.sentiment[word] == 'pos':
+                print "pos: %s" % (word)
                 if word in self.strong_pos:
-                  added_sent += 2
-                added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
-                posCount += added_sent
+                  #added_sent += 2
+                  strongPosCount += 1
+                #added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
+                posCount += added_sent 
+                strongPosCount += intensifier_count
               elif self.sentiment[word] == 'neg':
+                print "neg: %s" % (word)
                 if word in self.strong_neg:
-                  added_sent += 2
-                added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
+                  #added_sent += 2
+                  strongNegCount += 1
+                #added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
                 negCount += added_sent
+                strongNegCount += intensifier_count
 
               # No longer intensifying
               intensifier_count = 0
 
       #TODO: Account for ! - multiply by 2 even for !+
       final_score = posCount - negCount
-      final_score *= 2 if intensifier_count > 0 else 1
+      #final_score *= 2 if intensifier_count > 0 else 1
+      if final_score > 0 and strongNegCount <= strongPosCount: # Positive overall so make strong pos if '!' (But don't override strong neg)
+        strongPosCount += intensifier_count
+      elif final_score < 0 and strongPosCount <= strongNegCount: # Negative overall so make strong neg if '!' (But don't override strong pos)
+        strongNegCount += intensifier_count
+
+      # Just check if strong pos exist or strong neg exist and intensifier can boost the
+      # non strong to a strong
 
       # DEBUGGING TODO:REMOVE
       # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
@@ -732,9 +752,11 @@ class Chatbot:
       #TODO: Catch no sentiment or unclear sentiment!
       #TODO: Create stronger cutoffs for very strong / neg sentiment
       if posCount == 0.0 and negCount == 0.0: return 'none'
+      elif strongPosCount > strongNegCount: return 'str_pos'
+      elif strongPosCount < strongNegCount: return 'str_neg'
       elif final_score == 0: return 'unclear'
-      elif final_score >= 2: return 'str_pos' # Decide if 2 or 3???
-      elif final_score <= -2: return 'str_neg' # Decide if 2 or 3???
+      #elif final_score >= 2: return 'str_pos' # Decide if 2 or 3???
+      #elif final_score <= -2: return 'str_neg' # Decide if 2 or 3???
       elif final_score > 0: return 'pos'
       else: return 'neg'
 
