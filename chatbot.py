@@ -366,7 +366,12 @@ class Chatbot:
           #CREATIVE
           # find movies not in quotation marks, assume first letter is capitalized
           entities = self.findNonQuotationTitles(inpt)
+          if len(entities) == 1:
+              return (entities[0], 1)
+          elif len(entities) != 0:
+              return (entities, 2)
 
+          # else we still found nothing
           return ("", -1)
         elif len(entities) == 1: # One movie found - flag 1
           return (entities[0], 1)
@@ -374,17 +379,45 @@ class Chatbot:
           return (entities, 2)
 
     def findNonQuotationTitles(self, inpt):
-        # assume first letter is capitalized
-        # find a string from capitalized letter to a period or exclamation mark
-        # check if movie and if not shrink size of our capture
+        # check for every valid movie, stripped of date and article, if it is in
+        # the input
+        inpt = inpt.lower()
+        entities = []
 
-        # first split on periods, exclamations, or question marks,
-        # assume no one uses interrobang
+        for title in self.titles:
+            movie_title = title[0]
 
-        # BUG? What about edge cases like Mr. or something
+            #strip and Lowercase
+            movie_title = movie_title.lower()
+
+            movie_title = re.sub(r' \(\d\d\d\d\)', "", movie_title)
+            movie_title = re.sub(r'^(the |an |a )', "", movie_title)
+
+            #print "Cur title after stripping: " + movie_title
+
+            if movie_title in inpt:
+                print "Movie title: " + movie_title + " Input: " + inpt
+                print "TITLE[0]: " + title[0]
+                entities.append(movie_title)
+
+        return entities
+
+
+        """
+        # TODO: REMOVE? Don't worry about multiple sentences?
         sentences = self.split_into_sentences(inpt)
+        if len(sentences) == 0:
+            sentences = [inpt]
+
+        for sentence in sentences:
+            words = sentence.split()
+
+            for i in range(len(words), 0, -1):
+                #TODO: FILL OUT
 
         print str(sentences)
+        """
+
 
     def edit_distance(self, true_word, query, max_dist):
       # If length of titles differ more than max_dist than return max_dist + 1
@@ -520,8 +553,32 @@ class Chatbot:
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
 
+      self.move_article_to_front(self.titles)
+
       #Added for efficiency? -ND
       #self.titles = np.array(self.titles)
+
+    def move_article_to_front(self, titles):
+        for i,v in enumerate(titles):
+            movie_title = v[0]
+            date = re.findall(r'\(\d\d\d\d\)', movie_title)
+            if len(date) != 0:
+                date = date[0]
+            else:
+                date = ""
+
+
+            if re.search(r'.*, The \(\d\d\d\d\)', movie_title):
+                movie_title = re.sub(r', The \(\d\d\d\d\)', " " + date, movie_title)
+                movie_title = "The " + movie_title
+            elif re.search(r'.*, An \(\d\d\d\d\)', movie_title):
+                movie_title = re.sub(r', An \(\d\d\d\d\)', " " + date, movie_title)
+                movie_title = "An " + movie_title
+            elif re.search(r'.*, A \(\d\d\d\d\)', movie_title):
+                movie_title = re.sub(r', A \(\d\d\d\d\)', " " + date, movie_title)
+                movie_title = "A " + movie_title
+
+            titles[i][0] = movie_title
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
@@ -613,9 +670,9 @@ class Chatbot:
             if word in self.sentiment:
               added_sent = 1
               added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
-              if self.sentiment[word] == 'pos': 
+              if self.sentiment[word] == 'pos':
                 negCount += added_sent
-              elif self.sentiment[word] == 'neg': 
+              elif self.sentiment[word] == 'neg':
                 posCount += added_sent
 
               # No longer intensifying
@@ -636,7 +693,7 @@ class Chatbot:
                   added_sent += 2
                 added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
                 posCount += added_sent
-              elif self.sentiment[word] == 'neg': 
+              elif self.sentiment[word] == 'neg':
                 if word in self.strong_neg:
                   added_sent += 2
                 added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
