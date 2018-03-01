@@ -394,6 +394,8 @@ class Chatbot:
             #print "Cur title after stripping: " + movie_title
 
             if movie_title in inpt:
+                #TODO: " " + movie_title + " "
+                #TODO: check if moving things around in beginning worked
                 """
                 print "Movie title: " + movie_title + " Input: " + inpt
                 print "TITLE[0]: " + title[0
