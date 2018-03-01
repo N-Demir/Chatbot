@@ -353,11 +353,10 @@ class Chatbot:
     def processTitle(self, inpt):
         # TODO: Expand to allow for no quotation marks
         # movies should be clearly in quotations and match our database
-        movie_regex = r' "(.*?)" '
+        movie_regex = r'"(.*?)"'
 
         # Find all the entities
         entities = re.findall(movie_regex, inpt)
-
         # No movies found - flag -1
         if len(entities) == 0:
 
@@ -451,6 +450,7 @@ class Chatbot:
 
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
+        print "Level 1 titlesearch"
         #TODO: ACCOUNT FOR AMERICAN IN PARIS, AN, HARRY POTTER AND
         indices = []
         indices = [i for i, v in enumerate(self.titles)
@@ -459,6 +459,7 @@ class Chatbot:
 
     def isTitleInLevel2(self, inpt_title):
         # Check but with dates irrelevent
+        print "Level 2 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeDate(self.preProcessTitle(inpt_title)) ==
@@ -467,6 +468,7 @@ class Chatbot:
 
     def isTitleInLevel3(self, inpt_title):
         #account for subtitles
+        print "Level 3 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title))) ==
@@ -475,6 +477,7 @@ class Chatbot:
 
     def isTitleInLevel4(self, inpt_title):
         #account for sequels as well
+        print "Level 4 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title)))) ==
@@ -484,16 +487,19 @@ class Chatbot:
     def preProcessTitle(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
-        title_regex = r'^((an )|(the )|(a ))'
-        if re.search(title_regex, movie_title):
+        title_regex1 = r'^((an )|(the )|(a ))'
+        title_regex2 = r'((, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
+        if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
+        if re.search()
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
+        #print "Movie:" + movie_title
         return movie_title
 
     def removeDate(self, movie_title):
-        date_regex = r'\(\d\d\d\d\d\)'
+        date_regex = r'\(\d\d\d\d\)'
         if re.search(date_regex, movie_title):
             movie_title = re.sub(date_regex, "", movie_title)
         movie_title = movie_title.strip()
@@ -504,17 +510,17 @@ class Chatbot:
         colon_regex = r'^(.*?):.*'
         if re.search(colon_regex, movie_title):
             movie_title = re.findall(colon_regex, movie_title)[0]
-            print "Movie title after colon: " + movie_title
+            #print "Movie title after colon: " + movie_title
         movie_title = movie_title.strip()
 
         return movie_title
 
     def removeSequel(self, movie_title):
         #TODO: FILL OUT SEQUELS
-        sequel_regex = r'(.*) (?:\d|I|II|III)$'
+        sequel_regex = r'(.*) (?:\d|i|ii|iii)$'
         if re.search(sequel_regex, movie_title):
             movie_title = re.findall(sequel_regex, movie_title)[0]
-            print "Movie title after sequel: " + movie_title
+            #print "Movie title after sequel: " + movie_title
         movie_title = movie_title.strip()
 
         return movie_title
@@ -522,14 +528,16 @@ class Chatbot:
     def isMovie(self, movie_title):
         # Search for query as substring of movie title
         # TODO: This does not quite work ex. search for "The Little Mermaid (1989)"
+        print "Movie: " + movie_title
         indices = self.isTitleInLevel1(movie_title)
         if len(indices) == 0:
-            indices = self.isTitleInLevel2(movie_title)
+            indices = self.isTitleInLevel4(movie_title)
+            """
             if len(indices) == 0:
                 indices = self.isTitleInLevel3(movie_title)
                 if len(indices) == 0:
                     indices = self.isTitleInLevel4(movie_title)
-
+            """
 
         # SPELLCHECK
 
