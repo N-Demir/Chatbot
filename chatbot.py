@@ -658,16 +658,17 @@ class Chatbot:
               temp.append(word)
       inputString = temp
 
+      # Keep track of how many intensifiers appear in a row
+      # e.g. really reaallly like
       intensifier_count = 0
-      intensify = False
       for word in inputString:
-        # print "Word: " + word
         # Should we include strong sentiment with not?
         if "NOT_" in word:
             word = word.replace("NOT_", "")
             word = self.stem(word)
             if word in self.sentiment:
               added_sent = 1
+              # For each intensier we double added score
               added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
               if self.sentiment[word] == 'pos':
                 negCount += added_sent
@@ -678,14 +679,19 @@ class Chatbot:
               intensifier_count = 0
         else:
             # See if our word is an intensifier
+            print word
             for intens in self.intensifiers:
+              # Match our word against intensifier regexes
               if re.compile(intens).match(word):
                 intensifier_count += 1
                 continue
 
             word = self.stem(word)
             if word in self.sentiment:
-              # Try to do fine-grained sentiment
+              # Fine-grained sentiment
+              # normal pos/neg words have score 1
+              # strong pos/neg have score of 3
+              # intensifiers double word score
               added_sent = 1
               if self.sentiment[word] == 'pos':
                 if word in self.strong_pos:
@@ -701,18 +707,20 @@ class Chatbot:
               # No longer intensifying
               intensifier_count = 0
 
-        #TODO: Account for !
+      #TODO: Account for ! - multiply by 2 even for !+
+      final_score = posCount - negCount
+      final_score *= 2 if intensifier_count > 0 else 1
 
-        # DEBUGGING TODO:REMOVE
-        # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
+      # DEBUGGING TODO:REMOVE
+      # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
 
       #TODO: Catch no sentiment or unclear sentiment!
       #TODO: Create stronger cutoffs for very strong / neg sentiment
       if posCount == 0.0 and negCount == 0.0: return 'none'
-      elif posCount - negCount == 0: return 'unclear'
-      elif posCount - negCount >= 2: return 'str_pos'
-      elif negCount - posCount >=2: return 'str_neg'
-      elif posCount >= negCount: return 'pos'
+      elif final_score == 0: return 'unclear'
+      elif final_score >= 2: return 'str_pos' # Decide if 2 or 3???
+      elif final_score <= -2: return 'str_neg' # Decide if 2 or 3???
+      elif final_score > 0: return 'pos'
       else: return 'neg'
 
     def distance(self, u, lenU, v, lenV):
