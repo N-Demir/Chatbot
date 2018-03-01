@@ -816,7 +816,7 @@ class Chatbot:
             word = self.stem(word)
             if word in self.sentiment:
               added_sent = 1
-              For each intensier we double added score
+              #For each intensier we double added score
               #added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
               if self.sentiment[word] == 'pos':
                 negCount += added_sent
