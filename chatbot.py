@@ -111,10 +111,50 @@ class Chatbot:
         else:
           return "I'm sorry, we don't understand your input. Please enter a number 1, 2, or 3."
       if self.is_turbo == True:
-        #CREATIVE SECTION
+        # CREATIVE SECTION
+
+        # Allow for user to enter up to 2 movies
+        movie_tag = self.processTitle(input)
+        movie_flag = movie_tag[1]
+        if movie_flag == -1: # No movies found
+          return "Sorry, I don't understand. Tell me about a movie that you have seen."
+          #emotion detection? means they are talking about something else other than movie
+        elif movie_flag == 1: # 1 movie found
+          movie = movie_tag[0]
+          movie_index = self.isMovie(movie)
+          sentiment = self.sentimentClass(input)
+          if sentiment == 'pos':
+            response = self.getPosResponse(movie_index)
+            self.usr_rating_vec.append((movie_index, 1))
+          elif sentiment == 'neg':
+            response = self.getNegResponse(movie_index)
+            self.usr_rating_vec.append((movie_index, -1))
+          elif sentiment == 'none':
+            response = self.getNoneResponse(movie)
+          else: # Unclear sentiment
+             response = self.getUnclearResponse(movie_index)
+        elif movie_flag == 2: # multiple movies found
+          movie1 = movie_tag[0][0]
+          movie2 = movie_tag[0][1]
+          movie_index1 = self.isMovie(movie1)
+          movie_index2 = self.isMovie(movie2)
+
+          andRegex = r'(?:both )?"' + movie1 + '".{0,20}?and.{0,20}?"' + movie2 + '"' # same sentiment
+          orRegex = r'(?:either |neither )?"' + movie1 + '".{0,20}?(?:or|nor).{0,20}?"' + movie2 + '"' # same sentiment?
+          butRegex = r'"' + movie1 + '".{0,20}?but.{0,20}?"' + movie2 + '"' # different sentiment?
+
+          andEntities = re.findall(andRegex, input)
+          orEntities = re.findall(orRegex, input)
+          butEntities = re.findall(butRegex, input)
+
+
+
+        else: # more than 2 movies found
+          return "I'm sorry, please tell me about at most two movies at a time. Go ahead."
+
         response = 'processed %s in creative mode!!' % input
       else:
-        #STARTER SECTION
+        # STARTER SECTION
         # Process Movie title
         movie_tag = self.processTitle(input)
         # Get the flag indicating success of process Title
@@ -152,7 +192,7 @@ class Chatbot:
 
               # Need to fix this, just for testing
               #if len(self.usr_rating_vec) == 5:
-                #self.recommend(self.usr_rating_vec)
+                #self.recommend(self.usr_rating_vec)    
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
@@ -237,6 +277,7 @@ class Chatbot:
 
     def processTitle(self, input):
         # TODO: Expand to allow for no quotation marks
+        # movies should be clearly in quotations and match our database
         movie_regex = r'"(.*?)"'
 
         # Find all the entities
@@ -248,7 +289,7 @@ class Chatbot:
         elif len(entities) == 1: # One movie found - flag 1
           return (entities[0], 1)
         else: # Multiple movies found - flag 2
-          return ("", 2)
+          return (entities, 2)
 
     def edit_distance(self, true_word, query, max_dist):
       # If length of titles differ more than max_dist than return max_dist + 1
