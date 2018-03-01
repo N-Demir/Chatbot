@@ -585,9 +585,10 @@ class Chatbot:
 
     def removeArticles(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
+        # MUST BE CALLED AFTER removeDate
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        title_regex2 = r'(, an (\d\d\d\d))|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
+        title_regex2 = r'(, an (\d\d\d\d))|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #
         if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex1, r'', movie_title)
         if re.search(title_regex2, movie_title):
