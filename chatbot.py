@@ -224,20 +224,28 @@ class Chatbot:
               sentiment = self.sentimentClass(input)
               if sentiment == 'pos':
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getPosResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, 1))
+                if movie_index != None:
+                  response = self.getPosResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, 1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'str_pos':
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getStrPosResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
+                if movie_index != None:
+                  response = self.getStrPosResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, -1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'neg':
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getNegResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
+                if movie_index != None:
+                  response = self.getNegResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, -1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'str_neg': # Don't yet deal with changing the rating
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getStrNegResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
+                if movie_index != None:
+                  response = self.getStrNegResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, -1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'none':
                 response = self.getNoneResponse(movie_title)
               else: # Unclear sentiment
@@ -271,7 +279,9 @@ class Chatbot:
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
           #TODO: GET STuck in while loop asking for choice
-          if self.skip_to_next == False: return self.askForSelection(movie_indexes)
+          movie = self.askForSelection(movie_indexes)
+          if movie != None: return movie
+          else: return None
       else:
           return movie_indexes[0]
 
