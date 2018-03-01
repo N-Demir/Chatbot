@@ -201,8 +201,9 @@ class Chatbot:
         # STARTER SECTION
 
         # Process movie title
-        movie_tag = self.processTitle(input)
-        print(movie_tag)
+        temp = self.processTitle(input)
+        movie_tag = temp[0]
+        input = temp[1]
         # Get the flag indicating success of process Title
         movie_flag = movie_tag[1]
         if movie_flag == -1: # No movies found
@@ -352,7 +353,7 @@ class Chatbot:
     def processTitle(self, inpt):
         # TODO: Expand to allow for no quotation marks
         # movies should be clearly in quotations and match our database
-        movie_regex = r'"(.*?)"'
+        movie_regex = r' "(.*?)" '
 
         # Find all the entities
         entities = re.findall(movie_regex, inpt)
@@ -364,14 +365,16 @@ class Chatbot:
           # find movies not in quotation marks, assume first letter is capitalized
           entity = self.findNonQuotationTitles(inpt)
           if len(entity) != 0:
-              print "got here"
-              return (entity, 1)
+              inpt = re.sub(re.compile(entity), "", inpt)
+              return ((entity, 1), inpt)
           # else we still found nothing
-          return ("", -1)
+          return (("", -1), inpt)
         elif len(entities) == 1: # One movie found - flag 1
-          return (entities[0], 1)
+          inpt = re.sub(movie_regex, "", inpt)
+          return ((entities[0], 1), inpt)
         else: # Multiple movies found - flag 2
-          return (entities, 2)
+          #TODO: DO SOMETHING WITH THIS
+          return ((entities, 2), inpt)
 
     def findNonQuotationTitles(self, inpt):
         # check for every valid movie, stripped of date and article, if it is in
@@ -391,8 +394,10 @@ class Chatbot:
             #print "Cur title after stripping: " + movie_title
 
             if movie_title in inpt:
+                """
                 print "Movie title: " + movie_title + " Input: " + inpt
-                print "TITLE[0]: " + title[0]
+                print "TITLE[0]: " + title[0
+                """
                 entities.append(movie_title)
 
         if len(entities) == 0:
