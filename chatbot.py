@@ -493,7 +493,7 @@ class Chatbot:
       # Indexes to suggest
       indices = []
       start_time = time.time()
-      
+
       # Try removing the year from query and title!
       movie_title = re.sub(r'\(\d\d\d\d\)', "", movie_title)
 
@@ -536,7 +536,7 @@ class Chatbot:
             correct_spellings.add(title_substring)
             indices.append(i)
 
-      
+
       print "Spell check", time.time() - start_time, "to run"
 
     def isTitleInLevel1(self, inpt_title):
@@ -587,11 +587,11 @@ class Chatbot:
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        #title_regex2 = r'(, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
+        title_regex2 = r'(, an (\d\d\d\d))|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
         if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex1, r'', movie_title)
-        #if re.search(title_regex2, movie_title):
-        #    movie_title = re.sub(title_regex2, r' \1', movie_title)
+        if re.search(title_regex2, movie_title):
+            movie_title = re.sub(title_regex2, r' \1', movie_title)
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
