@@ -57,6 +57,11 @@ class Chatbot:
 
       self.negations = open("data/negations.txt", "r").read().splitlines()
       self.punctuations = open('data/punctuation.txt', "r").read().splitlines()
+      self.strong_neg = open('data/strong_neg_words.txt', "r").read().splitlines()
+      self.strong_pos = open('data/strong_pos_words.txt', "r").read().splitlines()
+      self.intensifiers = open('data/intensifiers.txt', "r").read().splitlines()
+      self.stemPos_Neg_Words()
+
 
     #############################################################################
     # 1. WARM UP REPL
@@ -191,9 +196,17 @@ class Chatbot:
                 movie_index = self.getMovieIndex(movie_indexes)
                 response = self.getPosResponse(movie_index)
                 self.usr_rating_vec.append((movie_index, 1))
+              elif sentiment == 'str_pos':
+                movie_index = self.getMovieIndex(movie_indexes)
+                response = self.getStrPosResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
               elif sentiment == 'neg':
                 movie_index = self.getMovieIndex(movie_indexes)
                 response = self.getNegResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              elif sentiment == 'str_neg': # Don't yet deal with changing the rating
+                movie_index = self.getMovieIndex(movie_indexes)
+                response = self.getStrNegResponse(movie_index)
                 self.usr_rating_vec.append((movie_index, -1))
               elif sentiment == 'none':
                 response = self.getNoneResponse(movie_title)
@@ -226,7 +239,7 @@ class Chatbot:
       return response
 
     def getMovieIndex(self, movie_indexes):
-      if len(movie_indexes) != 1:
+      if len(movie_indexes) > 1:
           #TODO: GET STuck in while loop asking for choice
           return self.askForSelection(movie_indexes)
       else:
@@ -235,6 +248,28 @@ class Chatbot:
     ###########################################################
     ######                   RESPONSES                   ######
     ###########################################################
+    def getStrPosResponse(self, movie_index):
+      NUM_POS_RESPONSES = 2
+      randInt = randint(1, NUM_POS_RESPONSES)
+
+      if randInt == 1:
+          return "Awesome, you really liked \"" + self.titles[movie_index][0] + "\"! What are some other movies you have seen."
+      elif randInt == 2:
+          return "Great choice! That is an amazing movie. \"" + self.titles[movie_index][0] + "\". What about another movie?"
+
+      return "ISSUE - posresponse" #TODO:REMOV
+
+    def getStrNegResponse(self, movie_index):
+      NUM_POS_RESPONSES = 2
+      randInt = randint(1, NUM_POS_RESPONSES)
+
+      if randInt == 1:
+          return "So you really disliked \"" + self.titles[movie_index][0] + "\". I'd love to here about other movies you have seen."
+      elif randInt == 2:
+          return "You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opion about?"
+
+      return "ISSUE - posresponse" #TODO:REMOV
+
     def getPosResponse(self, movie_index):
         NUM_POS_RESPONSES = 2
         randInt = randint(1, NUM_POS_RESPONSES)
@@ -374,8 +409,6 @@ class Chatbot:
         if len(indices) == 0:
           # Set the max edit distance to be one edit per word
           # TODO: consider different strategies
-          max_edit = len(re.findall(r'\w+', movie_title))
-          max_edit_word = 2
 
           start_time = time.time()
           # Find movie titles that are max edit distance or less away
@@ -383,21 +416,30 @@ class Chatbot:
 
           # Try removing the year from query and title!
           movie_title = re.sub(r'\(\d\d\d\d\)', "", movie_title)
+
+          # Maximum edit distance stuff
+          max_edit = len(re.findall(r'\w+', movie_title))
+          max_edit_word = 2
           # Try going word by word through a title and make sure at max one edit away!
           query_words = re.findall(r'\w+', movie_title.lower())
           for i, v in enumerate(self.titles):
-            # Need to handle the date removal and a/the
-            test_title = re.sub(r'\(\d\d\d\d\)', "", v[0].lower())
+            # Handle removing the final date plus any An|The|A that is at very end
+            test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
+
             # Try removing 'the', 'an', 'a'
-            test_title = re.sub(r'(, an )|(, the )|(, a )', "", test_title)
+            # Make this specific Be careful with an in the middle!
+            #test_title = re.sub(r'(, an )|(, the )|(, a )', "", test_title)
 
             title_words = re.findall(r'\w+', test_title)
 
             # Allow up to one error per word
             if len(query_words) == len(title_words):
               acceptable_error = True
+              total_error = 0
               for x in range(len(title_words)):
-                if (self.edit_distance(title_words[x], query_words[x], max_edit_word) > max_edit_word):
+                distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
+                total_error += distance
+                if (distance > max_edit_word or (total_error > max_edit and max_edit != 1)):
                   acceptable_error = False
                   break
 
@@ -516,6 +558,17 @@ class Chatbot:
         stemmedLex[self.stem(word)] = self.sentiment[word]
       self.sentiment = stemmedLex
 
+    def stemPos_Neg_Words(self):
+      stemmedPos = set()
+      for word in self.strong_pos:
+        stemmedPos.add(self.stem(word))
+      self.strong_pos = stemmedPos
+
+      stemmedNeg = set()
+      for word in self.strong_neg:
+        stemmedNeg.add(self.stem(word))
+      self.strong_neg = stemmedNeg
+
     def stem(self, word):
       return self.p.stem(word)
 
@@ -530,7 +583,6 @@ class Chatbot:
       temp = []
       negate = False
       for word in inputString:
-          # print "Word: " + word
           if word in self.negations:
               temp.append(word)
               if negate:
@@ -550,24 +602,60 @@ class Chatbot:
               temp.append(word)
       inputString = temp
 
+      intensifier_count = 0
+      intensify = False
       for word in inputString:
         # print "Word: " + word
+        # Should we include strong sentiment with not?
         if "NOT_" in word:
             word = word.replace("NOT_", "")
             word = self.stem(word)
             if word in self.sentiment:
-              if self.sentiment[word] == 'pos': negCount += 1
-              elif self.sentiment[word] == 'neg': posCount += 1
+              added_sent = 1
+              added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
+              if self.sentiment[word] == 'pos': 
+                negCount += added_sent
+              elif self.sentiment[word] == 'neg': 
+                posCount += added_sent
+
+              # No longer intensifying
+              intensifier_count = 0
         else:
+            # See if our word is an intensifier
+            for intens in self.intensifiers:
+              if re.compile(intens).match(word):
+                intensifier_count += 1
+                continue
+
             word = self.stem(word)
             if word in self.sentiment:
-              if self.sentiment[word] == 'pos': posCount += 1
-              elif self.sentiment[word] == 'neg': negCount += 1
+              # Try to do fine-grained sentiment
+              added_sent = 1
+              if self.sentiment[word] == 'pos':
+                if word in self.strong_pos:
+                  added_sent += 2
+                added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
+                posCount += added_sent
+              elif self.sentiment[word] == 'neg': 
+                if word in self.strong_neg:
+                  added_sent += 2
+                added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
+                negCount += added_sent
+
+              # No longer intensifying
+              intensifier_count = 0
+
+        #TODO: Account for !
+
         # DEBUGGING TODO:REMOVE
         # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
 
       #TODO: Catch no sentiment or unclear sentiment!
+      #TODO: Create stronger cutoffs for very strong / neg sentiment
       if posCount == 0.0 and negCount == 0.0: return 'none'
+      elif posCount - negCount == 0: return 'unclear'
+      elif posCount - negCount >= 2: return 'str_pos'
+      elif negCount - posCount >=2: return 'str_neg'
       elif posCount >= negCount: return 'pos'
       else: return 'neg'
 
