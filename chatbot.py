@@ -158,7 +158,7 @@ class Chatbot:
           movie_index1 = self.isMovie(movie1)
           movie_index2 = self.isMovie(movie2)
 
-          if len(movie_index1) != 0
+          if len(movie_index1) != 0:
 
           andRegex = r'(?:both )?"' + movie1 + '".{0,20}?and.{0,20}?"' + movie2 + '"' # same sentiment
           orRegex = r'(?:either |neither )?"' + movie1 + '".{0,20}?(?:or|nor).{0,20}?"' + movie2 + '"' # same sentiment?
