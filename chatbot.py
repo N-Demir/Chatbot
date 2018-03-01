@@ -646,7 +646,7 @@ class Chatbot:
               else:
                   negate = True
               continue
-          elif word in self.punctuations:
+          elif word[0] in self.punctuations: # To catch case of repeated punction like !!!! or 
               temp.append(word)
               negate = False
               continue
@@ -664,6 +664,8 @@ class Chatbot:
       for word in inputString:
         # Should we include strong sentiment with not?
         if "NOT_" in word:
+            print word
+
             word = word.replace("NOT_", "")
             word = self.stem(word)
             if word in self.sentiment:
