@@ -491,7 +491,8 @@ class Chatbot:
         title_regex2 = r'((, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
         if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
-        if re.search()
+        if re.search(title_regex2, movie_title):
+            #movie_title = re.sub()
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
