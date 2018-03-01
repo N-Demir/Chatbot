@@ -203,7 +203,7 @@ class Chatbot:
         # STARTER SECTION
 
         # Arbitrary input regexes
-        
+
         q0 = r'hi|hello'
         q1 = r'[Hh]ow are you'
         q2 = r'[Ww]hat(?:\'s | is )your name'
@@ -233,8 +233,9 @@ class Chatbot:
           elif randInt == 2:
             return "Enough with the questions, let's get to the movies! Can you tell about one you have seen?"
         # Process movie title
-        movie_tag = self.processTitle(input)
-        print(movie_tag)
+        temp = self.processTitle(input)
+        movie_tag = temp[0]
+        input = temp[1]
         # Get the flag indicating success of process Title
         movie_flag = movie_tag[1]
         if movie_flag == -1: # No movies found
@@ -398,7 +399,6 @@ class Chatbot:
 
         # Find all the entities
         entities = re.findall(movie_regex, inpt)
-
         # No movies found - flag -1
         if len(entities) == 0:
 
@@ -406,14 +406,16 @@ class Chatbot:
           # find movies not in quotation marks, assume first letter is capitalized
           entity = self.findNonQuotationTitles(inpt)
           if len(entity) != 0:
-              print "got here"
-              return (entity, 1)
+              inpt = re.sub(re.compile(entity), "", inpt)
+              return ((entity, 1), inpt)
           # else we still found nothing
-          return ("", -1)
+          return (("", -1), inpt)
         elif len(entities) == 1: # One movie found - flag 1
-          return (entities[0], 1)
+          inpt = re.sub(movie_regex, "", inpt)
+          return ((entities[0], 1), inpt)
         else: # Multiple movies found - flag 2
-          return (entities, 2)
+          #TODO: DO SOMETHING WITH THIS
+          return ((entities, 2), inpt)
 
     def findNonQuotationTitles(self, inpt):
         # check for every valid movie, stripped of date and article, if it is in
@@ -433,8 +435,12 @@ class Chatbot:
             #print "Cur title after stripping: " + movie_title
 
             if movie_title in inpt:
+                #TODO: " " + movie_title + " "
+                #TODO: check if moving things around in beginning worked
+                """
                 print "Movie title: " + movie_title + " Input: " + inpt
-                print "TITLE[0]: " + title[0]
+                print "TITLE[0]: " + title[0
+                """
                 entities.append(movie_title)
 
         if len(entities) == 0:
@@ -484,20 +490,99 @@ class Chatbot:
       return edit_dist_M[len(true_word)][len(query)]
 
 
-    def isMovie(self, movie_title):
-        #indices = np.where(self.titles == movie_title)
+    def isTitleInLevel1(self, inpt_title):
+        # Check exact match
+        print "Level 1 titlesearch"
+        #TODO: ACCOUNT FOR AMERICAN IN PARIS, AN, HARRY POTTER AND
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.preProcessTitle(inpt_title) == self.preProcessTitle(v[0])]
+        return indices
 
+    def isTitleInLevel2(self, inpt_title):
+        # Check but with dates irrelevent
+        print "Level 2 titlesearch"
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeDate(self.preProcessTitle(inpt_title)) ==
+                       self.removeDate(self.preProcessTitle(v[0]))]
+        return indices
+
+    def isTitleInLevel3(self, inpt_title):
+        #account for subtitles
+        print "Level 3 titlesearch"
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title))) ==
+                       self.removeAfterColon(self.removeDate(self.preProcessTitle(v[0])))]
+        return indices
+
+    def isTitleInLevel4(self, inpt_title):
+        #account for sequels as well
+        print "Level 4 titlesearch"
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title)))) ==
+                       self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(v[0]))))]
+        return indices
+
+    def preProcessTitle(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
-        title_regex = r'^((an )|(the )|(a ))'
-        if re.search(title_regex, movie_title):
+        title_regex1 = r'^((an )|(the )|(a ))'
+        title_regex2 = r'((, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
+        if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
+        if re.search(title_regex2, movie_title):
+            #movie_title = re.sub()
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
+        #print "Movie:" + movie_title
+        return movie_title
+
+    def removeDate(self, movie_title):
+        date_regex = r'\(\d\d\d\d\)'
+        if re.search(date_regex, movie_title):
+            movie_title = re.sub(date_regex, "", movie_title)
+        movie_title = movie_title.strip()
+
+        return movie_title
+
+    def removeAfterColon(self, movie_title):
+        colon_regex = r'^(.*?):.*'
+        if re.search(colon_regex, movie_title):
+            movie_title = re.findall(colon_regex, movie_title)[0]
+            #print "Movie title after colon: " + movie_title
+        movie_title = movie_title.strip()
+
+        return movie_title
+
+    def removeSequel(self, movie_title):
+        #TODO: FILL OUT SEQUELS
+        sequel_regex = r'(.*) (?:\d|i|ii|iii)$'
+        if re.search(sequel_regex, movie_title):
+            movie_title = re.findall(sequel_regex, movie_title)[0]
+            #print "Movie title after sequel: " + movie_title
+        movie_title = movie_title.strip()
+
+        return movie_title
+
+    def isMovie(self, movie_title):
         # Search for query as substring of movie title
         # TODO: This does not quite work ex. search for "The Little Mermaid (1989)"
-        indices = [i for i, v in enumerate(self.titles) if movie_title in v[0].lower()]
+        print "Movie: " + movie_title
+        indices = self.isTitleInLevel1(movie_title)
+        if len(indices) == 0:
+            indices = self.isTitleInLevel4(movie_title)
+            """
+            if len(indices) == 0:
+                indices = self.isTitleInLevel3(movie_title)
+                if len(indices) == 0:
+                    indices = self.isTitleInLevel4(movie_title)
+            """
+
+        # SPELLCHECK
 
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
@@ -696,7 +781,7 @@ class Chatbot:
               else:
                   negate = True
               continue
-          elif word[0] in self.punctuations: # To catch case of repeated punction like !!!! or 
+          elif word[0] in self.punctuations: # To catch case of repeated punction like !!!! or
               temp.append(word)
               negate = False
               continue
@@ -752,7 +837,7 @@ class Chatbot:
                   #added_sent += 2
                   strongPosCount += 1
                 #added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
-                posCount += added_sent 
+                posCount += added_sent
                 strongPosCount += intensifier_count
               elif self.sentiment[word] == 'neg':
                 print "neg: %s" % (word)
