@@ -495,7 +495,8 @@ class Chatbot:
       start_time = time.time()
 
       # Try removing the year from query and title!
-      movie_title = re.sub(r'\(\d\d\d\d\)', "", movie_title)
+      #query = re.sub(r'\(\d\d\d\d\)', "", movie_title)
+      #query = self.
 
       # Maximum edit distance stuff
       max_edit = len(re.findall(r'\w+', movie_title))
@@ -536,8 +537,16 @@ class Chatbot:
             correct_spellings.add(title_substring)
             indices.append(i)
 
+      indices_2 = []
+      for possible_titles in correct_spellings:
+        indices_3 = self.isTitleInLevel1(movie_title)
+        if len(indices) == 0:
+            indices_3 = self.isTitleInLevel4(movie_title)
+        indices_2.extend(indices_3)
 
       print "Spell check", time.time() - start_time, "to run"
+
+      return indices_2
 
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
@@ -646,6 +655,7 @@ class Chatbot:
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
         if len(indices) == 0:
+          '''
           # Set the max edit distance to be one edit per word
           # TODO: consider different strategies
 
@@ -691,6 +701,8 @@ class Chatbot:
                 indices.append(i)
 
           print "Spell check", time.time() - start_time, "to run"
+          '''
+          indices = self.spellCheck(movie_title)
 
         return indices
 
