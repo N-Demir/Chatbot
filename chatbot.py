@@ -314,8 +314,16 @@ class Chatbot:
         # first split on periods, exclamations, or question marks,
         # assume no one uses interrobang
 
-        # BUG? What about edge cases like Mr. or something
+        # TODO: REMOVE? Don't worry about multiple sentences?
         sentences = self.split_into_sentences(inpt)
+        if len(sentences) == 0:
+            sentences = [inpt]
+
+        for sentence in sentences:
+            words = sentence.split()
+
+            for i in range(len(words), 0, -1):
+                #TODO: FILL OUT
 
         print str(sentences)
 
@@ -449,8 +457,29 @@ class Chatbot:
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
 
+      self.move_article_to_front(self.titles)
+
       #Added for efficiency? -ND
       #self.titles = np.array(self.titles)
+
+    def move_article_to_front(self, titles):
+        for i,v in enumerate(titles):
+            movie_title = v[0]
+            date = re.findall(r'\(\d\d\d\d\)', movie_title)
+            if len(date) != 1:
+                print "BIG ERROR"
+
+            if re.search(r'.*, The \(\d\d\d\d\)', movie_title):
+                movie_title = re.sub(r', The \(\d\d\d\d\)', " " + date, movie_title)
+                movie_title = "The " + movie_title
+            elif re.search(r'.*, An \(\d\d\d\d\)', movie_title):
+                movie_title = re.sub(r', An \(\d\d\d\d\)', " " + date, movie_title)
+                movie_title = "An " + movie_title
+            elif re.search(r'.*, A \(\d\d\d\d\)', movie_title):
+                movie_title = re.sub(r', A \(\d\d\d\d\)', " " + date, movie_title)
+                movie_title = "A " + movie_title
+
+            titles[i][0] = movie_title
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
