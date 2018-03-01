@@ -293,6 +293,7 @@ class Chatbot:
         indices = [i for i, v in enumerate(self.titles) if movie_title in v[0].lower()]
 
         # If no substrings found try checking for miss-spelling
+        # Try maybe to allow for different versions of the movie?
         if len(indices) == 0:
           # Set the max edit distance to be one edit per word
           # TODO: consider different strategies
