@@ -489,6 +489,55 @@ class Chatbot:
 
       return edit_dist_M[len(true_word)][len(query)]
 
+    def spellCheck(self, query):
+      # Indexes to suggest
+      indices = []
+      start_time = time.time()
+      
+      # Try removing the year from query and title!
+      movie_title = re.sub(r'\(\d\d\d\d\)', "", movie_title)
+
+      # Maximum edit distance stuff
+      max_edit = len(re.findall(r'\w+', movie_title))
+      max_edit_word = 2
+      # Try going word by word through a title and make sure at max one edit away!
+      query_words = re.findall(r'\w+', movie_title.lower())
+      # Keep track of all possible titles substrings that are correct spellings
+      correct_spellings = set()
+
+      for i, v in enumerate(self.titles):
+        # Handle removing the final date plus any An|The|A that is at very end
+        test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
+
+        # Break the tital into individual words
+        title_words = re.findall(r'\w+', test_title)
+
+        # Allow up to one error per word
+        # Only consider words in length of query (i.e. allows for disambiguoizing)
+        #if len(query_words) == len(title_words):
+        title_substring = ''
+        if len(query_words) <= len(title_words):
+          acceptable_error = True
+          total_error = 0
+          #for x in range(len(title_words)):
+          for x in range(len(query_words)):
+            # Add the title word to our built up substring
+            title_substring += title_words[x] + ' '
+            distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
+            total_error += distance
+            if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
+              if title_words[x] == 'Scream': print 'here'
+              acceptable_error = False
+              break
+
+          # Add the word if has one error per word
+          if acceptable_error:
+            title_substring = title_substring.strip()
+            correct_spellings.add(title_substring)
+            indices.append(i)
+
+      
+      print "Spell check", time.time() - start_time, "to run"
 
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
