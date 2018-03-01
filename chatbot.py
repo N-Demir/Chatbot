@@ -538,16 +538,14 @@ class Chatbot:
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        title_regex2 = r'((, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
+        #title_regex2 = r'(, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
         if re.search(title_regex1, movie_title):
-            movie_title = re.sub(title_regex, "", movie_title)
-        if re.search(title_regex2, movie_title):
-            pass
-            #movie_title = re.sub()
+            movie_title = re.sub(title_regex1, r'', movie_title)
+        #if re.search(title_regex2, movie_title):
+        #    movie_title = re.sub(title_regex2, r' \1', movie_title)
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
-        #print "Movie:" + movie_title
         return movie_title
 
     def removeDate(self, movie_title):
