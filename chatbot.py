@@ -49,6 +49,7 @@ class Chatbot:
       self.usr_rating_vec = []
       self.numRatings = 5
       self.numRecs = 3
+      #self.prevInput = None
       self.read_data()
       self.p = PorterStemmer()
       self.stemLexicon()
@@ -201,6 +202,36 @@ class Chatbot:
       else:
         # STARTER SECTION
 
+        # Arbitrary input regexes
+        
+        q0 = r'hi|hello'
+        q1 = r'[Hh]ow are you'
+        q2 = r'[Ww]hat(?:\'s | is )your name'
+        q3 = r'[Hh]ow(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
+        q4 = r'[Dd]o you love me'
+        q5 = r'^[Nn]o\.?$'
+        basicQ = r'\?$'
+
+        r0 = re.findall(q0, input)
+        if len(r0) != 0: return "Hello! Tell me about a movie you've seen."
+        r1 = re.findall(q1, input)
+        if len(r1) != 0: return "I am well, but tell me about some movies."
+        r2 = re.findall(q2, input)
+        if len(r2) != 0: return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
+        r3 = re.findall(q3, input)
+        if len(r3) != 0: return "It has been good! Let's talk about some movies now."
+        r4 = re.findall(q4, input)
+        if len(r4) != 0: return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
+        r5 = re.findall(q5, input)
+        if len(r5) != 0: return "Yes, please."
+        rbasic = re.findall(basicQ, input)
+        if len(rbasic) != 0:
+          numResponses = 2
+          randInt = randint(1, numResponses)
+          if randInt == 1:
+            return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen"
+          elif randInt == 2:
+            return "Enough with the questions, let's get to the movies! Can you tell about one you have seen?"
         # Process movie title
         movie_tag = self.processTitle(input)
         print(movie_tag)
