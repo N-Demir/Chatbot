@@ -545,7 +545,7 @@ class Chatbot:
         #TODO: ACCOUNT FOR AMERICAN IN PARIS, AN, HARRY POTTER AND
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.preProcessTitle(inpt_title) == self.preProcessTitle(v[0])]
+                    if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
         return indices
 
     def isTitleInLevel2(self, inpt_title):
@@ -553,41 +553,48 @@ class Chatbot:
         print "Level 2 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeDate(self.preProcessTitle(inpt_title)) ==
-                       self.removeDate(self.preProcessTitle(v[0]))]
+                    if self.removeDate(self.removeArticles(inpt_title)) ==
+                       self.removeDate(self.removeArticles(v[0]))]
         return indices
 
     def isTitleInLevel3(self, inpt_title):
-        #account for subtitles
+        # account for subtitles
         print "Level 3 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title))) ==
-                       self.removeAfterColon(self.removeDate(self.preProcessTitle(v[0])))]
+                    if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) ==
+                       self.removeAfterColon(self.removeDate(self.removeArticles(v[0])))]
         return indices
 
     def isTitleInLevel4(self, inpt_title):
-        #account for sequels as well
+        # account for sequels as well
         print "Level 4 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title)))) ==
-                       self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(v[0]))))]
+                    if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) ==
+                       self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(v[0]))))]
         return indices
 
-    def preProcessTitle(self, movie_title):
+    def isTitleInLevel5(self, inpt_title):
+        # All bets are off, just substring
+        print "Level 5 titlesearch"
+        indices = []
+        indices = [i for i, v in enumerate(self.title)
+                    if self.removeArticles(inpt_title) in self.removeArticles(v[0])]
+        return indices
+
+    def removeArticles(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        title_regex2 = r'((, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
+        #title_regex2 = r'(, an (\d\d\d\d)|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #FIX this
         if re.search(title_regex1, movie_title):
-            movie_title = re.sub(title_regex, "", movie_title)
-        if re.search(title_regex2, movie_title):
-            #movie_title = re.sub()
+            movie_title = re.sub(title_regex1, r'', movie_title)
+        #if re.search(title_regex2, movie_title):
+        #    movie_title = re.sub(title_regex2, r' \1', movie_title)
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
-        #print "Movie:" + movie_title
         return movie_title
 
     def removeDate(self, movie_title):
@@ -624,6 +631,8 @@ class Chatbot:
         indices = self.isTitleInLevel1(movie_title)
         if len(indices) == 0:
             indices = self.isTitleInLevel4(movie_title)
+            if len(indices) == 0:
+                indices = self.isTitleinLevel5(movie_title)
             """
             if len(indices) == 0:
                 indices = self.isTitleInLevel3(movie_title)
@@ -854,7 +863,7 @@ class Chatbot:
             word = self.stem(word)
             if word in self.sentiment:
               added_sent = 1
-              # For each intensier we double added score
+              #For each intensier we double added score
               #added_sent *= 2 * intensifier_count if intensifier_count > 0 else 1
               if self.sentiment[word] == 'pos':
                 negCount += added_sent
