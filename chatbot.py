@@ -112,6 +112,8 @@ class Chatbot:
       # calling other functions. Although modular code is not graded, it is       #
       # highly recommended                                                        #
       #############################################################################
+      
+      # User decides how to continue or quit the chatbot after recommendations are given
       if self.is_repeat == True:
         if input == '1':
           return "Please type \":quit\""
@@ -124,7 +126,9 @@ class Chatbot:
           self.usr_rating_vec = []
           return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
         else:
-          return "I'm sorry, we don't understand your input. Please enter a number 1, 2, or 3."
+          return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
+      
+
       if self.is_turbo == True:
         # CREATIVE SECTION
 
@@ -135,7 +139,7 @@ class Chatbot:
           return "Sorry, I don't understand. Tell me about a movie that you have seen."
           #emotion detection? means they are talking about something else other than movie
         elif movie_flag == 1: # 1 movie found
-          movie = movie_tag[0]
+          movies = movie_tag[0]
           movie_index = self.isMovie(movie)
           sentiment = self.sentimentClass(input)
           if sentiment == 'pos':
@@ -149,10 +153,12 @@ class Chatbot:
           else: # Unclear sentiment
              response = self.getUnclearResponse(movie_index)
         elif movie_flag == 2: # multiple movies found
-          movie1 = movie_tag[0][0]
-          movie2 = movie_tag[0][1]
+          movie1 = movies[0]
+          movie2 = movies[1]
           movie_index1 = self.isMovie(movie1)
           movie_index2 = self.isMovie(movie2)
+
+          if len(movie_index1) != 0
 
           andRegex = r'(?:both )?"' + movie1 + '".{0,20}?and.{0,20}?"' + movie2 + '"' # same sentiment
           orRegex = r'(?:either |neither )?"' + movie1 + '".{0,20}?(?:or|nor).{0,20}?"' + movie2 + '"' # same sentiment?
@@ -162,31 +168,58 @@ class Chatbot:
           orEntities = re.findall(orRegex, input)
           butEntities = re.findall(butRegex, input)
 
+          sentiment = self.sentimentClass(input)
+          if sentiment == 'pos':
+            if len(andEntities) > 0:
 
+            movie_index = self.getMovieIndex(movie_indexes)
+            response = self.getPosResponse(movie_index)
+            self.usr_rating_vec.append((movie_index, 1))
+          elif sentiment == 'neg':
+            movie_index = self.getMovieIndex(movie_indexes)
+            response = self.getNegResponse(movie_index)
+            self.usr_rating_vec.append((movie_index, -1))
+          elif sentiment == 'none':
+            response = self.getNoneResponse(movie_title)
+          else: # Unclear sentiment
+            response = self.getUnclearResponse(movie_title)
+          
+          if len(andEntities) > 0:
+
+          elif len(orEntities > 0):
+            sentiment = self.sentimentClass
+          elif len(butEntities > 0):
+            sentiment1 =
+            sentiment2 = 
 
         else: # more than 2 movies found
-          return "I'm sorry, please tell me about at most two movies at a time. Go ahead."
+          return "I'm sorry, please tell me about either one ot two movies at a time. Go ahead."
 
         response = 'processed %s in creative mode!!' % input
+      
+
+
+
+
+
       else:
         # STARTER SECTION
-        # Process Movie title
+
+        # Process movie title
         movie_tag = self.processTitle(input)
         # Get the flag indicating success of process Title
         movie_flag = movie_tag[1]
         if movie_flag == -1: # No movies found
             return "Sorry, I don't understand. Tell me about a movie that you have seen."
-        elif movie_flag == 1:
-            # Movie found
+        elif movie_flag == 1: # Movie found
             movie_title = movie_tag[0]
             movie_indexes = self.isMovie(movie_title)
 
-            if len(movie_indexes) != 0: # Good movie!!
+            if len(movie_indexes) != 0: # Good movie!
               # Need to encorperate the sentiment
               #self.usr_rating_vec.append((movie_index, 1))
               #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
 
-              #TODO: fill out
               # We have recieved a valid movie so we have to extract sentiment,
               # record the movie rating based on sentiment, and respond reflecting
               # the sentiment.
