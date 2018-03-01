@@ -449,10 +449,39 @@ class Chatbot:
       return edit_dist_M[len(true_word)][len(query)]
 
 
+    def isTitleInLevel1(self, inpt_title):
+        # Check exact match
+        #TODO: ACCOUNT FOR AMERICAN IN PARIS, AN, HARRY POTTER AND
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.preProcessTitle(inpt_title) == self.preProcessTitle(v[0])]
+        return indices
 
-    def isMovie(self, movie_title):
-        #indices = np.where(self.titles == movie_title)
+    def isTitleInLevel2(self, inpt_title):
+        # Check but with dates irrelevent
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeDate(self.preProcessTitle(inpt_title)) ==
+                       self.removeDate(self.preProcessTitle(v[0]))]
+        return indices
 
+    def isTitleInLevel3(self, inpt_title):
+        #account for subtitles
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title))) ==
+                       self.removeAfterColon(self.removeDate(self.preProcessTitle(v[0])))]
+        return indices
+
+    def isTitleInLevel4(self, inpt_title):
+        #account for sequels as well
+        indices = []
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(inpt_title)))) ==
+                       self.removeSequel(self.removeAfterColon(self.removeDate(self.preProcessTitle(v[0]))))]
+        return indices
+
+    def preProcessTitle(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
         movie_title = movie_title.lower()
         title_regex = r'^((an )|(the )|(a ))'
@@ -461,9 +490,48 @@ class Chatbot:
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
+        return movie_title
+
+    def removeDate(self, movie_title):
+        date_regex = r'\(\d\d\d\d\d\)'
+        if re.search(date_regex, movie_title):
+            movie_title = re.sub(date_regex, "", movie_title)
+        movie_title = movie_title.strip()
+
+        return movie_title
+
+    def removeAfterColon(self, movie_title):
+        colon_regex = r'^(.*?):.*'
+        if re.search(colon_regex, movie_title):
+            movie_title = re.findall(colon_regex, movie_title)[0]
+            print "Movie title after colon: " + movie_title
+        movie_title = movie_title.strip()
+
+        return movie_title
+
+    def removeSequel(self, movie_title):
+        #TODO: FILL OUT SEQUELS
+        sequel_regex = r'(.*) (?:\d|I|II|III)$'
+        if re.search(sequel_regex, movie_title):
+            movie_title = re.findall(sequel_regex, movie_title)[0]
+            print "Movie title after sequel: " + movie_title
+        movie_title = movie_title.strip()
+
+        return movie_title
+
+    def isMovie(self, movie_title):
         # Search for query as substring of movie title
         # TODO: This does not quite work ex. search for "The Little Mermaid (1989)"
-        indices = [i for i, v in enumerate(self.titles) if movie_title in v[0].lower()]
+        indices = self.isTitleInLevel1(movie_title)
+        if len(indices) == 0:
+            indices = self.isTitleInLevel2(movie_title)
+            if len(indices) == 0:
+                indices = self.isTitleInLevel3(movie_title)
+                if len(indices) == 0:
+                    indices = self.isTitleInLevel4(movie_title)
+
+
+        # SPELLCHECK
 
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
