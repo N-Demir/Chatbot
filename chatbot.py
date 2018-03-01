@@ -250,6 +250,33 @@ class Chatbot:
         else: # Multiple movies found - flag 2
           return ("", 2)
 
+    def edit_distance(self, true_word, query, max_dist):
+      # If length of titles differ more than max_dist than return max_dist + 1
+      if abs(len(true_word) - len(query)) > max_dist:
+        return max_dist + 1
+
+      # Create matrix for DP algorithm
+      # Initialize to all zeros and make dimension (m+1) x (n+1)
+      # Initialize first row to be 0...M and first col to be 0...M
+      edit_dist_M = [[(x + i) for i in range(len(query) + 1)] for x in range(len(true_word) + 1)]
+
+      # Substitute cost
+      sub_cost = 1
+
+      for j in range(1, len(query) + 1):
+        for i in range(1, len(true_word) + 1):
+          cost_del = edit_dist_M[i - 1][j] + 1
+          cost_ins = edit_dist_M[i][j-1] + 1
+          # Compute cost of substitution. If letters we are comparing are 
+          # equal we encure no cost
+          cost_sub = edit_dist_M[i-1][j-1] + (0 if query[j - 1].lower == true_word[i - 1].lower else sub_cost)
+
+          edit_dist_M[i][j] = min(cost_del, cost_ins, cost_sub)
+
+      return edit_dist_M[len(true_word)][len(query)]
+
+
+
     def isMovie(self, movie_title):
         #indices = np.where(self.titles == movie_title)
 
@@ -258,8 +285,53 @@ class Chatbot:
         title_regex = r'^((an )|(the )|(a ))'
         if re.search(title_regex, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
+        # Remove trailing whitespace 
+        movie_title = movie_title.strip()
 
+        # Search for query as substring of movie title
+        # TODO: This does not quite work ex. search for "The Little Mermaid (1989)"
         indices = [i for i, v in enumerate(self.titles) if movie_title in v[0].lower()]
+
+        # If no substrings found try checking for miss-spelling
+        if len(indices) == 0:
+          # Set the max edit distance to be one edit per word
+          # TODO: consider different strategies
+          max_edit = len(re.findall(r'\w+', movie_title))
+          max_edit_word = 2
+
+          start_time = time.time()
+          # Find movie titles that are max edit distance or less away
+          #indices = [i for i, v in enumerate(self.titles) if self.edit_distance(v[0].lower(), movie_title, max_edit) <= max_edit]
+
+          # Try removing the year from query and title!
+          movie_title = re.sub(r'\(\d\d\d\d\)', "", movie_title)
+          # Try going word by word through a title and make sure at max one edit away!
+          query_words = re.findall(r'\w+', movie_title.lower())
+          for i, v in enumerate(self.titles):
+            # Need to handle the date removal and a/the
+            test_title = re.sub(r'\(\d\d\d\d\)', "", v[0].lower())
+            # Try removing 'the', 'an', 'a'
+            test_title = re.sub(r'(, an )|(, the )|(, a )', "", test_title)
+
+            title_words = re.findall(r'\w+', test_title)
+            
+            # Allow up to one error per word
+            if len(query_words) == len(title_words):
+              acceptable_error = True
+              for x in range(len(title_words)):
+                if (self.edit_distance(title_words[x], query_words[x], max_edit_word) > max_edit_word):
+                  acceptable_error = False
+                  break
+              
+              # Add the word if has one error per word
+              if acceptable_error:
+                indices.append(i)
+
+
+
+          print "Spell check", time.time() - start_time, "to run"
+
+
         return indices
 
     def askForSelection(self, movie_indexes):
