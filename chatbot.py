@@ -25,6 +25,16 @@ from random import randint
 
 from PorterStemmer import PorterStemmer
 
+
+# IGNORE THIS STUFF
+caps = "([A-Z])"
+prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
+suffixes = "(Inc|Ltd|Jr|Sr|Co)"
+starters = "(Mr|Mrs|Ms|Dr|He\s|She\s|It\s|They\s|Their\s|Our\s|We\s|But\s|However\s|That\s|This\s|Wherever)"
+acronyms = "([A-Z][.][A-Z][.](?:[A-Z][.])?)"
+websites = "[.](com|net|org|io|gov)"
+# FOUND IT TO SPLIT SENTENCES
+
 class Chatbot:
     """Simple class to implement the chatbot for PA 6."""
 
@@ -103,7 +113,7 @@ class Chatbot:
       # highly recommended                                                        #
       #############################################################################
       if self.is_repeat == True:
-        if input == '1': 
+        if input == '1':
           return "Please type \":quit\""
         elif input == '2':
           self.is_repeat = False
@@ -205,7 +215,7 @@ class Chatbot:
 
               # Need to fix this, just for testing
               #if len(self.usr_rating_vec) == 5:
-                #self.recommend(self.usr_rating_vec)    
+                #self.recommend(self.usr_rating_vec)
             else: # Unknown movie
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
         else:
@@ -310,21 +320,39 @@ class Chatbot:
     ###########################################################
 
 
-    def processTitle(self, input):
+    def processTitle(self, inpt):
         # TODO: Expand to allow for no quotation marks
         # movies should be clearly in quotations and match our database
         movie_regex = r'"(.*?)"'
 
         # Find all the entities
-        entities = re.findall(movie_regex, input)
+        entities = re.findall(movie_regex, inpt)
 
         # No movies found - flag -1
         if len(entities) == 0:
+
+          #CREATIVE
+          # find movies not in quotation marks, assume first letter is capitalized
+          entities = self.findNonQuotationTitles(inpt)
+
           return ("", -1)
         elif len(entities) == 1: # One movie found - flag 1
           return (entities[0], 1)
         else: # Multiple movies found - flag 2
           return (entities, 2)
+
+    def findNonQuotationTitles(self, inpt):
+        # assume first letter is capitalized
+        # find a string from capitalized letter to a period or exclamation mark
+        # check if movie and if not shrink size of our capture
+
+        # first split on periods, exclamations, or question marks,
+        # assume no one uses interrobang
+
+        # BUG? What about edge cases like Mr. or something
+        sentences = self.split_into_sentences(inpt)
+
+        print str(sentences)
 
     def edit_distance(self, true_word, query, max_dist):
       # If length of titles differ more than max_dist than return max_dist + 1
@@ -343,7 +371,7 @@ class Chatbot:
         for i in range(1, len(true_word) + 1):
           cost_del = edit_dist_M[i - 1][j] + 1
           cost_ins = edit_dist_M[i][j-1] + 1
-          # Compute cost of substitution. If letters we are comparing are 
+          # Compute cost of substitution. If letters we are comparing are
           # equal we encure no cost
           cost_sub = edit_dist_M[i-1][j-1] + (0 if query[j - 1].lower == true_word[i - 1].lower else sub_cost)
 
@@ -361,7 +389,7 @@ class Chatbot:
         title_regex = r'^((an )|(the )|(a ))'
         if re.search(title_regex, movie_title):
             movie_title = re.sub(title_regex, "", movie_title)
-        # Remove trailing whitespace 
+        # Remove trailing whitespace
         movie_title = movie_title.strip()
 
         # Search for query as substring of movie title
@@ -395,7 +423,7 @@ class Chatbot:
             #test_title = re.sub(r'(, an )|(, the )|(, a )', "", test_title)
 
             title_words = re.findall(r'\w+', test_title)
-            
+
             # Allow up to one error per word
             if len(query_words) == len(title_words):
               acceptable_error = True
@@ -406,7 +434,7 @@ class Chatbot:
                 if (distance > max_edit_word or (total_error > max_edit and max_edit != 1)):
                   acceptable_error = False
                   break
-              
+
               # Add the word if has one error per word
               if acceptable_error:
                 indices.append(i)
@@ -428,7 +456,7 @@ class Chatbot:
         while True:
             inpt = raw_input("> ")
             if inpt.isdigit():
-                #TODO IS THIS Enough
+                #TODO IS THIS BUG FREE??
                 index = int(inpt)
                 if 1 <= index and index <= len(movie_indexes):
                     return movie_indexes[index - 1]
@@ -730,6 +758,34 @@ class Chatbot:
       return movie_to_recomend
 
 
+
+    def split_into_sentences(self, text):
+        text = " " + text + "  "
+        text = text.replace("\n"," ")
+        text = re.sub(prefixes,"\\1<prd>",text)
+        text = re.sub(websites,"<prd>\\1",text)
+        if "Ph.D" in text: text = text.replace("Ph.D.","Ph<prd>D<prd>")
+        text = re.sub("\s" + caps + "[.] "," \\1<prd> ",text)
+        text = re.sub(acronyms+" "+starters,"\\1<stop> \\2",text)
+        text = re.sub(caps + "[.]" + caps + "[.]" + caps + "[.]","\\1<prd>\\2<prd>\\3<prd>",text)
+        text = re.sub(caps + "[.]" + caps + "[.]","\\1<prd>\\2<prd>",text)
+        text = re.sub(" "+suffixes+"[.] "+starters," \\1<stop> \\2",text)
+        text = re.sub(" "+suffixes+"[.]"," \\1<prd>",text)
+        text = re.sub(" " + caps + "[.]"," \\1<prd>",text)
+        if "e.g." in text: text = text.replace("e.g.","e<prd>g<prd>")
+        if "i.e." in text: text = text.replace("i.e.","i<prd>e<prd>")
+        if "”" in text: text = text.replace(".”","”.")
+        if "\"" in text: text = text.replace(".\"","\".")
+        if "!" in text: text = text.replace("!\"","\"!")
+        if "?" in text: text = text.replace("?\"","\"?")
+        text = text.replace(".",".<stop>")
+        text = text.replace("?","?<stop>")
+        text = text.replace("!","!<stop>")
+        text = text.replace("<prd>",".")
+        sentences = text.split("<stop>")
+        sentences = sentences[:-1]
+        sentences = [s.strip() for s in sentences]
+        return sentences
     #############################################################################
     # 4. Debug info                                                             #
     #############################################################################
