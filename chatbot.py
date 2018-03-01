@@ -111,7 +111,7 @@ class Chatbot:
       # calling other functions. Although modular code is not graded, it is       #
       # highly recommended                                                        #
       #############################################################################
-      
+
       # User decides how to continue or quit the chatbot after recommendations are given
       if self.is_repeat == True:
         if input == '1':
@@ -126,7 +126,7 @@ class Chatbot:
           return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
         else:
           return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
-      
+
 
       if self.is_turbo == True:
         # CREATIVE SECTION
@@ -182,20 +182,20 @@ class Chatbot:
           #   response = self.getNoneResponse(movie_title)
           # else: # Unclear sentiment
           #   response = self.getUnclearResponse(movie_title)
-          
+
           # if len(andEntities) > 0:
 
           # elif len(orEntities > 0):
           #   sentiment = self.sentimentClass
           # elif len(butEntities > 0):
           #   sentiment1 =
-          #   sentiment2 = 
+          #   sentiment2 =
 
         else: # more than 2 movies found
           return "I'm sorry, please tell me about either one ot two movies at a time. Go ahead."
 
         response = 'processed %s in creative mode!!' % input
-      
+
 
 
 
@@ -365,12 +365,10 @@ class Chatbot:
 
           #CREATIVE
           # find movies not in quotation marks, assume first letter is capitalized
-          entities = self.findNonQuotationTitles(inpt)
-          if len(entities) == 1:
-              return (entities[0], 1)
-          elif len(entities) != 0:
-              return (entities, 2)
-
+          entity = self.findNonQuotationTitles(inpt)
+          if len(entity) != 0:
+              print "got here"
+              return (entity, 1)
           # else we still found nothing
           return ("", -1)
         elif len(entities) == 1: # One movie found - flag 1
@@ -400,7 +398,9 @@ class Chatbot:
                 print "TITLE[0]: " + title[0]
                 entities.append(movie_title)
 
-        return entities
+        if len(entities) == 0:
+            return ""
+        return max(entities, key=len)
 
 
         """
@@ -526,16 +526,17 @@ class Chatbot:
                     print bot_prompt + "Sorry, that's not a valid number."
             elif len(inpt) != 0:
                 #Check if this is a movie name
-                movie_indexes = self.isMovie(inpt)
-                if len(movie_indexes) == 1:
+                temp = self.isMovie(inpt)
+                if len(temp) == 1:
                     return movie_indexes[0]
-                elif len(movie_indexes) == 0:
+                elif len(temp) == 0:
                     print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
                 else:
                     print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
-                    for i, movie_index in enumerate(movie_indexes):
+                    for i, movie_index in enumerate(temp):
                         print str(i + 1) + ") " + self.titles[movie_index][0]
-                    print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
+                    print "Please tell me a number from 1 to " + str(len(temp)) + " or the movie name."
+                    movie_indexes = temp
             else:
                 print bot_prompt + "Please enter something."
 
