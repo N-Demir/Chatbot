@@ -197,15 +197,12 @@ class Chatbot:
         response = 'processed %s in creative mode!!' % input
       
 
-
-
-
-
       else:
         # STARTER SECTION
 
         # Process movie title
         movie_tag = self.processTitle(input)
+        print(movie_tag)
         # Get the flag indicating success of process Title
         movie_flag = movie_tag[1]
         if movie_flag == -1: # No movies found
@@ -298,7 +295,7 @@ class Chatbot:
       if randInt == 1:
           return "So you really disliked \"" + self.titles[movie_index][0] + "\". I'd love to here about other movies you have seen."
       elif randInt == 2:
-          return "You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opion about?"
+          return "You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opinion about?"
 
       return "ISSUE - posresponse" #TODO:REMOV
 
@@ -514,30 +511,31 @@ class Chatbot:
         for i, movie_index in enumerate(movie_indexes):
             print str(i + 1) + ") " + self.titles[movie_index][0]
         print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
+        print "If the movie you are looking for is not listed above, please type \"more\"."
 
         while True:
             inpt = raw_input("> ")
             if inpt.isdigit():
                 #TODO IS THIS BUG FREE??
                 index = int(inpt)
-                if 1 <= index and index <= len(movie_indexes):
+                if index >= 1 and index <= len(movie_indexes):
                     return movie_indexes[index - 1]
                 else:
-                    print bot_prompt + "Sorry, that's not a valid number."
+                    print bot_prompt + "Please enter a valid input."
             elif len(inpt) != 0:
-                #Check if this is a movie name
+                # Check if this is a movie name
                 movie_indexes = self.isMovie(inpt)
                 if len(movie_indexes) == 1:
                     return movie_indexes[0]
                 elif len(movie_indexes) == 0:
                     print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
-                else:
-                    print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
-                    for i, movie_index in enumerate(movie_indexes):
-                        print str(i + 1) + ") " + self.titles[movie_index][0]
-                    print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
+            elif inpt == "more":
+                print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
+                for i, movie_index in enumerate(movie_indexes):
+                    print str(i + 1) + ") " + self.titles[movie_index][0]
+                print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
             else:
-                print bot_prompt + "Please enter something."
+                print bot_prompt + "Please enter a valid input."
 
 
     #############################################################################
