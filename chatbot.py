@@ -19,7 +19,6 @@ import time
 import numpy as np
 import heapq
 
-
 from movielens import ratings
 from random import randint
 
@@ -158,7 +157,7 @@ class Chatbot:
           movie_index1 = self.isMovie(movie1)
           movie_index2 = self.isMovie(movie2)
 
-          if len(movie_index1) != 0
+          #if len(movie_index1) != 0
 
           andRegex = r'(?:both )?"' + movie1 + '".{0,20}?and.{0,20}?"' + movie2 + '"' # same sentiment
           orRegex = r'(?:either |neither )?"' + movie1 + '".{0,20}?(?:or|nor).{0,20}?"' + movie2 + '"' # same sentiment?
@@ -169,28 +168,28 @@ class Chatbot:
           butEntities = re.findall(butRegex, input)
 
           sentiment = self.sentimentClass(input)
-          if sentiment == 'pos':
-            if len(andEntities) > 0:
+          # if sentiment == 'pos':
+          #   if len(andEntities) > 0:
 
-            movie_index = self.getMovieIndex(movie_indexes)
-            response = self.getPosResponse(movie_index)
-            self.usr_rating_vec.append((movie_index, 1))
-          elif sentiment == 'neg':
-            movie_index = self.getMovieIndex(movie_indexes)
-            response = self.getNegResponse(movie_index)
-            self.usr_rating_vec.append((movie_index, -1))
-          elif sentiment == 'none':
-            response = self.getNoneResponse(movie_title)
-          else: # Unclear sentiment
-            response = self.getUnclearResponse(movie_title)
+          #   movie_index = self.getMovieIndex(movie_indexes)
+          #   response = self.getPosResponse(movie_index)
+          #   self.usr_rating_vec.append((movie_index, 1))
+          # elif sentiment == 'neg':
+          #   movie_index = self.getMovieIndex(movie_indexes)
+          #   response = self.getNegResponse(movie_index)
+          #   self.usr_rating_vec.append((movie_index, -1))
+          # elif sentiment == 'none':
+          #   response = self.getNoneResponse(movie_title)
+          # else: # Unclear sentiment
+          #   response = self.getUnclearResponse(movie_title)
           
-          if len(andEntities) > 0:
+          # if len(andEntities) > 0:
 
-          elif len(orEntities > 0):
-            sentiment = self.sentimentClass
-          elif len(butEntities > 0):
-            sentiment1 =
-            sentiment2 = 
+          # elif len(orEntities > 0):
+          #   sentiment = self.sentimentClass
+          # elif len(butEntities > 0):
+          #   sentiment1 =
+          #   sentiment2 = 
 
         else: # more than 2 movies found
           return "I'm sorry, please tell me about either one ot two movies at a time. Go ahead."
@@ -220,7 +219,7 @@ class Chatbot:
               #self.usr_rating_vec.append((movie_index, 1))
               #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
 
-              # We have recieved a valid movie so we have to extract sentiment,
+              # We have received a valid movie so we have to extract sentiment,
               # record the movie rating based on sentiment, and respond reflecting
               # the sentiment.
 
@@ -472,10 +471,7 @@ class Chatbot:
               if acceptable_error:
                 indices.append(i)
 
-
-
           print "Spell check", time.time() - start_time, "to run"
-
 
         return indices
 
@@ -501,7 +497,7 @@ class Chatbot:
                 if len(movie_indexes) == 1:
                     return movie_indexes[0]
                 elif len(movie_indexes) == 0:
-                    print bot_prompt + "Sorry I don't know the movie \"" + inpt + "\""
+                    print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
                 else:
                     print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
                     for i, movie_index in enumerate(movie_indexes):
@@ -852,8 +848,6 @@ class Chatbot:
 
     def bot_name(self):
       return self.name
-
-
 
 
 if __name__ == '__main__':
