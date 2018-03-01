@@ -44,6 +44,7 @@ class Chatbot:
       self.name = 'moviebot'
       self.is_turbo = is_turbo
       self.is_repeat = False
+      self.skip_to_next = False
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -192,7 +193,7 @@ class Chatbot:
           #   sentiment2 =
 
         else: # more than 2 movies found
-          return "I'm sorry, please tell me about either one ot two movies at a time. Go ahead."
+          return "I'm sorry, please tell me about either one or two movies at a time. Go ahead."
 
         response = 'processed %s in creative mode!!' % input
 
@@ -223,20 +224,28 @@ class Chatbot:
               sentiment = self.sentimentClass(input)
               if sentiment == 'pos':
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getPosResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, 1))
+                if movie_index != None:
+                  response = self.getPosResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, 1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'str_pos':
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getStrPosResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
+                if movie_index != None:
+                  response = self.getStrPosResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, -1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'neg':
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getNegResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
+                if movie_index != None:
+                  response = self.getNegResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, -1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'str_neg': # Don't yet deal with changing the rating
                 movie_index = self.getMovieIndex(movie_indexes)
-                response = self.getStrNegResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
+                if movie_index != None:
+                  response = self.getStrNegResponse(movie_index)
+                  self.usr_rating_vec.append((movie_index, -1))
+                else: response = "Ok, tell me about about another movie."
               elif sentiment == 'none':
                 response = self.getNoneResponse(movie_title)
               else: # Unclear sentiment
@@ -270,7 +279,9 @@ class Chatbot:
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
           #TODO: GET STuck in while loop asking for choice
-          return self.askForSelection(movie_indexes)
+          movie = self.askForSelection(movie_indexes)
+          if movie != None: return movie
+          else: return None
       else:
           return movie_indexes[0]
 
@@ -442,7 +453,6 @@ class Chatbot:
       return edit_dist_M[len(true_word)][len(query)]
 
 
-
     def isMovie(self, movie_title):
         #indices = np.where(self.titles == movie_title)
 
@@ -511,7 +521,7 @@ class Chatbot:
         for i, movie_index in enumerate(movie_indexes):
             print str(i + 1) + ") " + self.titles[movie_index][0]
         print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
-        print "If the movie you are looking for is not listed above, please type \"more\"."
+        print "If the movie you are looking for is not listed above, please type \"next\"."
 
         while True:
             inpt = raw_input("> ")
@@ -519,25 +529,28 @@ class Chatbot:
                 #TODO IS THIS BUG FREE??
                 index = int(inpt)
                 if index >= 1 and index <= len(movie_indexes):
+                    print movie_indexes[index - 1]
                     return movie_indexes[index - 1]
                 else:
                     print bot_prompt + "Please enter a valid input."
+            elif inpt == "next":
+                self.skip_to_next = True
+                return None
             elif len(inpt) != 0:
-                #Check if this is a movie name
+                # Check if this is a movie name
                 temp = self.isMovie(inpt)
                 if len(temp) == 1:
                     return movie_indexes[0]
                 elif len(temp) == 0:
                     print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
-            elif inpt == "more":
-                print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
-                for i, movie_index in enumerate(temp):
-                    print str(i + 1) + ") " + self.titles[movie_index][0]
-                print "Please tell me a number from 1 to " + str(len(temp)) + " or the movie name."
-                movie_indexes = temp
+            # elif inpt == "more":
+            #     print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
+            #     for i, movie_index in enumerate(temp):
+            #         print str(i + 1) + ") " + self.titles[movie_index][0]
+            #     print "Please tell me a number from 1 to " + str(len(temp)) + " or the movie name."
+            #     movie_indexes = temp
             else:
                 print bot_prompt + "Please enter a valid input."
-
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
