@@ -12,6 +12,7 @@
 import math
 import re
 import csv
+import copy
 
 # For time testing
 import time
@@ -620,6 +621,7 @@ class Chatbot:
           # else we still found nothing
           return (("", -1), inpt)
         elif len(entities) == 1: # One movie found - flag 1
+          self.quotationFound = False
           inpt = re.sub(movie_regex, "", inpt)
           return ((entities[0], 1), inpt)
         else: # Multiple movies found - flag 2
@@ -628,50 +630,38 @@ class Chatbot:
 
     def findNonQuotationTitles(self, inpt):
         # DOES NOT NEED FIRST LETTER CAPS, IS THAT OKAY?
-        punctuations = '''!-[]{};:'"\,<>./?@#$%^&*_~'''
+        punctuations = '!.?'
         self.quotationFound = False
 
+        inpt = re.sub(r'[!.?]', r'', inpt)
         temp2 = inpt.split()
+        print "INPUT: " + inpt
         inpt = inpt.lower()
         entities = []
 
-        for title in self.titles:
-            movie_title = title[0]
-            movie_title = self.removeArticles(movie_title)
+        for entry in self.custom_titles:
+            titles = re.findall("<>(.*?)</>", entry[0])
+            for title in titles:
+                movie_title = title
+                movie_title = self.removeArticles(movie_title)
 
-            movie_title = movie_title.split()
-            #print "Movie title: " + str(movie_title)
-            #TODO: Remove punctuations?
+                movie_title = movie_title.split()
+                #print "Movie title: " + str(movie_title)
+                #TODO: Remove punctuations?
 
-            for i, word in enumerate(inpt.split()):
-                #print inpt
-                #print str(word[0])
-                #print str(word[0].isupper())
-                #print str(temp2)
-                if temp2[i][0].isupper() and movie_title[0] == word.lower():
-                    #print "GOT HERE"
-                    temp = ""
-                    for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
-                        #print "INPUT" + str(inpt)
-                        if inpt.split()[i] == movie_title[j]:
-                            temp += " " + temp2[i]
-                            i += 1
-                        else:
-                            break
-                    temp = temp.strip()
-                    entities.append(temp)
-
-            #print "Cur title after stripping: " + movie_title
-            """
-            if movie_title in inpt:
-                #TODO: " " + movie_title + " "
-                #TODO: check if moving things around in beginning worked
-
-                print "Movie title: " + movie_title + " Input: " + inpt
-                print "TITLE[0]: " + title[0
-
-                entities.append(movie_title)
-            """
+                for i, word in enumerate(inpt.split()):
+                    if temp2[i][0].isupper() and movie_title[0] == word.lower():
+                        #print "GOT HERE"
+                        temp = ""
+                        for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
+                            #print "INPUT" + str(inpt)
+                            if inpt.split()[i] == movie_title[j]:
+                                temp += " " + temp2[i]
+                                i += 1
+                            else:
+                                break
+                        temp = temp.strip()
+                        entities.append(temp)
 
         if len(entities) == 0:
             return ""
@@ -794,36 +784,66 @@ class Chatbot:
         # Check exact match
         #print "Level 1 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
+        indices = [i for i, v in enumerate(self.custom_titles)
+                    if self.isTitleInLevel1Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel1Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            #print "Title: " + title
+            if self.removeArticles(inpt_title) == self.removeArticles(title):
+                return True
+        return False
+
 
     def isTitleInLevel2(self, inpt_title):
         # Check but with dates irrelevent
         #print "Level 2 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeDate(self.removeArticles(inpt_title)) ==
-                       self.removeDate(self.removeArticles(v[0]))]
+        indices = [i for i, v in enumerate(self.custom_titles)
+                    if self.isTitleInLevel2Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel2Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            #print "Title: " + title
+            if self.removeDate(self.removeArticles(inpt_title)) == self.removeDate(self.removeArticles(title)):
+                return True
+        return False
 
     def isTitleInLevel3(self, inpt_title):
         # account for subtitles
         #print "Level 3 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) ==
-                       self.removeAfterColon(self.removeDate(self.removeArticles(v[0])))]
+        indices = [i for i, v in enumerate(self.custom_titles)
+                    if self.isTitleInLevel3Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel3Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            #print "Title: " + title
+            if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) == self.removeAfterColon(self.removeDate(self.removeArticles(title))):
+                return True
+        return False
 
     def isTitleInLevel4(self, inpt_title):
         # account for sequels as well
         #print "Level 4 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) ==
-                       self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(v[0]))))]
+        indices = [i for i, v in enumerate(self.custom_titles)
+                    if self.isTitleInLevel4Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel4Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            #print "Title: " + title
+            if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) == self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(title)))):
+                return True
+        return False
 
     def isTitleInLevel5(self, inpt_title):
         # All bets are off, just substring
@@ -831,9 +851,17 @@ class Chatbot:
             return []
         #print "Level 5 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(v[0]).startswith(self.removeArticles(inpt_title))]
+        indices = [i for i, v in enumerate(self.custom_titles)
+                    if self.isTitleInLevel5Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel5Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            #print "Title: " + title
+            if self.removeArticles(title).startswith(self.removeArticles(inpt_title)):
+                return True
+        return False
 
     def removeArticles(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
@@ -954,38 +982,61 @@ class Chatbot:
       self.titles, self.ratings = ratings()
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
-
       #self.move_article_to_front(self.titles)
       for i,v in enumerate(self.titles):
           self.titles[i][0] = self.move_article_to_front(v[0])
 
-      self.custom_titles = self.titles
+      self.custom_titles = copy.deepcopy(self.titles)
+      self.custom_titles = self.scope_movie_titles(self.custom_titles)
+      #print self.titles
 
     def scope_movie_titles(self, titles):
         for i,v in enumerate(titles):
             date = re.findall(r'\(\d\d\d\d\)', v[0])
-            alternate_titles = re.findall(r'\(([^\d]+.*)\)', v[0])
-            for title, i in enumerate(alternate_titles):
-                # Get rid of a.k.a
-                alternate_titles[i] = re.sub(r'a\.k\.a ', "", title)
-                # Move article to the front
-                articles = re.findall(r', (\w{0,5})', alternate_titles[i])
-                if len(articles) == 0:
-                    print "No article found in movie name: " + title
-                elif len(articles) > 1:
-                    print "Problem, length not 1 of articles: " + str(articles)
-                else:
-                    alternate_titles[i] = re.sub(r', (\w{0,5})', "", alternate_titles[i])
-                    alternate_titles[i] = articles[0] + " " + alternate_titles[i]
+            #print str(v)
+            alternate_titles = re.findall(r'\(([^\d]+?.*?)\)', v[0])
+            #print str(alternate_titles)
+            if len(alternate_titles) != 0:
+                for j, title in enumerate(alternate_titles):
+                    # Get rid of a.k.a
+                    #if re.search(r'a\.k\.a\. ', alternate_titles[j]):
+                        #print "FOUND SOMETHING: " + alternate_titles[j]
+                    alternate_titles[j] = re.sub(r'a\.k\.a\. ', "", alternate_titles[j])
+                    # Move article to the front
+                    articles = re.findall(r', (\w{0,4})$', alternate_titles[j])
+                    if len(articles) > 1:
+                        print "Problem, length not 1 of articles: " + str(articles)
+                    elif len(articles) != 0:
+                        #print "GOT HEREEE"
+                        alternate_titles[j] = re.sub(r', (\w{0,4})$', "", alternate_titles[j])
+                        alternate_titles[j] = articles[0] + " " + alternate_titles[j]
+                        #print alternate_titles[j]
 
-                alternate_titles[i] = alternate_titles[i].strip
-                if len(date) != 0:
-                    alternate_titles[i] += " " + date[0]
+                    alternate_titles[j] = alternate_titles[j].strip()
+                    #print str(alternate_titles)
+                    if len(date) != 0:
+                        #print str(alternate_titles)
+                        alternate_titles[j] = alternate_titles[j] + " " + date[0]
 
             # fix original name
-            titles[i] = re.sub(r'\(.*\)', '', titles[i])
-            titles[i] = re.sub(r'\s+', ' ', titles[i])
-            titles[i] = titles[i].strip()
+            #if len(alternate_titles) != 0: print "Titles: " + str(titles)
+            titles[i][0] = re.sub(r'\(.*?\)', '', titles[i][0])
+            titles[i][0] = re.sub(r'\s+', ' ', titles[i][0])
+            #titles[i][0] = titles[i][0].strip()
+
+
+            #titles[i][0] = self.move_article_to_front(titles[i][0])
+            titles[i][0] = titles[i][0].strip()
+            if len(date) != 0:
+                titles[i][0] = "<>" + titles[i][0] + " " + date[0] + "</>"
+            else:
+                #print "HIIIII"
+                titles[i][0] = "<>" + titles[i][0] + "</>"
+
+            for title in alternate_titles:
+                titles[i][0] = titles[i][0] + "<>" + title + "</>"
+            #print "TITLE:" + titles[i][0]
+        return titles
 
     def move_article_to_front(self, v):
         movie_title = v
@@ -994,14 +1045,15 @@ class Chatbot:
             date = date[0]
         else:
             date = ""
-        if re.search(r'.*, The \(\d\d\d\d\)', movie_title):
-            movie_title = re.sub(r', The \(\d\d\d\d\)', " " + date, movie_title)
+
+        if re.search(r'.*, The [)(]', movie_title):
+            movie_title = re.sub(r', The ([)(])', r" \1", movie_title)
             movie_title = "The " + movie_title
-        elif re.search(r'.*, An \(\d\d\d\d\)', movie_title):
-            movie_title = re.sub(r', An \(\d\d\d\d\)', " " + date, movie_title)
+        elif re.search(r'.*, An [)(]', movie_title):
+            movie_title = re.sub(r', An ([)(])', r" \1", movie_title)
             movie_title = "An " + movie_title
-        elif re.search(r'.*, A \(\d\d\d\d\)', movie_title):
-            movie_title = re.sub(r', A \(\d\d\d\d\)', " " + date, movie_title)
+        elif re.search(r'.*, A [)(]', movie_title):
+            movie_title = re.sub(r', A ([)(])', r" \1", movie_title)
             movie_title = "A " + movie_title
         return movie_title
 
