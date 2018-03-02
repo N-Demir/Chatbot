@@ -6,7 +6,7 @@
 # Original Python code by Ignacio Cases (@cases)
 #
 #TODOS: Remember what people said about previous movies
-# TODO ND: Allow toy story to have options
+# TODO ND: Allow toy story to have options, be snobby if they change
 #Dones:
 #####################################################################import csv
 import math
