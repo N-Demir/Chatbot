@@ -88,7 +88,7 @@ class Chatbot:
       self.strong_neg = open('data/strong_neg_words.txt', "r").read().splitlines()
       self.strong_pos = open('data/strong_pos_words.txt', "r").read().splitlines()
       self.intensifiers = open('data/intensifiers.txt', "r").read().splitlines()
-      self.jokes = open('data/intensifiers.txt', "r").read().splitlines()
+      self.jokes = open('data/jokes.txt', "r").read().splitlines()
       self.stemPos_Neg_Words()
 
 
@@ -470,6 +470,7 @@ class Chatbot:
 
 
     def getArbitraryResponse(self, input):
+      print "INPUT" + input
       input = input.lower()
       q0 = r'^hi|hello'
       q2 = r'what(?:\'s | is )your name'
