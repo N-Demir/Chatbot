@@ -440,10 +440,13 @@ class Chatbot:
         if len(entities) == 0:
 
           #CREATIVE
-          # find movies not in quotation marks, assume first letter is capitalized
+          # find movies not in quotation marks
           entity = self.findNonQuotationTitles(inpt)
           if len(entity) != 0:
-              inpt = re.sub(re.compile(entity), "", inpt)
+              temp = entity
+              if re.search(r'\(.*\)', temp):
+                  temp = re.sub(r'\(.*\)', "", temp)
+              inpt = re.sub(temp, "", inpt)
               return ((entity, 1), inpt)
           # else we still found nothing
           return (("", -1), inpt)
@@ -455,17 +458,19 @@ class Chatbot:
           return ((entities, 2), inpt)
 
     def findNonQuotationTitles(self, inpt):
-        # check for every valid movie, stripped of date and article, if it is in
-        # the input
+        # DOES NOT NEED FIRST LETTER CAPS, IS THAT OKAY?
+        punctuations = '''!-[]{};:'"\,<>./?@#$%^&*_~'''
+
         inpt = inpt.lower()
         entities = []
 
         for title in self.titles:
             movie_title = title[0]
             movie_title = self.removeArticles(movie_title)
+
             movie_title = movie_title.split()
             #print "Movie title: " + str(movie_title)
-
+            #TODO: Remove punctuations?
 
             for i, word in enumerate(inpt.split()):
                 if movie_title[0] == word:
@@ -477,11 +482,8 @@ class Chatbot:
                             i += 1
                         else:
                             break
+                    temp = temp.strip()
                     entities.append(temp)
-
-
-
-
 
             #print "Cur title after stripping: " + movie_title
             """
@@ -659,7 +661,6 @@ class Chatbot:
         # MUST BE CALLED AFTER removeDate
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        #title_regex2 = r'(?:, an (\(\d\d\d\d\)))|(?:, the (\(\d\d\d\d\)))|(?:, a (\(\d\d\d\d\)))'
         title_regex_the = r', the (\(\d\d\d\d\))'
         title_regex_an = r', an (\(\d\d\d\d\))'
         title_regex_a = r', a (\(\d\d\d\d\))'
@@ -709,9 +710,13 @@ class Chatbot:
         print "Movie: " + movie_title
         indices = self.isTitleInLevel1(movie_title)
         if len(indices) == 0:
-            indices = self.isTitleInLevel4(movie_title)
+            indices = self.isTitleInLevel2(movie_title)
             if len(indices) == 0:
-                indices = self.isTitleInLevel5(movie_title)
+                indices = self.isTitleInLevel3(movie_title)
+                if len(indices) == 0:
+                    indices = self.isTitleInLevel4(movie_title)
+                    if len(indices) == 0:
+                        indices = self.isTitleInLevel5(movie_title)
 
         # SPELLCHECK
 
