@@ -911,7 +911,7 @@ class Chatbot:
     def removeSequel(self, movie_title):
         # M?(CM|D?C?C?C? |CD)(XC |XL |L?X?X?X?)(V?I?I?I? |IV |IX)
         #TODO: FILL OUT SEQUELS
-        sequel_regex = r'(.*) (?:\d|i|ii|iii)$'
+        sequel_regex = r'(.*) (?:and|\d|i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii|xiii)$'
         if re.search(sequel_regex, movie_title):
             movie_title = re.findall(sequel_regex, movie_title)[0]
             #print "Movie title after sequel: " + movie_title
