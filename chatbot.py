@@ -1044,6 +1044,11 @@ class Chatbot:
         print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
         print "If the movie you are looking for is not listed above, please type \"next\"."
 
+        # After this loop they will have selected a movie so we should not 
+        # check if we have just spell checked
+        self.spellCheckPerformed1 = False
+        self.spellCheckPerformed2 = False
+
         while True:
             inpt = raw_input("> ")
             if inpt.isdigit():
