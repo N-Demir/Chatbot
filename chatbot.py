@@ -588,7 +588,7 @@ class Chatbot:
         # All bets are off, just substring
         print "Level 5 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.title)
+        indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(inpt_title) in self.removeArticles(v[0])]
         return indices
 
@@ -597,11 +597,18 @@ class Chatbot:
         # MUST BE CALLED AFTER removeDate
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        title_regex2 = r'(, an (\d\d\d\d))|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #
+        #title_regex2 = r'(?:, an (\(\d\d\d\d\)))|(?:, the (\(\d\d\d\d\)))|(?:, a (\(\d\d\d\d\)))'
+        title_regex_the = r', the (\(\d\d\d\d\))'
+        title_regex_an = r', an (\(\d\d\d\d\))'
+        title_regex_a = r', a (\(\d\d\d\d\))'
         if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex1, r'', movie_title)
-        if re.search(title_regex2, movie_title):
-            movie_title = re.sub(title_regex2, r' \1', movie_title)
+        elif re.search(title_regex_the, movie_title):
+            movie_title = re.sub(title_regex_the, r' \1', movie_title)
+        elif re.search(title_regex_an, movie_title):
+            movie_title = re.sub(title_regex_an, r' \1', movie_title)
+        elif re.search(title_regex_a, movie_title):
+            movie_title = re.sub(title_regex_a, r' \1', movie_title)
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
@@ -642,7 +649,7 @@ class Chatbot:
         if len(indices) == 0:
             indices = self.isTitleInLevel4(movie_title)
             if len(indices) == 0:
-                indices = self.isTitleinLevel5(movie_title)
+                indices = self.isTitleInLevel5(movie_title)
             """
             if len(indices) == 0:
                 indices = self.isTitleInLevel3(movie_title)
