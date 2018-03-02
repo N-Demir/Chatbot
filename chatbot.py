@@ -781,41 +781,51 @@ class Chatbot:
     def scope_movie_titles(self, titles):
         for i,v in enumerate(titles):
             date = re.findall(r'\(\d\d\d\d\)', v[0])
-            print str(v)
-            alternate_titles = re.findall(r'\(([^\d]+.*)\)', v[0])
-            for title, i in enumerate(alternate_titles):
-                # Get rid of a.k.a
-                alternate_titles[i] = re.sub(r'a\.k\.a ', "", title)
-                # Move article to the front
-                articles = re.findall(r', (\w{0,5})', alternate_titles[i])
-                if len(articles) == 0:
-                    print "No article found in movie name: " + title
-                elif len(articles) > 1:
-                    print "Problem, length not 1 of articles: " + str(articles)
-                else:
-                    alternate_titles[i] = re.sub(r', (\w{0,5})', "", alternate_titles[i])
-                    alternate_titles[i] = articles[0] + " " + alternate_titles[i]
+            #print str(v)
+            alternate_titles = re.findall(r'\(([^\d]+?.*?)\)', v[0])
+            #print str(alternate_titles)
+            if len(alternate_titles) != 0:
+                #print str(alternate_titles)
+                for j, title in enumerate(alternate_titles):
+                    # Get rid of a.k.a
+                    #print str(alternate_titles)
+                    alternate_titles[j] = re.sub(r'a\.k\.a ', "", title)
+                    # Move article to the front
+                    articles = re.findall(r', (\w{0,5})', alternate_titles[j])
+                    if len(articles) == 0:
+                        #print "No article found in movie name: " + title
+                        pass
+                    elif len(articles) > 1:
+                        #print "Problem, length not 1 of articles: " + str(articles)
+                        pass
+                    else:
+                        alternate_titles[j] = re.sub(r', (\w{0,5})', "", alternate_titles[j])
+                        alternate_titles[j] = articles[0] + " " + alternate_titles[j]
 
-                alternate_titles[i] = alternate_titles[i].strip
-                if len(date) != 0:
-                    alternate_titles[i] += " " + date[0]
+                    alternate_titles[j] = alternate_titles[j].strip()
+                    #print str(alternate_titles)
+                    if len(date) != 0:
+                        #print str(alternate_titles)
+                        alternate_titles[j] = alternate_titles[j] + " " + date[0]
 
             # fix original name
-            titles[i][0] = re.sub(r'\(.*\)', '', titles[i][0])
+            #if len(alternate_titles) != 0: print "Titles: " + str(titles)
+            titles[i][0] = re.sub(r'\(.*?\)', '', titles[i][0])
             titles[i][0] = re.sub(r'\s+', ' ', titles[i][0])
-            titles[i][0] = titles[i][0].strip()
+            #titles[i][0] = titles[i][0].strip()
+
 
             titles[i][0] = self.move_article_to_front(titles[i][0])
             titles[i][0] = titles[i][0].strip()
             if len(date) != 0:
-                print "HIIIII"
                 titles[i][0] = "(" + titles[i][0] + " " + date[0] + ")"
             else:
+                #print "HIIIII"
                 titles[i][0] = "(" + titles[i][0] + ")"
 
             for title in alternate_titles:
-                titles[i][0] += title
-            #print "TITLE:" + titles[i]
+                titles[i][0] = titles[i][0] + "(" + title + ")"
+            #print "TITLE:" + titles[i][0]
         return titles
 
     def move_article_to_front(self, v):
