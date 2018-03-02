@@ -280,7 +280,6 @@ class Chatbot:
       basicQ1 = r'^(can|what|where|why|how|are|aren\'t) ([^?]*)(?:\?)?'
       basicQ2 = r'\?$'
 
-
       r0 = re.findall(q0, input)
       if len(r0) != 0:
         return "Hello! Tell me about a movie you've seen."
@@ -360,10 +359,11 @@ class Chatbot:
     ######                   RESPONSES                   ######
     ###########################################################
     def noMovieResponse(self):
-      numResponses = 2
-      randInt = randint(1, numResponses)
-      #if randInt == 1:
-      return "I'm sorry, I'm not sure what you mean. Tell me about a movie."
+      responses = []
+      responses.append("I'm sorry, I'm not sure what you mean. Tell me about a movie.")
+      responses.append("Sorry, I don't quite understand. Tell me about a movie that you have seen.")
+      responses.append("Let's get back to movies - I'd love to hear your opinion on one.")
+      return responses[randint(1, len(responses)-1)]
 
     def getStrPosResponse(self, movie_index):
       responses = []
@@ -371,7 +371,6 @@ class Chatbot:
       responses.append("Great choice! That is an amazing movie. \"" + self.titles[movie_index][0] + "\". What about another movie?")
       responses.append("" + self.titles[movie_index][0] + " is a fantastic movie! Let's hear about another one.")
       return responses[randint(1, len(responses)-1)]
-      return "ISSUE - posresponse" #TODO:REMOVE
 
     def getStrNegResponse(self, movie_index):
       responses = []
@@ -379,7 +378,6 @@ class Chatbot:
       responses.append("You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opinion about?")
       responses.append("I see you really weren't a fan of \"" + self.titles[movie_index][0] + "\". Can you tell me about another movie?")
       return responses[randint(1, len(responses)-1)]
-      return "ISSUE - posresponse" #TODO:REMOVE
 
     def getPosResponse(self, movie_index):
         responses = []
@@ -387,7 +385,6 @@ class Chatbot:
         responses.append("Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". What about another movie?")
         responses.append("Great! I'm glad you liked \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
         return responses[randint(1, len(responses)-1)]
-        return "ISSUE - posresponse" #TODO:REMOVE
 
     def getNegResponse(self, movie_index):
         responses = []
@@ -395,7 +392,6 @@ class Chatbot:
         responses.append("Ok, you disliked \"" + self.titles[movie_index][0] + "\". What about another movie?")
         responses.append("I'm sorry you did not enjoy \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
         return responses[randint(1, len(responses)-1)]
-        return "ISSUE - negresponse" #TODO:REMOVE
 
     def getNoneResponse(self, movie_index):
         responses = []
@@ -404,7 +400,6 @@ class Chatbot:
         responses.append("Did you like or dislike " + self.titles[movie_index][0] + "\"?")
         return responses[randint(1, len(responses)-1)]
         #TODO: REMEMBER PREVIOUS THING
-        return "ISSUE - noneResponse"
 
     def getUnclearResponse(self, movie_index):
         responses = []
@@ -412,7 +407,6 @@ class Chatbot:
         responses.append("I'm sorry, I can't quite tell what your opinion is on \"" + self.titles[movie_index][0] + "\". Can you tell me more?")
         responses.append("I'm not certain about your opinion on \"" + self.titles[movie_index][0] + "\". Could you tell me more about it?")
         return responses[randint(1, len(responses)-1)]
-        return "ISSUE - unclearResponse" #TODO:REMOVE
 
     ###########################################################
     ######                 END RESPONSES                 ######
