@@ -1508,10 +1508,25 @@ class Chatbot:
     #############################################################################
     def intro(self):
       return """
-      Your task is to implement the chatbot as detailed in the PA6 instructions.
-      Remember: in the starter mode, movie names will come in quotation marks and
-      expressions of sentiment will be simple!
-      Write here the description for your own chatbot!
+      Welcome to our chatbot!
+      We implemented the following creative features from the rubric:
+        - Identifying movies without quotation marks or perfect capitalization
+        - Fine-grained sentiment extraction
+        - Spell-checking movie titles
+        - Disambiguating movie titles for series and year ambiguities
+        - Understanding references to things said previously
+        - Responding to arbitrary input
+        - Speaking very fluently
+        - Alternate/foreign titles
+      We also implemented some "other features," described below.
+        - Give user the option to specify a range of dates for the recommendations.
+        - Gives user the option to choose a specific genre for the recommendations.
+        - Gives user a selection of movies to choose from if the input movie detected
+          is part of a series.
+        - Detect redundant input movies and update the user's rating if a different
+          sentiment was detected than what is currently stored.
+        - Explicitly confirm spell check with user to make sure it's what they intended.
+        - Tell user jokes when prompted.
       """
 
     #############################################################################
