@@ -1076,7 +1076,7 @@ class Chatbot:
                         print str(i + 1) + ") " + self.titles[movie_index][0]
                         movie_indexes = temp
                 elif len(temp) == 0:
-                   print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
+                   print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\". Please enter a valid input."
                 else:
                     return temp[0]
                 # temp = self.isMovie(inpt)
