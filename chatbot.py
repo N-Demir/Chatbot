@@ -205,15 +205,15 @@ class Chatbot:
     def getRepeatResponse(self, input):
       if input == '1':
           return "Please type \":quit\""
-        elif input == '2':
+      elif input == '2':
           self.is_repeat = False
           self.numRatings += 3
           return "Please tell me about another movie you've seen."
-        elif input == '3':
+      elif input == '3':
           self.is_repeat = False
           self.usr_rating_vec = []
           return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
-        else:
+      else:
           return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
 
     def getArbitraryResponse(self, input):
@@ -394,7 +394,7 @@ class Chatbot:
         # DOES NOT NEED FIRST LETTER CAPS, IS THAT OKAY?
         punctuations = '''!-[]{};:'"\,<>./?@#$%^&*_~'''
 
-        inpt = inpt.lower()
+        #inpt = inpt.lower()
         entities = []
 
         for title in self.titles:
@@ -406,7 +406,7 @@ class Chatbot:
             #TODO: Remove punctuations?
 
             for i, word in enumerate(inpt.split()):
-                if movie_title[0] == word:
+                if word.istitle() and movie_title[0] == word:
                     temp = ""
                     for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
                         #print "INPUT" + str(inpt)
