@@ -5,9 +5,7 @@
 # v.1.0.2
 # Original Python code by Ignacio Cases (@cases)
 #
-#TODOS: Remember what people said about previous movies
-# TODO ND: Allow toy story to have options, be snobby if they change
-#Dones:
+#TODOS: be snobby if they change
 #####################################################################import csv
 import math
 import re
@@ -92,6 +90,7 @@ class Chatbot:
       self.strong_neg = open('data/strong_neg_words.txt', "r").read().splitlines()
       self.strong_pos = open('data/strong_pos_words.txt', "r").read().splitlines()
       self.intensifiers = open('data/intensifiers.txt', "r").read().splitlines()
+      self.jokes = open('data/intensifiers.txt', "r").read().splitlines()
       self.stemPos_Neg_Words()
 
 
@@ -135,7 +134,7 @@ class Chatbot:
 
     def process(self, input):
       # For debug
-      print input
+      #print input
       """Takes the input string from the REPL and call delegated functions
       that
         1) extract the relevant information and
@@ -511,7 +510,7 @@ class Chatbot:
         return "Yes, please."
       r6 = re.findall(q6, input)
       if len(r6) != 0:
-        return "Haha very funny. I will if you tell me about a movie."
+        return self.jokes[randint(0, len(self.jokes))]
       # r10 = re.findall(q10, input)
       # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
       rbasic1 = re.findall(basicQ1, input)
@@ -685,7 +684,7 @@ class Chatbot:
           entity = self.findNonQuotationTitles(inpt)
           if len(entity) != 0:
               temp = entity
-              print "Movie: " + temp
+              #print "Movie: " + temp
               if re.search(r'\(.*\)', temp):
                   temp = re.sub(r'\(.*\)', "", temp)
               inpt = re.sub(temp, "", inpt)
@@ -707,7 +706,7 @@ class Chatbot:
 
         inpt = re.sub(r'[!.?]', r'', inpt)
         temp2 = inpt.split()
-        print "INPUT: " + inpt
+        #print "INPUT: " + inpt
         inpt = inpt.lower()
         entities = []
 
@@ -754,7 +753,7 @@ class Chatbot:
             for i in range(len(words), 0, -1):
                 #TODO: FILL OUT
 
-        print str(sentences)
+       #print str(sentences)
         """
 
     def edit_distance(self, true_word, query, max_dist):
@@ -838,7 +837,7 @@ class Chatbot:
                   distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
                   total_error += distance
                   if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
-                    #f title_words[x] == 'Scream': print 'here'
+                    #f title_words[x] == 'Scream':#print 'here'
                     acceptable_error = False
                     break
 
@@ -848,7 +847,7 @@ class Chatbot:
                   # Get the location of the last word that matched as spelling error
                   # and generate the correclty spelled sequence
                   title_substring = test_title[0 : test_title.find(last_word) + len(last_word)]
-                  print title_substring
+                  #print title_substring
                   correct_spellings.add(title_substring)
                   indices.append(i)
 
@@ -863,14 +862,14 @@ class Chatbot:
 
         indices_2.extend(indices_3)
 
-      print "Spell check", time.time() - start_time, "to run"
+      #print "Spell check", time.time() - start_time, "to run"
 
       return list(set(indices_2))
 
     def isTitleInLevel1(self, inpt_title):
         self.DONOTTOUCHME_TOY_STORY = False
         # Check exact match
-        print "Level 1 titlesearch"
+        #print "Level 1 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel1Helper(inpt_title, v[0])]
@@ -891,7 +890,7 @@ class Chatbot:
         # Check but with dates irrelevent
         if self.DONOTTOUCHME_TOY_STORY == True:
             return []
-        print "Level 2 titlesearch"
+       #print "Level 2 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel2Helper(inpt_title, v[0])]
@@ -909,7 +908,7 @@ class Chatbot:
         # account for subtitles
         if self.DONOTTOUCHME_TOY_STORY == True:
             return []
-        print "Level 3 titlesearch"
+       #print "Level 3 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel3Helper(inpt_title, v[0])]
@@ -926,7 +925,7 @@ class Chatbot:
     def isTitleInLevel4(self, inpt_title):
         # account for sequels as well
         #    return []
-        print "Level 4 titlesearch"
+       #print "Level 4 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel4Helper(inpt_title, v[0])]
@@ -944,7 +943,7 @@ class Chatbot:
         # All bets are off, just substring
         if self.quotationFound == True:
             return []
-        print "Level 5 titlesearch"
+       #print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel5Helper(inpt_title, v[0])]
@@ -1035,11 +1034,11 @@ class Chatbot:
 
     def askForSelection(self, movie_indexes):
         bot_prompt = "\001\033[96m\002%s> \001\033[0m\002" % self.name
-        print bot_prompt + "Sorry, which movie are you referring to?"
+       #print bot_prompt + "Sorry, which movie are you referring to?"
         for i, movie_index in enumerate(movie_indexes):
-            print str(i + 1) + ") " + self.titles[movie_index][0]
-        print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
-        print "If the movie you are looking for is not listed above, please type \"next\"."
+           #print str(i + 1) + ") " + self.titles[movie_index][0]
+       #print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
+       #print "If the movie you are looking for is not listed above, please type \"next\"."
 
         while True:
             inpt = raw_input("> ")
@@ -1047,41 +1046,41 @@ class Chatbot:
                 #TODO IS THIS BUG FREE??
                 index = int(inpt)
                 if index >= 1 and index <= len(movie_indexes):
-                    print movie_indexes[index - 1]
+                   #print movie_indexes[index - 1]
                     return movie_indexes[index - 1]
                 else:
-                    print bot_prompt + "Please enter a valid input."
+                   #print bot_prompt + "Please enter a valid input."
             elif inpt == "next":
                 return None
             elif len(inpt) != 0:
                 # Check if this is a movie name
                 temp = []
                 for index in movie_indexes:
-                    print "title: " + self.titles[index][0]
+                   #print "title: " + self.titles[index][0]
                     if self.removeArticles(self.titles[index][0]).startswith(self.removeArticles(inpt)):
                         temp.append(index)
                 movie_indexes = temp
                 if len(movie_indexes) > 1:
-                    print bot_prompt + "Could you help me narrow it down more please?"
+                   #print bot_prompt + "Could you help me narrow it down more please?"
                     for i, movie_index in enumerate(movie_indexes):
-                        print str(i + 1) + ") " + self.titles[movie_index][0]
+                       #print str(i + 1) + ") " + self.titles[movie_index][0]
                 elif len(movie_indexes) == 0:
-                    print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
+                   #print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
                 else:
                     return movie_indexes[0]
                 # temp = self.isMovie(inpt)
                 # if len(temp) == 1:
                 #     return movie_indexes[0]
                 # elif len(temp) == 0:
-                #     print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
+                #    #print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
             # elif inpt == "more":
-            #     print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
+            #    #print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
             #     for i, movie_index in enumerate(temp):
-            #         print str(i + 1) + ") " + self.titles[movie_index][0]
-            #     print "Please tell me a number from 1 to " + str(len(temp)) + " or the movie name."
+            #        #print str(i + 1) + ") " + self.titles[movie_index][0]
+            #    #print "Please tell me a number from 1 to " + str(len(temp)) + " or the movie name."
             #     movie_indexes = temp
             else:
-                print bot_prompt + "Please enter a valid input."
+               #print bot_prompt + "Please enter a valid input."
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
@@ -1118,7 +1117,7 @@ class Chatbot:
                     # Move article to the front
                     articles = re.findall(r', (\w{0,4})$', alternate_titles[j])
                     if len(articles) > 1:
-                        print "Problem, length not 1 of articles: " + str(articles)
+                       #print "Problem, length not 1 of articles: " + str(articles)
                     elif len(articles) != 0:
                         #print "GOT HEREEE"
                         alternate_titles[j] = re.sub(r', (\w{0,4})$', "", alternate_titles[j])
@@ -1132,7 +1131,7 @@ class Chatbot:
                         alternate_titles[j] = alternate_titles[j] + " " + date[0]
 
             # fix original name
-            #if len(alternate_titles) != 0: print "Titles: " + str(titles)
+            #if len(alternate_titles) != 0:#print "Titles: " + str(titles)
             titles[i][0] = re.sub(r'\(.*?\)', '', titles[i][0])
             titles[i][0] = re.sub(r'\s+', ' ', titles[i][0])
             #titles[i][0] = titles[i][0].strip()
@@ -1188,15 +1187,15 @@ class Chatbot:
               #print "Original: " + str(original) + " Binarized: " + str(binarized)
               if original == 0:
                   if binarized != 0:
-                      print "0 - MISTAKE"
+                     #print "0 - MISTAKE"
 
               if original == 3:
                   if binarized != -1:
-                      print "3 - MISTAKE"
+                     #print "3 - MISTAKE"
 
               if original == 3.5:
                   if binarized != 1:
-                      print "1 - MISTAKE"
+                     #print "1 - MISTAKE"
       """
 
     def stemLexicon(self):
@@ -1325,7 +1324,7 @@ class Chatbot:
       # non strong to a strong
 
       # DEBUGGING TODO:REMOVE
-      # print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
+      ##print "Count of word: " + word + " pos: " + str(posCount) + " neg: " + str(negCount)
 
       #TODO: Catch no sentiment or unclear sentiment!
       #TODO: Create stronger cutoffs for very strong / neg sentiment
@@ -1452,14 +1451,14 @@ class Chatbot:
       #movie_to_recomend = movie_to_recomend[:-1]
 
 
-      print "Recommend took", time.time() - start_time, "to run"
+     #print "Recommend took", time.time() - start_time, "to run"
 
       '''
-      # Print top 50
+      ##print top 50
       for i in range(50):
         #print '%s rated %f' % (self.titles[sorted_movies[i][0]][0], sorted_movies[i][1])
         movie_i = heapq.heappop(est_ratings)
-        print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1)
+       #print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1)
       '''
       return est_ratings
       #return movie_to_recomend
