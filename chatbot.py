@@ -610,9 +610,18 @@ class Chatbot:
         # Check exact match
         print "Level 1 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
+        indices = [i for i, v in enumerate(self.custom_titles)
+                    if isTitleInLevel1Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel1Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            print "Title: " + title
+            if self.removeArticles(inpt_title) == self.removeArticles(title):
+                return True
+        return False
+
 
     def isTitleInLevel2(self, inpt_title):
         # Check but with dates irrelevent
@@ -623,23 +632,48 @@ class Chatbot:
                        self.removeDate(self.removeArticles(v[0]))]
         return indices
 
+    def isTitleInLevel2Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            print "Title: " + title
+            if self.removeDate(self.removeArticles(inpt_title)) ==
+               self.removeDate(self.removeArticles(title)):
+                return True
+        return False
+
     def isTitleInLevel3(self, inpt_title):
         # account for subtitles
         print "Level 3 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) ==
-                       self.removeAfterColon(self.removeDate(self.removeArticles(v[0])))]
+                    if isTitleInLevel3Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel3Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            print "Title: " + title
+            if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) ==
+               self.removeAfterColon(self.removeDate(self.removeArticles(title))):
+                return True
+        return False
 
     def isTitleInLevel4(self, inpt_title):
         # account for sequels as well
         print "Level 4 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) ==
-                       self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(v[0]))))]
+                    if isTitleInLevel4Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel4Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            print "Title: " + title
+            if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) ==
+               self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(title)))):
+                return True
+        return False
 
     def isTitleInLevel5(self, inpt_title):
         # All bets are off, just substring
@@ -649,8 +683,16 @@ class Chatbot:
         print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(v[0]).startswith(self.removeArticles(inpt_title))]
+                    if isTitleInLevel5Helper(inpt_title, v[0])]
         return indices
+
+    def isTitleInLevel5Helper(self, inpt_title, entry):
+        titles = re.findall("<>(.*?)</>", entry)
+        for title in titles:
+            print "Title: " + title
+            if if self.removeArticles(v[0]).startswith(self.removeArticles(title)):
+                return True
+        return False
 
     def removeArticles(self, movie_title):
         #Preprocess movie_titles: Lowercase; remove a, an, the at beg
@@ -821,10 +863,10 @@ class Chatbot:
                 titles[i][0] = "(" + titles[i][0] + " " + date[0] + ")"
             else:
                 #print "HIIIII"
-                titles[i][0] = "(" + titles[i][0] + ")"
+                titles[i][0] = "<>" + titles[i][0] + "</>"
 
             for title in alternate_titles:
-                titles[i][0] = titles[i][0] + "(" + title + ")"
+                titles[i][0] = titles[i][0] + "<>" + title + "</>"
             #print "TITLE:" + titles[i][0]
         return titles
 
