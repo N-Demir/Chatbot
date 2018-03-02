@@ -263,7 +263,7 @@ class Chatbot:
                 if arbResp != None: return arbResp
                 return "Darn, I can't seem to remember that movie. Sorry about that! I promise I'll know the next one."
               self.unknown_movie = True
-              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
+              return "Unfortunately I have never seen that movie, but I would love to hear about other movies that you have seen."
       else:
         return "Please tell me about one movie at a time. Go ahead."
 
