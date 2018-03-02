@@ -115,19 +115,7 @@ class Chatbot:
       #############################################################################
 
       # User decides how to continue or quit the chatbot after recommendations are given
-      if self.is_repeat == True:
-        if input == '1':
-          return "Please type \":quit\""
-        elif input == '2':
-          self.is_repeat = False
-          self.numRatings += 3
-          return "Please tell me about another movie you've seen."
-        elif input == '3':
-          self.is_repeat = False
-          self.usr_rating_vec = []
-          return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
-        else:
-          return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
+      if self.is_repeat == True: return self.getRepeatResponse(input)
 
       # Handle arbitrary input
       response = self.getArbitraryResponse(input)
@@ -213,6 +201,20 @@ class Chatbot:
         return response + '\n' + recommend_response
 
       return response
+
+    def getRepeatResponse(self, input):
+      if input == '1':
+          return "Please type \":quit\""
+        elif input == '2':
+          self.is_repeat = False
+          self.numRatings += 3
+          return "Please tell me about another movie you've seen."
+        elif input == '3':
+          self.is_repeat = False
+          self.usr_rating_vec = []
+          return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
+        else:
+          return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
 
     def getArbitraryResponse(self, input):
       input = input.lower()
