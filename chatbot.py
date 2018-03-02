@@ -462,23 +462,38 @@ class Chatbot:
 
         for title in self.titles:
             movie_title = title[0]
+            movie_title = self.removeArticles(movie_title)
+            movie_title = movie_title.split()
+            #print "Movie title: " + str(movie_title)
 
-            #strip and Lowercase
-            movie_title = movie_title.lower()
 
-            movie_title = re.sub(r' \(\d\d\d\d\)', "", movie_title)
-            movie_title = re.sub(r'^(the |an |a )', "", movie_title)
+            for i, word in enumerate(inpt.split()):
+                if movie_title[0] == word:
+                    temp = ""
+                    for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
+                        #print "INPUT" + str(inpt)
+                        if inpt.split()[i] == movie_title[j]:
+                            temp += " " + movie_title[j]
+                            i += 1
+                        else:
+                            break
+                    entities.append(temp)
+
+
+
+
 
             #print "Cur title after stripping: " + movie_title
-
+            """
             if movie_title in inpt:
                 #TODO: " " + movie_title + " "
                 #TODO: check if moving things around in beginning worked
-                """
+
                 print "Movie title: " + movie_title + " Input: " + inpt
                 print "TITLE[0]: " + title[0
-                """
+
                 entities.append(movie_title)
+            """
 
         if len(entities) == 0:
             return ""
@@ -599,7 +614,6 @@ class Chatbot:
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
         print "Level 1 titlesearch"
-        #TODO: ACCOUNT FOR AMERICAN IN PARIS, AN, HARRY POTTER AND
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
@@ -637,7 +651,7 @@ class Chatbot:
         print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(inpt_title) in self.removeArticles(v[0])]
+                    if self.removeArticles(v[0]).startswith(self.removeArticles(inpt_title))]
         return indices
 
     def removeArticles(self, movie_title):
@@ -645,11 +659,18 @@ class Chatbot:
         # MUST BE CALLED AFTER removeDate
         movie_title = movie_title.lower()
         title_regex1 = r'^((an )|(the )|(a ))'
-        title_regex2 = r'(, an (\d\d\d\d))|(, the (\d\d\d\d))|(, a (\d\d\d\d))' #
+        #title_regex2 = r'(?:, an (\(\d\d\d\d\)))|(?:, the (\(\d\d\d\d\)))|(?:, a (\(\d\d\d\d\)))'
+        title_regex_the = r', the (\(\d\d\d\d\))'
+        title_regex_an = r', an (\(\d\d\d\d\))'
+        title_regex_a = r', a (\(\d\d\d\d\))'
         if re.search(title_regex1, movie_title):
             movie_title = re.sub(title_regex1, r'', movie_title)
-        if re.search(title_regex2, movie_title):
-            movie_title = re.sub(title_regex2, r' \1', movie_title)
+        elif re.search(title_regex_the, movie_title):
+            movie_title = re.sub(title_regex_the, r' \1', movie_title)
+        elif re.search(title_regex_an, movie_title):
+            movie_title = re.sub(title_regex_an, r' \1', movie_title)
+        elif re.search(title_regex_a, movie_title):
+            movie_title = re.sub(title_regex_a, r' \1', movie_title)
         # Remove trailing whitespace
         movie_title = movie_title.strip()
 
@@ -691,12 +712,6 @@ class Chatbot:
             indices = self.isTitleInLevel4(movie_title)
             if len(indices) == 0:
                 indices = self.isTitleInLevel5(movie_title)
-            """
-            if len(indices) == 0:
-                indices = self.isTitleInLevel3(movie_title)
-                if len(indices) == 0:
-                    indices = self.isTitleInLevel4(movie_title)
-            """
 
         # SPELLCHECK
 
