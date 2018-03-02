@@ -44,7 +44,7 @@ class Chatbot:
       self.name = 'moviebot'
       self.is_turbo = is_turbo
       self.is_repeat = False
-      self.skip_to_next = False
+      self.selection = False
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -129,146 +129,73 @@ class Chatbot:
         else:
           return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
 
+      # Handle arbitrary input
+      response = self.getArbitraryResponse(input)
+      if response != None: return response
 
-      if self.is_turbo == True:
-        # CREATIVE SECTION
+      # Process movie title
+      temp = self.processTitle(input)
+      movie_tag = temp[0]
+      input = temp[1]
+      # Get the flag indicating success of process Title
+      movie_flag = movie_tag[1]
+      if movie_flag == -1: # No movies found
+          numResponses = 2
+          randInt = randint(1, numResponses)
+          if randInt == 1:
+            return "Hm I don't really want to talk about that right now. Let's go back to movies."
+          elif randInt == 2:
+            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+      elif movie_flag == 1: # Movie found
+          movie_title = movie_tag[0]
+          movie_indexes = self.isMovie(movie_title)
 
-        # Allow for user to enter up to 2 movies
-        movie_tag = self.processTitle(input)
-        movie_flag = movie_tag[1]
-        if movie_flag == -1: # No movies found
-          return "Sorry, I don't understand. Tell me about a movie that you have seen."
-          #emotion detection? means they are talking about something else other than movie
-        elif movie_flag == 1: # 1 movie found
-          movies = movie_tag[0]
-          movie_index = self.isMovie(movie)
-          sentiment = self.sentimentClass(input)
-          if sentiment == 'pos':
-            response = self.getPosResponse(movie_index)
-            self.usr_rating_vec.append((movie_index, 1))
-          elif sentiment == 'neg':
-            response = self.getNegResponse(movie_index)
-            self.usr_rating_vec.append((movie_index, -1))
-          elif sentiment == 'none':
-            response = self.getNoneResponse(movie)
-          else: # Unclear sentiment
-             response = self.getUnclearResponse(movie_index)
-        elif movie_flag == 2: # multiple movies found
-          movie1 = movies[0]
-          movie2 = movies[1]
-          movie_index1 = self.isMovie(movie1)
-          movie_index2 = self.isMovie(movie2)
+          if len(movie_indexes) != 0: # Good movie!
+            # Need to encorperate the sentiment
+            #self.usr_rating_vec.append((movie_index, 1))
+            #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
 
-          #if len(movie_index1) != 0
+            # We have received a valid movie so we have to extract sentiment,
+            # record the movie rating based on sentiment, and respond reflecting
+            # the sentiment.
 
-          andRegex = r'(?:both )?"' + movie1 + '".{0,20}?and.{0,20}?"' + movie2 + '"' # same sentiment
-          orRegex = r'(?:either |neither )?"' + movie1 + '".{0,20}?(?:or|nor).{0,20}?"' + movie2 + '"' # same sentiment?
-          butRegex = r'"' + movie1 + '".{0,20}?but.{0,20}?"' + movie2 + '"' # different sentiment?
+            sentiment = self.sentimentClass(input)
+            if sentiment == 'pos':
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getPosResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, 1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'str_pos':
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getStrPosResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'neg':
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getNegResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'str_neg': # Don't yet deal with changing the rating
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getStrNegResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'none':
+              response = self.getNoneResponse(movie_title)
+            else: # Unclear sentiment
+              response = self.getUnclearResponse(movie_title)
 
-          andEntities = re.findall(andRegex, input)
-          orEntities = re.findall(orRegex, input)
-          butEntities = re.findall(butRegex, input)
-
-          sentiment = self.sentimentClass(input)
-          # if sentiment == 'pos':
-          #   if len(andEntities) > 0:
-
-          #   movie_index = self.getMovieIndex(movie_indexes)
-          #   response = self.getPosResponse(movie_index)
-          #   self.usr_rating_vec.append((movie_index, 1))
-          # elif sentiment == 'neg':
-          #   movie_index = self.getMovieIndex(movie_indexes)
-          #   response = self.getNegResponse(movie_index)
-          #   self.usr_rating_vec.append((movie_index, -1))
-          # elif sentiment == 'none':
-          #   response = self.getNoneResponse(movie_title)
-          # else: # Unclear sentiment
-          #   response = self.getUnclearResponse(movie_title)
-
-          # if len(andEntities) > 0:
-
-          # elif len(orEntities > 0):
-          #   sentiment = self.sentimentClass
-          # elif len(butEntities > 0):
-          #   sentiment1 =
-          #   sentiment2 =
-
-        else: # more than 2 movies found
-          return "I'm sorry, please tell me about either one or two movies at a time. Go ahead."
-
-        response = 'processed %s in creative mode!!' % input
-
-
+            # Need to fix this, just for testing
+            #if len(self.usr_rating_vec) == 5:
+            #self.recommend(self.usr_rating_vec)
+          else: # Unknown movie
+            return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
       else:
-        # STARTER SECTION
-
-        # Arbitrary input regexes
-        response = self.getArbitraryResponse(input)
-        if response != None: return response
-
-        # Process movie title
-        temp = self.processTitle(input)
-        movie_tag = temp[0]
-        input = temp[1]
-        # Get the flag indicating success of process Title
-        movie_flag = movie_tag[1]
-        if movie_flag == -1: # No movies found
-            numResponses = 2
-            randInt = randint(1, numResponses)
-            if randInt == 1:
-              return "Hm I don't really want to talk about that right now. Let's go back to movies."
-            elif randInt == 2:
-              return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-        elif movie_flag == 1: # Movie found
-            movie_title = movie_tag[0]
-            movie_indexes = self.isMovie(movie_title)
-
-            if len(movie_indexes) != 0: # Good movie!
-              # Need to encorperate the sentiment
-              #self.usr_rating_vec.append((movie_index, 1))
-              #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
-
-              # We have received a valid movie so we have to extract sentiment,
-              # record the movie rating based on sentiment, and respond reflecting
-              # the sentiment.
-
-              sentiment = self.sentimentClass(input)
-              if sentiment == 'pos':
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getPosResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, 1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'str_pos':
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getStrPosResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, -1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'neg':
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getNegResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, -1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'str_neg': # Don't yet deal with changing the rating
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getStrNegResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, -1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'none':
-                response = self.getNoneResponse(movie_title)
-              else: # Unclear sentiment
-                response = self.getUnclearResponse(movie_title)
-
-              # Need to fix this, just for testing
-              #if len(self.usr_rating_vec) == 5:
-                #self.recommend(self.usr_rating_vec)
-            else: # Unknown movie
-              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
-        else:
-          return "Please tell me about one movie at a time. Go ahead."
+        return "Please tell me about one movie at a time. Go ahead."
 
       if (len(self.usr_rating_vec) == self.numRatings):
         movie_recommend = self.recommend(self.usr_rating_vec)
@@ -745,7 +672,6 @@ class Chatbot:
                 else:
                     print bot_prompt + "Please enter a valid input."
             elif inpt == "next":
-                self.skip_to_next = True
                 return None
             elif len(inpt) != 0:
                 # Check if this is a movie name
