@@ -69,6 +69,8 @@ class Chatbot:
       self.date_range = None
       self.give_rec = False
       self.use_date_range = False
+      self.use_genre = False
+      self.genre = None
 
       self.sentiment = {}
       self.usr_rating_vec = []
@@ -147,7 +149,10 @@ class Chatbot:
       if self.repeatedMovie: return self.updateResponse(input)
 
       # Get whether they want a date range for their rec
-      if self.get_recommend_date: response = self.recommend_date(input)
+      #if self.get_recommend_date: response = self.recommend_date(input)
+      if self.get_recommend_date: return self.recommend_date(input)
+
+      if self.get_recommend_genre: response = self.recommend_genre(input)
 
       # Give the recommendation!
       if self.give_rec:
@@ -276,9 +281,32 @@ class Chatbot:
 
     def getRec(self):
       recommendations = self.recommend(self.usr_rating_vec)
-      # movie_to_recomend += str(i + 1) + ') ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
       movies_to_recommend = ''
-      if self.use_date_range:
+      if self.use_genre and self.use_date_range:
+        movie_count = 0
+        while movie_count < self.numRecs and len(recommendations) > 0:
+          movie_id = heapq.heappop(recommendations)[1]
+          genres = self.titles[movie_id][1].lower()
+          movie = self.titles[movie_id][0]
+          date = re.findall(r'(\d\d\d\d)', movie)
+          if len(date) > 0:
+            date = int(date[0])
+          else:
+            date = 3001 # Out of max range
+          if date >= int(self.date_range[0]) and date <= int(self.date_range[1]) and self.genre.lower() in genres:
+            #print 'here'
+            movie_count += 1
+            movies_to_recommend += str(movie_count) + ') ' + movie + '\n'
+      elif self.use_genre:
+        movie_count = 0
+        while movie_count < self.numRecs and len(recommendations) > 0:
+          movie_id = heapq.heappop(recommendations)[1]
+          genres = self.titles[movie_id][1].lower()
+          movie = self.titles[movie_id][0]
+          if self.genre.lower() in genres:
+            movie_count += 1
+            movies_to_recommend += str(movie_count) + ') ' + movie + '\n'
+      elif self.use_date_range:
         movie_count = 0
         while movie_count < self.numRecs and len(recommendations) > 0:
           movie = self.titles[heapq.heappop(recommendations)[1]][0]
@@ -301,7 +329,8 @@ class Chatbot:
       date_range_regex = r'(\d\d\d\d)-(\d\d\d\d)'
       one_date_regex = r'(\d\d\d\d)\+'
       self.get_recommend_date = False
-      self.give_rec = True
+      self.get_recommend_genre = True
+      #self.give_rec = True
       if re.search(no_regex, input):
         responses = []
         responses.append("No problem!")
@@ -311,15 +340,32 @@ class Chatbot:
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.'
+        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quite'
       elif re.search(one_date_regex, input):
         self.date_range = [re.findall(one_date_regex, input)[0], 3000]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.'
+        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure). Use \'no\' to quite'
       else:
         self.get_recommend_date = True
-        self.give_rec = False
+        self.get_recommend_genre = False
+        #self.give_rec = False
         return "Sorry, I didn't quite get that. Please enter a response like one of the following formats: 2000-2003, 1995+, no"
+
+    def recommend_genre(self, input):
+      no_regex = r'(?:^[Nn]o|^[Nn]ope)'
+      self.recommend_genre = False
+      self.give_rec = True
+      if re.search(no_regex, input):
+        responses = []
+        responses.append("No problem!")
+        responses.append("No worries!")
+        responses.append("Ok, thanks!")
+        return responses[randint(1, len(responses)-1)]
+      else: # Assume input is genre!
+        self.genre = input
+        self.use_genre = True
+        return "Perfect! We can look for movies in this genre"
+
 
     def updateResponse(self, input):
       yes_regex = r'(?:^[Yy]es|^I do )'
@@ -328,9 +374,9 @@ class Chatbot:
       # Check if they respond yes and want to update
       if re.search(yes_regex, input):
         if self.newSentiment == 'pos':
-          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], 1, self.newSentiment)
+          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], .5, self.newSentiment)
         elif self.newSentiment == 'neg':
-          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], -1, self.newSentiment)
+          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], -.5, self.newSentiment)
         elif self.newSentiment == 'str_pos':
           self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], 1, self.newSentiment)
         elif self.newSentiment == 'str_neg':
@@ -459,7 +505,7 @@ class Chatbot:
       response = ''
       if sentiment == 'pos':
         self.no_sentiment = False
-        self.usr_rating_vec.append((movie_index, 1, 'pos'))
+        self.usr_rating_vec.append((movie_index, .5, 'pos'))
         self.previous_sentiment = 'pos'
         response = self.getPosResponse(movie_index)
         if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
@@ -473,7 +519,7 @@ class Chatbot:
         return response
       elif sentiment == 'neg':
         self.no_sentiment = False
-        self.usr_rating_vec.append((movie_index, -1, 'neg'))
+        self.usr_rating_vec.append((movie_index, -.5, 'neg'))
         self.previous_sentiment = 'neg'
         response = self.getNegResponse(movie_index)
         if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
