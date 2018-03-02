@@ -462,7 +462,7 @@ class Chatbot:
         self.usr_rating_vec.append((movie_index, 1, 'pos'))
         self.previous_sentiment = 'pos'
         response = self.getPosResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
         return response
       elif sentiment == 'str_pos':
         self.no_sentiment = False
