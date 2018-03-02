@@ -50,6 +50,11 @@ class Chatbot:
       self.selection = False
       self.quotationFound = False
 
+      # Flags for previous referencing
+      self.no_sentiment = True
+      self.previous_sentiment = None
+      self.previous_movie = None
+
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -133,12 +138,12 @@ class Chatbot:
       # Get the flag indicating success of process Title
       movie_flag = movie_tag[1]
       if movie_flag == -1: # No movies found
-          numResponses = 2
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "Hm I don't really want to talk about that right now. Let's go back to movies."
-          elif randInt == 2:
-            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+        numResponses = 2
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "Hm I don't really want to talk about that right now. Let's go back to movies."
+        elif randInt == 2:
+          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
       elif movie_flag == 1: # Movie found
           movie_title = movie_tag[0]
           movie_indexes = self.isMovie(movie_title)
@@ -177,9 +182,12 @@ class Chatbot:
                 response = self.getStrNegResponse(movie_index)
                 self.usr_rating_vec.append((movie_index, -1))
               else: response = "Ok, tell me about about another movie."
-            elif sentiment == 'none':
+            elif sentiment == 'none': # No sentiment detected
               movie_index = self.getMovieIndex(movie_indexes)
               if movie_index != None:
+                # Save the previous index and set no sentiment flag
+                self.previous_movie = movie_index
+                self.no_sentiment = True
                 response = self.getNoneResponse(movie_index)
               else: response = "Ok, tell me about another movie."
             else: # Unclear sentiment
@@ -212,7 +220,7 @@ class Chatbot:
         # Return our response plus our recommendation
         return response + '\n' + recommend_response
 
-    return response
+      return response
 
     def getRepeatResponse(self, input):
       if input == '1':
