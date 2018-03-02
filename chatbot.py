@@ -260,7 +260,7 @@ class Chatbot:
               return "Hm, unfortunately I still can't tell how you feel about \"" + self.titles[self.previous_movie][0] + "\". Could you fill me in?"
             else:
               # Handle arbitrary input
-              arbResp = self.getArbitraryResponse(input)
+              arbResp = self.getArbitraryResponse(old_input)
               if arbResp != None: return arbResp
               if self.unknown_movie:
                 return "Darn, I can't seem to remember that movie. Sorry about that! I promise I'll know the next one."
@@ -1464,14 +1464,26 @@ class Chatbot:
         - Speaking very fluently
         - Alternate/foreign titles
       We also implemented some "other features," described below.
-        - Give user the option to specify a range of dates for the recommendations.
+        - Gives user the option to specify a range of dates for the recommendations.
         - Gives user the option to choose a specific genre for the recommendations.
-        - Gives user a selection of movies to choose from if the input movie detected
-          is part of a series.
-        - Detect redundant input movies and update the user's rating if a different
+        - Gives user a selection of movies to choose from if the input movie detected is
+          part of a series.
+        - Detects redundant input movies and update the user's rating if a different
           sentiment was detected than what is currently stored.
-        - Explicitly confirm spell check with user to make sure it's what they intended.
-        - Tell user jokes when prompted.
+        - Incorporates fine-grained sentiment into movie recommendations. Uses fine-grained
+          scale for the movies rated by the user corresponding to
+          (strong neg/neg/pos/strong pos) = (-1/-0.5/0.5/1).
+        - Incorporates fine-grained sentiment with referencing previous info. For example,
+          allows for 'I really like "toy story 2"' [bot response] -> usr 'but not "Jurassic
+          park" or 'I saw "toy story 2"' [bot response: how do you like it]-> usr 'I loved it'.
+        - Significantly improves speed of recommendation calculations in collaborative
+          filtering by vectorizing the calculations. Specifcally, for estimating a rating
+          for a movie i, rather than individually looping through the movies rated by the
+          user to compute the summation of similarity*rating, we compute the total summation
+          through a series of matrix calculations (where movie i is normalized in a vector
+          and we have a matrix with the normalized user-rated movies).
+        - Explicitly confirms spell check with user to make sure it's what they intended.
+        - Tells a variety of jokes when prompted.
       """
 
     #############################################################################
