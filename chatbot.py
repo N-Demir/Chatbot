@@ -477,7 +477,7 @@ class Chatbot:
       q2 = r'what(?:\'s | is )your name'
       q7 = r'who are you'
       q4 = r'do you love me'
-      q6 = r'tell me a joke'
+      q6 = r'[tT]ell me a joke'
       q1 = r'(?:how)?(\'s | is | are )(you|it)(?: doing| going)?(?: ok| well)?'
       q3 = r'how(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
       q5 = r'^no\.?$'
@@ -1070,7 +1070,7 @@ class Chatbot:
                         print str(i + 1) + ") " + self.titles[movie_index][0]
                         movie_indexes = temp
                 elif len(temp) == 0:
-                   print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
+                   print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\". Please enter a valid input."
                 else:
                     return temp[0]
                 # temp = self.isMovie(inpt)
