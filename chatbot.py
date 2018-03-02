@@ -426,21 +426,37 @@ class Chatbot:
         for title in self.titles:
             movie_title = title[0]
             movie_title = self.removeArticles(movie_title)
+            movie_title = movie_title.split()
+            #print "Movie title: " + str(movie_title)
 
-            #for word in inpt:
+
+            for i, word in enumerate(inpt.split()):
+                if movie_title[0] == word:
+                    temp = ""
+                    for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
+                        #print "INPUT" + str(inpt)
+                        if inpt.split()[i] == movie_title[j]:
+                            temp += " " + movie_title[j]
+                            i += 1
+                        else:
+                            break
+                    entities.append(temp)
+
+
 
 
 
             #print "Cur title after stripping: " + movie_title
-
+            """
             if movie_title in inpt:
                 #TODO: " " + movie_title + " "
                 #TODO: check if moving things around in beginning worked
-                """
+
                 print "Movie title: " + movie_title + " Input: " + inpt
                 print "TITLE[0]: " + title[0
-                """
+
                 entities.append(movie_title)
+            """
 
         if len(entities) == 0:
             return ""
@@ -550,7 +566,6 @@ class Chatbot:
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
         print "Level 1 titlesearch"
-        #TODO: ACCOUNT FOR AMERICAN IN PARIS, AN, HARRY POTTER AND
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
