@@ -772,32 +772,61 @@ class Chatbot:
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
 
-      self.move_article_to_front(self.titles)
+      #self.move_article_to_front(self.titles)
+      for i,v in enumerate(self.titles):
+          self.titles[i] = self.move_article_to_front(v)
 
-      #Added for efficiency? -ND
-      #self.titles = np.array(self.titles)
+      self.custom_titles = self.titles
 
-    def move_article_to_front(self, titles):
+    def scope_movie_titles(self, titles):
         for i,v in enumerate(titles):
-            movie_title = v[0]
-            date = re.findall(r'\(\d\d\d\d\)', movie_title)
-            if len(date) != 0:
-                date = date[0]
-            else:
-                date = ""
+            date = re.findall(r'\(\d\d\d\d\)', v[0])
+            alternate_titles = re.findall(r'\(([^\d]+.*)\)', v[0])
+            for title, i in enumerate(alternate_titles):
+                # Get rid of a.k.a
+                alternate_titles[i] = re.sub(r'a\.k\.a ', "", title)
+                # Move article to the front
+                articles = re.findall(r', (\w{0,5})', alternate_titles[i])
+                if len(articles) == 0:
+                    print "No article found in movie name: " + title
+                elif len(articles) > 1:
+                    print "Problem, length not 1 of articles: " + str(articles)
+                else:
+                    alternate_titles[i] = re.sub(r', (\w{0,5})', "", alternate_titles[i])
+                    alternate_titles[i] = articles[0] + " " + alternate_titles[i]
+
+                alternate_titles[i] = alternate_titles[i].strip
+                if len(date) != 0:
+                    alternate_titles[i] += " " + date[0]
+
+            # fix original name
+            titles[i] = re.sub(r'\(.*\)', '', titles[i])
+            titles[i] = re.sub(r'\s+', ' ', titles[i])
+            titles[i] = titles[i].strip()
 
 
-            if re.search(r'.*, The \(\d\d\d\d\)', movie_title):
-                movie_title = re.sub(r', The \(\d\d\d\d\)', " " + date, movie_title)
-                movie_title = "The " + movie_title
-            elif re.search(r'.*, An \(\d\d\d\d\)', movie_title):
-                movie_title = re.sub(r', An \(\d\d\d\d\)', " " + date, movie_title)
-                movie_title = "An " + movie_title
-            elif re.search(r'.*, A \(\d\d\d\d\)', movie_title):
-                movie_title = re.sub(r', A \(\d\d\d\d\)', " " + date, movie_title)
-                movie_title = "A " + movie_title
 
-            titles[i][0] = movie_title
+    def move_article_to_front(self, v):
+        movie_title = v
+        date = re.findall(r'\(\d\d\d\d\)', movie_title)
+        if len(date) != 0:
+            date = date[0]
+        else:
+            print movie_title
+            date = ""
+
+
+        if re.search(r'.*, The \(\d\d\d\d\)', movie_title):
+            movie_title = re.sub(r', The \(\d\d\d\d\)', " " + date, movie_title)
+            movie_title = "The " + movie_title
+        elif re.search(r'.*, An \(\d\d\d\d\)', movie_title):
+            movie_title = re.sub(r', An \(\d\d\d\d\)', " " + date, movie_title)
+            movie_title = "An " + movie_title
+        elif re.search(r'.*, A \(\d\d\d\d\)', movie_title):
+            movie_title = re.sub(r', A \(\d\d\d\d\)', " " + date, movie_title)
+            movie_title = "A " + movie_title
+
+        return movie_title
 
     def binarize(self):
       """Modifies the ratings matrix to make all of the ratings binary"""
