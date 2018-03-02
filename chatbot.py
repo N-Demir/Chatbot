@@ -41,7 +41,7 @@ class Chatbot:
     # `moviebot` is the default chatbot. Change it to your chatbot's name       #
     #############################################################################
     def __init__(self, is_turbo=False):
-      self.NUMBER_TILL_REC = 3
+      self.NUMBER_TILL_REC = 5
       self.name = 'moviebot'
 
       #flags
@@ -61,6 +61,8 @@ class Chatbot:
       self.previous_sentiment = None
       self.previous_movie = None
 
+      self.spellChecking = False
+
       # Flags for recommending movies
       self.get_recommend_date = False
       self.get_recommend_genre = False
@@ -70,7 +72,7 @@ class Chatbot:
 
       self.sentiment = {}
       self.usr_rating_vec = []
-      self.numRatings = 3
+      self.numRatings = 5
       self.numRecs = 3
       self.read_data()
       self.p = PorterStemmer()
@@ -124,6 +126,8 @@ class Chatbot:
     #############################################################################
 
     def process(self, input):
+      # For debug
+      print input
       """Takes the input string from the REPL and call delegated functions
       that
         1) extract the relevant information and
@@ -152,7 +156,11 @@ class Chatbot:
         continue_response += '3. Restart with new ratings for new recommendations.'
         self.is_repeat = True
         self.give_rec = False
+<<<<<<< HEAD
         return response + '\n' + 'Here\'s what I\'ve got for you:\n' + self.getRec() + '\n' + continue_response
+=======
+        return response + '\n' + 'Here\'s what I got for you:\n' + self.getRec() + '\n' + continue_response
+>>>>>>> jon
 
       # # Handle arbitrary input
       # arbResp = self.getArbitraryResponse(input)
@@ -187,6 +195,8 @@ class Chatbot:
       elif movie_flag == 1: # Movie found
           movie_title = movie_tag[0]
           movie_indexes = self.isMovie(movie_title)
+          # Added
+          self.quotationFound = False
 
           if len(movie_indexes) != 0: # Good movie!
             # Undo ceratin flags!
@@ -218,49 +228,7 @@ class Chatbot:
               response = self.processMovieAndSentiment(sentiment, movie_index, old_input)
             else:
               response = "Ok, tell me about another movie."
-            '''
-            if sentiment == 'pos':
-              movie_index = self.getMovieIndex(movie_indexes)
-              if movie_index != None:
-                response = self.getPosResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, 1))
-              else: response = "Ok, tell me about about another movie."
-            elif sentiment == 'str_pos':
-              movie_index = self.getMovieIndex(movie_indexes)
-              if movie_index != None:
-                response = self.getStrPosResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
-              else: response = "Ok, tell me about about another movie."
-            elif sentiment == 'neg':
-              movie_index = self.getMovieIndex(movie_indexes)
-              if movie_index != None:
-                response = self.getNegResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
-              else: response = "Ok, tell me about about another movie."
-            elif sentiment == 'str_neg': # Don't yet deal with changing the rating
-              movie_index = self.getMovieIndex(movie_indexes)
-              if movie_index != None:
-                response = self.getStrNegResponse(movie_index)
-                self.usr_rating_vec.append((movie_index, -1))
-              else: response = "Ok, tell me about about another movie."
-            elif sentiment == 'none': # No sentiment detected
-              movie_index = self.getMovieIndex(movie_indexes)
-              if movie_index != None:
-                # Save the previous index and set no sentiment flag
-                self.previous_movie = movie_index
-                self.no_sentiment = True
-                response = self.getNoneResponse(movie_index)
-              else: response = "Ok, tell me about another movie."
-            else: # Unclear sentiment
-              movie_index = self.getMovieIndex(movie_indexes)
-              if movie_index != None:
-                response = self.getUnclearResponse(movie_index)
-              else: response = "Ok, tell me about another movie."
-            '''
-
-            # Need to fix this, just for testing
-            #if len(self.usr_rating_vec) == 5:
-            #self.recommend(self.usr_rating_vec)
+        
           else: # Unknown movie
             if self.no_sentiment and self.sentimentForPreviousMention(old_input): # Try to see if we can use previous info
               # Function to check for previous movie reference
@@ -323,7 +291,7 @@ class Chatbot:
           else:
             date = 3001 # Out of max range
           if date >= int(self.date_range[0]) and date <= int(self.date_range[1]):
-            print 'here'
+            #print 'here'
             movie_count += 1
             movies_to_recommend += str(movie_count) + ') ' + movie + '\n'
       else:
@@ -584,7 +552,7 @@ class Chatbot:
         responses = []
         responses.append("Ok, thank you! Tell me your opinion on \"" + self.titles[movie_index][0] + "\".")
         responses.append("What did you think about \"" + self.titles[movie_index][0] + "\"?")
-        responses.append("Did you like or dislike " + self.titles[movie_index][0] + "\"?")
+        responses.append("Did you like or dislike \"" + self.titles[movie_index][0] + "\"?")
         return responses[randint(1, len(responses)-1)]
         #TODO: REMEMBER PREVIOUS THING
 
@@ -747,6 +715,8 @@ class Chatbot:
         # Only consider words in length of query (i.e. allows for disambiguoizing)
         #if len(query_words) == len(title_words):
         title_substring = ''
+        # Keep track of the last word seen
+        last_word = ''
         if len(query_words) <= len(title_words):
           acceptable_error = True
           total_error = 0
@@ -754,26 +724,35 @@ class Chatbot:
           for x in range(len(query_words)):
             # Add the title word to our built up substring
             title_substring += title_words[x] + ' '
+            last_word = title_words[x]
             #print title_actual
             #title_substring += title_actual[x] + ' '
             distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
             total_error += distance
             if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
-              if title_words[x] == 'Scream': print 'here'
+              #f title_words[x] == 'Scream': print 'here'
               acceptable_error = False
               break
 
           # Add the word if has one error per word
           if acceptable_error:
-            title_substring = title_substring.strip()
+            #title_substring = title_substring.strip()
+            # Get the location of the last word that matched as spelling error
+            # and generate the correclty spelled sequence
+            title_substring = test_title[0 : test_title.find(last_word) + len(last_word)]
+            print title_substring
             correct_spellings.add(title_substring)
             indices.append(i)
 
       indices_2 = []
       for possible_title in correct_spellings:
-        indices_3 = self.isTitleInLevel1(possible_title)
-        if len(indices_3) == 0:
-            indices_3 = self.isTitleInLevel4(possible_title)
+        #self.quotationFound = True
+        self.spellChecking = True
+        indices_3 = self.isMovie(possible_title)
+        #indices_3 = self.isTitleInLevel1(possible_title)
+        #if len(indices_3) == 0:
+            #indices_3 = self.isTitleInLevel4(possible_title)
+
         indices_2.extend(indices_3)
 
       print "Spell check", time.time() - start_time, "to run"
@@ -784,8 +763,14 @@ class Chatbot:
         # Check exact match
         #print "Level 1 titlesearch"
         indices = []
+<<<<<<< HEAD
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel1Helper(inpt_title, v[0])]
+=======
+        indices = [i for i, v in enumerate(self.titles)
+                    if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
+        #print self.titles[indices[0]]
+>>>>>>> jon
         return indices
 
     def isTitleInLevel1Helper(self, inpt_title, entry):
@@ -929,9 +914,11 @@ class Chatbot:
 
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
-        if self.quotationFound == False and len(indices) == 0:
+        if self.quotationFound == False and len(indices) == 0 and not self.spellChecking:
+          self.spellChecking = True
           indices = self.spellCheck(movie_title)
 
+        self.spellChecking = False
         return indices
 
     def askForSelection(self, movie_indexes):
