@@ -50,6 +50,11 @@ class Chatbot:
       self.selection = False
       self.quotationFound = False
 
+      # Flags for previous referencing
+      self.no_sentiment = True
+      self.previous_sentiment = None
+      self.previous_movie = None
+
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -129,19 +134,27 @@ class Chatbot:
       # Process movie title
       temp = self.processTitle(input)
       movie_tag = temp[0]
+      old_input = input
       input = temp[1]
       # Get the flag indicating success of process Title
       movie_flag = movie_tag[1]
       if movie_flag == -1: # No movies found
-          numResponses = 2
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "I'm sorry, I'm not sure what you mean. Tell me about a movie."
+          if self.no_sentiment: # Try to see if we can use previous info
+            # Function to check for previous movie reference
+            sentiment = self.sentimentClass(old_input) # We have to worry maybe if they still have no sentiment
+            response = self.processMovieAndSentiment(sentiment, self.previous_movie)
+            self.no_sentiment = False
+          else:
+            return self.noMovieResponse()
       elif movie_flag == 1: # Movie found
+
           movie_title = movie_tag[0]
           movie_indexes = self.isMovie(movie_title)
 
           if len(movie_indexes) != 0: # Good movie!
+            # Undo ceratin flags!
+            self.no_sentiment = False
+
             # Need to encorperate the sentiment
             #self.usr_rating_vec.append((movie_index, 1))
             #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
@@ -151,6 +164,12 @@ class Chatbot:
             # the sentiment.
             response = ''
             sentiment = self.sentimentClass(input)
+            movie_index = self.getMovieIndex(movie_indexes)
+            if (movie_index != None):
+              response = self.processMovieAndSentiment(sentiment, movie_index)
+            else:
+              response = "Ok, tell me about another movie."
+            '''
             if sentiment == 'pos':
               movie_index = self.getMovieIndex(movie_indexes)
               if movie_index != None:
@@ -175,9 +194,12 @@ class Chatbot:
                 response = self.getStrNegResponse(movie_index)
                 self.usr_rating_vec.append((movie_index, -1))
               else: response = "Ok, tell me about about another movie."
-            elif sentiment == 'none':
+            elif sentiment == 'none': # No sentiment detected
               movie_index = self.getMovieIndex(movie_indexes)
               if movie_index != None:
+                # Save the previous index and set no sentiment flag
+                self.previous_movie = movie_index
+                self.no_sentiment = True
                 response = self.getNoneResponse(movie_index)
               else: response = "Ok, tell me about another movie."
             else: # Unclear sentiment
@@ -185,12 +207,20 @@ class Chatbot:
               if movie_index != None:
                 response = self.getUnclearResponse(movie_index)
               else: response = "Ok, tell me about another movie."
+            '''
 
             # Need to fix this, just for testing
             #if len(self.usr_rating_vec) == 5:
             #self.recommend(self.usr_rating_vec)
           else: # Unknown movie
-            return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
+            if self.no_sentiment: # Try to see if we can use previous info
+              # Function to check for previous movie reference
+              sentiment = self.sentimentClass(old_input) # We have to worry maybe if they still have no sentiment
+              print old_input
+              response = self.processMovieAndSentiment(sentiment, self.previous_movie)
+              self.no_sentiment = False
+            else:
+              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
       else:
         return "Please tell me about one movie at a time. Go ahead."
 
@@ -211,6 +241,16 @@ class Chatbot:
         return response + '\n' + recommend_response
 
       return response
+
+    def lookForPreviousMention(self, input):
+      it_regex = r'((?:^|[\W])[iI]t(?:$|[\W]))'
+      that_movie_regex = r'((?:^|[\W])[tT]hat movie(?:$|[\W]))'
+
+      # Look for reference to previous said movie
+      if re.match(it_regex, input) or re.match(that_movie_regex, input):
+        return True
+
+      return False
 
     def getRepeatResponse(self, input):
       if input == '1':
@@ -287,33 +327,25 @@ class Chatbot:
         return responses[randint(1, len(responses)-1)]
       return None
 
-    def processMovieAndSentiment(self, input, movie_indexes):
-      sentiment = self.sentimentClass(input)
-      movie_index = self.getMovieIndex(movie_indexes)
+    def processMovieAndSentiment(self, sentiment, movie_index):
       if sentiment == 'pos':
-        if movie_index != None:
-          self.usr_rating_vec.append((movie_index, 1))
-          return self.getPosResponse(movie_index)
-        else: return "Ok, tell me about another movie."
+        self.usr_rating_vec.append((movie_index, 1))
+        return self.getPosResponse(movie_index)
       elif sentiment == 'str_pos':
-        if movie_index != None:
-          self.usr_rating_vec.append((movie_index, -1))
-          return self.getStrPosResponse(movie_index)
-        else: return "Ok, tell me about another movie."
+        self.usr_rating_vec.append((movie_index, -1))
+        return self.getStrPosResponse(movie_index)
       elif sentiment == 'neg':
-        if movie_index != None:
-          self.usr_rating_vec.append((movie_index, -1))
-          return self.getNegResponse(movie_index)
-        else: return "Ok, tell me about another movie."
+        self.usr_rating_vec.append((movie_index, -1))
+        return self.getNegResponse(movie_index)
       elif sentiment == 'str_neg': # Don't yet deal with changing the rating
-        if movie_index != None:
-          self.usr_rating_vec.append((movie_index, -1))
-          return self.getStrNegResponse(movie_index)
-        else: return "Ok, tell me about another movie."
+        self.usr_rating_vec.append((movie_index, -1))
+        return self.getStrNegResponse(movie_index)
       elif sentiment == 'none':
-        return self.getNoneResponse(movie_title)
+        self.previous_movie = movie_index
+        self.no_sentiment = True
+        return self.getNoneResponse(movie_index)
       else: # Unclear sentiment
-        return self.getUnclearResponse(movie_title)
+        return self.getUnclearResponse(movie_index)
 
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
@@ -327,6 +359,12 @@ class Chatbot:
     ###########################################################
     ######                   RESPONSES                   ######
     ###########################################################
+    def noMovieResponse(self):
+      numResponses = 2
+      randInt = randint(1, numResponses)
+      #if randInt == 1:
+      return "I'm sorry, I'm not sure what you mean. Tell me about a movie."
+
     def getStrPosResponse(self, movie_index):
       responses = []
       responses.append("Awesome, you really liked \"" + self.titles[movie_index][0] + "\"! What are some other movies you have seen.")
@@ -800,6 +838,8 @@ class Chatbot:
       stemmedLex = {}
       for word in self.sentiment:
         stemmedLex[self.stem(word)] = self.sentiment[word]
+      # Add awesome!
+      stemmedLex[self.stem('awesome')] = 'pos'
       self.sentiment = stemmedLex
 
     def stemPos_Neg_Words(self):
@@ -823,12 +863,14 @@ class Chatbot:
       strongNegCount = 0.0
       inputString.lower()
       inputString = re.sub(r'\".*\"', '', inputString)
-      inputString = inputString.split()
+      #nputString = inputString.split()
+      inputString = re.findall(r"[\w']+|[.,!?;]+", inputString)
 
       # negate things first
       temp = []
       negate = False
       for word in inputString:
+          print word
           if word in self.negations:
               temp.append(word)
               if negate:
@@ -836,7 +878,7 @@ class Chatbot:
               else:
                   negate = True
               continue
-          elif word[0] in self.punctuations: # To catch case of repeated punction like !!!! or
+          elif word[len(word) - 1] in self.punctuations: # To catch case of repeated punction like !!!! or
               temp.append(word)
               negate = False
               continue
