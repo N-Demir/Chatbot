@@ -723,50 +723,54 @@ class Chatbot:
       # Keep track of all possible titles substrings that are correct spellings
       correct_spellings = set()
 
-      for i, v in enumerate(self.titles):
-        # Handle removing the final date plus any An|The|A that is at very end
-        #test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
-        test_title = self.removeArticles(v[0].lower())
-        test_title = self.removeDate(test_title)
+      #for i, v in enumerate(self.titles):
+      for i, entry in enumerate(self.custom_titles):
+            titles = re.findall("<>(.*?)</>", entry[0])
+            for title in titles:
+              # Handle removing the final date plus any An|The|A that is at very end
+              #test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
+              #test_title = self.removeArticles(v[0].lower())
+              test_title = self.removeArticles(title)
+              test_title = self.removeDate(test_title)
 
-        # Break the tital into individual words
-        title_words = re.findall(r'\w+', test_title)
-        #title_words = test_title.split()
-        # Includes punction and stuff
-        #title_actual = test_title.split()
+              # Break the tital into individual words
+              title_words = re.findall(r'\w+', test_title)
+              #title_words = test_title.split()
+              # Includes punction and stuff
+              #title_actual = test_title.split()
 
-        # Allow up to one error per word
-        # Only consider words in length of query (i.e. allows for disambiguoizing)
-        #if len(query_words) == len(title_words):
-        title_substring = ''
-        # Keep track of the last word seen
-        last_word = ''
-        if len(query_words) <= len(title_words):
-          acceptable_error = True
-          total_error = 0
-          #for x in range(len(title_words)):
-          for x in range(len(query_words)):
-            # Add the title word to our built up substring
-            title_substring += title_words[x] + ' '
-            last_word = title_words[x]
-            #print title_actual
-            #title_substring += title_actual[x] + ' '
-            distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
-            total_error += distance
-            if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
-              #f title_words[x] == 'Scream': print 'here'
-              acceptable_error = False
-              break
+              # Allow up to one error per word
+              # Only consider words in length of query (i.e. allows for disambiguoizing)
+              #if len(query_words) == len(title_words):
+              title_substring = ''
+              # Keep track of the last word seen
+              last_word = ''
+              if len(query_words) <= len(title_words):
+                acceptable_error = True
+                total_error = 0
+                #for x in range(len(title_words)):
+                for x in range(len(query_words)):
+                  # Add the title word to our built up substring
+                  title_substring += title_words[x] + ' '
+                  last_word = title_words[x]
+                  #print title_actual
+                  #title_substring += title_actual[x] + ' '
+                  distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
+                  total_error += distance
+                  if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
+                    #f title_words[x] == 'Scream': print 'here'
+                    acceptable_error = False
+                    break
 
-          # Add the word if has one error per word
-          if acceptable_error:
-            #title_substring = title_substring.strip()
-            # Get the location of the last word that matched as spelling error
-            # and generate the correclty spelled sequence
-            title_substring = test_title[0 : test_title.find(last_word) + len(last_word)]
-            print title_substring
-            correct_spellings.add(title_substring)
-            indices.append(i)
+                # Add the word if has one error per word
+                if acceptable_error:
+                  #title_substring = title_substring.strip()
+                  # Get the location of the last word that matched as spelling error
+                  # and generate the correclty spelled sequence
+                  title_substring = test_title[0 : test_title.find(last_word) + len(last_word)]
+                  print title_substring
+                  correct_spellings.add(title_substring)
+                  indices.append(i)
 
       indices_2 = []
       for possible_title in correct_spellings:
@@ -905,6 +909,7 @@ class Chatbot:
         return movie_title
 
     def removeSequel(self, movie_title):
+        # M?(CM|D?C?C?C? |CD)(XC |XL |L?X?X?X?)(V?I?I?I? |IV |IX)
         #TODO: FILL OUT SEQUELS
         sequel_regex = r'(.*) (?:\d|i|ii|iii)$'
         if re.search(sequel_regex, movie_title):
