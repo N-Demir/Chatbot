@@ -61,7 +61,12 @@ class Chatbot:
       self.previous_sentiment = None
       self.previous_movie = None
       self.spellChecking = False
+<<<<<<< HEAD
       self.DONOTTOUCHME_TOY_STORY = False
+=======
+      self.spellCheckPerformed1 = False # flag for confirmation of movie title
+      self.spellCheckPerformed2 = False # flag for yes/no from user
+>>>>>>> emilia
 
       # Flags for recommending movies
       self.get_recommend_date = False
@@ -214,6 +219,26 @@ class Chatbot:
             response = ''
             sentiment = self.sentimentClass(input)
             movie_index = self.getMovieIndex(movie_indexes)
+
+            # Check if movie is correct spelling
+            if self.spellCheckPerformed1:
+              title = self.titles[movie_index][0]
+              self.spellCheckPerformed2 = True
+              return "Did you mean the movie \"" + title + "\"?"
+            elif self.spellCheckPerformed2:
+              spellCheckPerformed1 = False
+              yes_regex = r'(?:^[Yy]es|^[Yy]ep)'
+              yes = re.findall(yes_regex, input)
+              if len(yes) != 0:
+                spellCheckPerformed2 = False
+                return self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
+              no_regex = r'(?:^[Nn]o|^[Nn]ope)'
+              no = re.findall(no_regex, input)
+              if len(no) != 0:
+                spellCheckPerformed2 = False
+                return "Ok, sorry about that. Tell me about another movie."
+              return "Please enter yes or no."
+
             # Check if movie index is already been seen
             location_already_discussed = -1
             for i in range(len(self.usr_rating_vec)):
@@ -993,6 +1018,7 @@ class Chatbot:
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
         if self.quotationFound == False and len(indices) == 0 and not self.spellChecking:
+          self.spellCheckPerformed = True
           self.spellChecking = True
           indices = self.spellCheck(movie_title)
 
