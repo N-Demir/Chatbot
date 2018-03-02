@@ -64,6 +64,9 @@ class Chatbot:
       self.DONOTTOUCHME_TOY_STORY = False
       self.spellCheckPerformed1 = False # flag for confirmation of movie title
       self.spellCheckPerformed2 = False # flag for yes/no from user
+      self.spell_check_sent = None
+      self.spell_check_index = None
+      self.spell_check_input = None
 
       # Flags for recommending movies
       self.get_recommend_date = False
@@ -150,6 +153,9 @@ class Chatbot:
       # Deal with repeated talking about movies
       if self.repeatedMovie: return self.updateResponse(input)
 
+      # See if we are responding to spell check
+      if self.spellCheckPerformed2: return self.spellCheckFeedback(input)
+
       # Get whether they want a date range for their rec
       #if self.get_recommend_date: response = self.recommend_date(input)
       if self.get_recommend_date: return self.recommend_date(input)
@@ -217,25 +223,6 @@ class Chatbot:
             sentiment = self.sentimentClass(input)
             movie_index = self.getMovieIndex(movie_indexes)
 
-            # Check if movie is correct spelling
-            if self.spellCheckPerformed1:
-              title = self.titles[movie_index][0]
-              self.spellCheckPerformed1 = False
-              self.spellCheckPerformed2 = True
-              return "Did you mean the movie \"" + title + "\"?"
-            if self.spellCheckPerformed2:
-              yes_regex = r'(?:^[Yy]es|^[Yy]ep)'
-              yes = re.findall(yes_regex, input)
-              if len(yes) != 0:
-                spellCheckPerformed2 = False
-                return self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
-              no_regex = r'(?:^[Nn]o|^[Nn]ope)'
-              no = re.findall(no_regex, input)
-              if len(no) != 0:
-                spellCheckPerformed2 = False
-                return "Ok, sorry about that. Tell me about another movie."
-              return "Please enter yes or no."
-
             # Check if movie index is already been seen
             location_already_discussed = -1
             for i in range(len(self.usr_rating_vec)):
@@ -249,6 +236,16 @@ class Chatbot:
               self.newSentiment = sentiment
               self.repeatedIndx = location_already_discussed
             elif (movie_index != None):
+              # Check if movies were spell checked
+              if self.spellCheckPerformed1:
+                title = self.titles[movie_index][0]
+                self.spellCheckPerformed1 = False
+                self.spellCheckPerformed2 = True
+                self.spell_check_sent = sentiment
+                self.spell_check_index = movie_index
+                self.spell_check_input = old_input
+                return "Did you mean the movie \"" + title + "\"?"
+
               response = self.processMovieAndSentiment(sentiment, movie_index, old_input)
             else:
               response = "Ok, tell me about another movie."
@@ -345,6 +342,20 @@ class Chatbot:
         for i in range(self.numRecs):
           movies_to_recommend += str(i + 1) + ') ' + self.titles[heapq.heappop(recommendations)[1]][0] + '\n'
       return movies_to_recommend
+
+    def spellCheckFeedback(self, input):
+      no_regex = r'(?:^[Nn]o|^[Nn]ope)'
+      yes_regex = r'(?:^[Yy]es|^I did )'
+
+      self.spellCheckPerformed2 = False
+      if re.match(yes_regex, input):
+        return "Sweet!\n" + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
+      elif re.match(no_regex, input):
+        return "Oops sorry. Hopefully I'll understand the next movie better"
+      else:
+        self.spellCheckPerformed2 = True
+        return "Could you clarify with a yes or no?"
+
 
     def recommend_date(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
