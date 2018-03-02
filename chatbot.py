@@ -612,7 +612,7 @@ class Chatbot:
       addRequests.append(" Can you tell me about another movie?")
       addRequests.append(" Tell me about another movie you have seen.")
       addRequests.append(" Is there another movie you can tell me about?")
-      return addRequests[randint\(0, len(addRequests)-1)]
+      return addRequests[randint(0, len(addRequests)-1)]
 
     def noMovieResponse(self):
       responses = []
