@@ -218,7 +218,7 @@ class Chatbot:
 
     def getArbitraryResponse(self, input):
       input = input.lower()
-      q0 = r'hi|hello'
+      q0 = r'^hi|hello'
       q2 = r'what(?:\'s | is )your name'
       q4 = r'do you love me'
       q6 = r'tell me a joke'
