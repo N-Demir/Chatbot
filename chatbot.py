@@ -72,7 +72,6 @@ class Chatbot:
       self.usr_rating_vec = []
       self.numRatings = 3
       self.numRecs = 3
-      #self.prevInput = None
       self.read_data()
       self.p = PorterStemmer()
       self.stemLexicon()
@@ -144,7 +143,7 @@ class Chatbot:
       if self.repeatedMovie: return self.updateResponse(input)
 
       # Get whether they want a date range for their rec
-      if self.get_recommend_date: response = self.recommend_date(input) 
+      if self.get_recommend_date: response = self.recommend_date(input)
 
       # Give the recommendation!
       if self.give_rec:
@@ -152,7 +151,7 @@ class Chatbot:
         continue_response += '1. Quit\n'
         continue_response += '2. Add additional movie ratings for more recommendations.\n'
         continue_response += '3. Restart with new ratings for new recommendations.'
-        self.is_repeat = True 
+        self.is_repeat = True
         return response + '\n' + 'Here\'s what I got for you:\n' + self.getRec() + '\n' + continue_response
 
       # Handle arbitrary input
@@ -172,7 +171,7 @@ class Chatbot:
             sentiment = self.sentimentClass(old_input) # We have to worry maybe if they still have no sentiment
             response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
             self.no_sentiment = False
-          elif self.no_sentiment: 
+          elif self.no_sentiment:
               return "Hm, Unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
           elif self.unkown_movie:
             return "Hey, lets chat about movies!"
@@ -208,7 +207,7 @@ class Chatbot:
             if (location_already_discussed != -1):
               # Compare the sentiment
               response = self.redundantInfo(sentiment, self.usr_rating_vec[i][2])
-              self.newSentiment = sentiment 
+              self.newSentiment = sentiment
               self.repeatedIndx = location_already_discussed
             elif (movie_index != None):
               response = self.processMovieAndSentiment(sentiment, movie_index, old_input)
@@ -263,7 +262,7 @@ class Chatbot:
               sentiment = self.sentimentClass(old_input) # We have to worry maybe if they still have no sentiment
               response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
               self.no_sentiment = False
-            elif self.no_sentiment: 
+            elif self.no_sentiment:
               return "Hm, Unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
             else:
               if self.unkown_movie:
@@ -347,13 +346,13 @@ class Chatbot:
 
       # Check if they respond yes and want to update
       if re.search(yes_regex, input):
-        if self.newSentiment == 'pos': 
+        if self.newSentiment == 'pos':
           self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], 1, self.newSentiment)
-        elif self.newSentiment == 'neg': 
+        elif self.newSentiment == 'neg':
           self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], -1, self.newSentiment)
-        elif self.newSentiment == 'str_pos': 
+        elif self.newSentiment == 'str_pos':
           self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], 1, self.newSentiment)
-        elif self.newSentiment == 'str_neg': 
+        elif self.newSentiment == 'str_neg':
           self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], -1, self.newSentiment)
 
         self.repeatedMovie = False
@@ -517,7 +516,7 @@ class Chatbot:
         # Try to see if they are referencing previous shit
         # Meaning that we have not been able to extract sentiment. They could
         # now reference previous info
-        self.no_sentiment = True  
+        self.no_sentiment = True
         return self.getUnclearResponse(movie_index)
 
     def getMovieIndex(self, movie_indexes):
@@ -559,7 +558,7 @@ class Chatbot:
         responses.append("Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". What about another movie?")
         responses.append("Great! I'm glad you liked \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
         return responses[randint(1, len(responses)-1)]
-      
+
     def getNegResponse(self, movie_index):
         responses = []
         responses.append("You did not like " + self.titles[movie_index][0] + ". Thank you! Tell me about another movie you have seen.")
@@ -585,7 +584,6 @@ class Chatbot:
     ###########################################################
     ######                 END RESPONSES                 ######
     ###########################################################
-
 
     def processTitle(self, inpt):
         # TODO: Expand to allow for no quotation marks
@@ -683,7 +681,6 @@ class Chatbot:
 
         print str(sentences)
         """
-
 
     def edit_distance(self, true_word, query, max_dist):
       # If length of titles differ more than max_dist than return max_dist + 1
@@ -949,7 +946,7 @@ class Chatbot:
 
       #self.move_article_to_front(self.titles)
       for i,v in enumerate(self.titles):
-          self.titles[i] = self.move_article_to_front(v[0])
+          self.titles[i][0] = self.move_article_to_front(v[0])
 
       self.custom_titles = self.titles
 
