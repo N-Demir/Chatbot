@@ -41,6 +41,7 @@ class Chatbot:
     # `moviebot` is the default chatbot. Change it to your chatbot's name       #
     #############################################################################
     def __init__(self, is_turbo=False):
+      self.NUMBER_TILL_REC = 5
       self.name = 'moviebot'
       self.is_turbo = is_turbo
       self.is_repeat = False
@@ -89,7 +90,7 @@ class Chatbot:
       # TODO: Write a short farewell message                                      #
       #############################################################################
 
-      goodbye_message = 'Have a nice day!'
+      goodbye_message = 'Have a nice day! It was great chatting!'
 
       #############################################################################
       #                             END OF YOUR CODE                              #
@@ -116,18 +117,7 @@ class Chatbot:
 
       # User decides how to continue or quit the chatbot after recommendations are given
       if self.is_repeat == True:
-        if input == '1':
-          return "Please type \":quit\""
-        elif input == '2':
-          self.is_repeat = False
-          self.numRatings += 3
-          return "Please tell me about another movie you've seen."
-        elif input == '3':
-          self.is_repeat = False
-          self.usr_rating_vec = []
-          return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
-        else:
-          return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
+        return self.repeatMovieRec(input)
 
 
       if self.is_turbo == True:
@@ -316,9 +306,15 @@ class Chatbot:
                   self.usr_rating_vec.append((movie_index, -1))
                 else: response = "Ok, tell me about about another movie."
               elif sentiment == 'none':
-                response = self.getNoneResponse(movie_title)
+                movie_index = self.getMovieIndex(movie_indexes)
+                if movie_index != None:
+                  response = self.getNoneResponse(movie_index)
+                else: response = "Ok, tell me about another movie."
               else: # Unclear sentiment
-                response = self.getUnclearResponse(movie_title)
+                movie_index = self.getMovieIndex(movie_indexes)
+                if movie_index != None:
+                  response = self.getUnclearResponse(movie_index)
+                else: response = "Ok, tell me about another movie."
 
               # Need to fix this, just for testing
               #if len(self.usr_rating_vec) == 5:
@@ -328,6 +324,7 @@ class Chatbot:
         else:
           return "Please tell me about one movie at a time. Go ahead."
 
+      print len(self.usr_rating_vec)
       if (len(self.usr_rating_vec) == self.numRatings):
         movie_recommend = self.recommend(self.usr_rating_vec)
         # TODO: Make this a stand alone function
@@ -344,6 +341,50 @@ class Chatbot:
         return response + '\n' + recommend_response
 
       return response
+
+    def processMovieAndSentiment(self, input, movie_indexes):
+      sentiment = self.sentimentClass(input)
+      movie_index = self.getMovieIndex(movie_indexes)
+      if sentiment == 'pos':
+        if movie_index != None:
+          self.usr_rating_vec.append((movie_index, 1))
+          return self.getPosResponse(movie_index)
+        else: return "Ok, tell me about another movie."
+      elif sentiment == 'str_pos':
+        if movie_index != None:
+          self.usr_rating_vec.append((movie_index, -1))
+          return self.getStrPosResponse(movie_index)
+        else: return "Ok, tell me about another movie."
+      elif sentiment == 'neg':
+        if movie_index != None:
+          self.usr_rating_vec.append((movie_index, -1))
+          return self.getNegResponse(movie_index)
+        else: return "Ok, tell me about another movie."
+      elif sentiment == 'str_neg': # Don't yet deal with changing the rating
+        if movie_index != None:
+          self.usr_rating_vec.append((movie_index, -1))
+          return self.getStrNegResponse(movie_index)
+        else: return "Ok, tell me about another movie."
+      elif sentiment == 'none':
+        return self.getNoneResponse(movie_title)
+      else: # Unclear sentiment
+        return self.getUnclearResponse(movie_title)
+
+
+    def repeatMovieRec(self, input):
+      if input == '1':
+        return "Please type \":quit\""
+      elif input == '2':
+        self.is_repeat = False
+        self.numRatings += 3
+        return "Please tell me about another movie you've seen."
+      elif input == '3':
+        self.is_repeat = False
+        self.usr_rating_vec = []
+        self.numRatings = self.NUMBER_TILL_REC
+        return "Sweet! Let's explore some new movies. Just like before, what are some movies I can base my recommendation off of?"
+      else:
+        return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
 
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
@@ -401,27 +442,27 @@ class Chatbot:
 
         return "ISSUE - negresponse" #TODO:REMOVE
 
-    def getNoneResponse(self, movie_title):
+    def getNoneResponse(self, movie_index):
         NUM_NONE_RESPONSES = 2
         randInt = randint(1, NUM_NONE_RESPONSES)
 
         if randInt == 1:
-            return "Ok, thank you! Tell me your opinion on \"" + movie_title + "\"."
+            return "Ok, thank you! Tell me your opinion on \"" + self.titles[movie_index][0] + "\"."
         elif randInt == 2:
-            return "What did you think about \"" + movie_title + "\"?" #TODO: fill out
+            return "What did you think about \"" + self.titles[movie_index][0] + "\"?" #TODO: fill out
 
 
         #TODO: REMEMBER PREVIOUS THING
         return "ISSUE - noneResponse"
 
-    def getUnclearResponse(self, movie_title):
+    def getUnclearResponse(self, movie_index):
         NUM_UNCLEAR_RESPONSES = 2
         randInt = randint(1, NUM_UNCLEAR_RESPONSES)
 
         if randInt == 1:
-            return "I'm sorry, I'm not quite sure if you liked \"" + movie_title + "\" Tell me more about \"" + movie + "\"."
+            return "I'm sorry, I'm not quite sure if you liked \"" + self.titles[movie_index][0] + "\" Tell me more about \"" + self.titles[movie_index][0] + "\"."
         elif randInt == 2:
-            return "I'm sorry, I can't quite tell what your opinion is on \"" + movie_title + "\". Can you tell me more?" #TODO: fill out
+            return "I'm sorry, I can't quite tell what your opinion is on \"" + self.titles[movie_index][0] + "\". Can you tell me more?" #TODO: fill out
 
         return "ISSUE - unclearResponse" #TODO:REMOVE
     ###########################################################
