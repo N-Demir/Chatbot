@@ -275,7 +275,7 @@ class Chatbot:
 
         responses = []
         responses.append('I think I am getting to know you a bit better, and I want to blow you away with some amazing movie recommendations. ')
-        responses.append('Ok, I am ready to give you some movie recommendations! ')
+        responses.append('Alright, I am ready to give you some movie recommendations! ')
         responses.append('Get ready for the big movie recommendations reveal! ')
         responses.append('Almost ready to give you your recommendations! ')
         responses.append('Now I think I have a good sense of some movies you would love. ')
@@ -340,7 +340,30 @@ class Chatbot:
 
       self.spellCheckPerformed2 = False
       if re.match(yes_regex, input):
-        return "Sweet!\n" + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
+
+        words = ["Sweet! ", "Awesome! ", "Great! ", "Wonderful! ", "Nice! "]
+        word = words[randint(0, len(words)-1)]
+
+        response = "" + word + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
+        if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
+
+        # Add recommendation if enough ratings
+        if (len(self.usr_rating_vec) == self.numRatings):
+          self.get_recommend_date = True
+
+          responses = []
+          responses.append('I think I am getting to know you a bit better, and I want to blow you away with some amazing movie recommendations. ')
+          responses.append('Alright, I am ready to give you some movie recommendations! ')
+          responses.append('Get ready for the big movie recommendations reveal! ')
+          responses.append('Almost ready to give you your recommendations! ')
+          responses.append('Now I think I have a good sense of some movies you would love. ')
+          recommend_response = responses[randint(0, len(responses)-1)]
+          recommend_response += 'First, though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
+
+          response += '\n' + recommend_response
+        # Return our response plus our recommendation
+        return response
+        
       elif re.match(no_regex, input):
         return "Oops sorry for misunderstanding your query. Hopefully I'll understand the next movie better!"
       else:
@@ -542,6 +565,8 @@ class Chatbot:
         self.usr_rating_vec.append((movie_index, .5, 'pos'))
         self.previous_sentiment = 'pos'
         response = self.getPosResponse(movie_index)
+        print("VEC LENGTH: " + str(len(self.usr_rating_vec)))
+        print("NUMBER_TILL_REC: " + str(self.NUMBER_TILL_REC))
         if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
         return response
       elif sentiment == 'str_pos':
