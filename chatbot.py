@@ -341,7 +341,7 @@ class Chatbot:
       self.spellCheckPerformed2 = False
       if re.match(yes_regex, input):
 
-        words = ["Sweet! ", "Awesome! ", "Great! ", "Wonderful! ", "Nice! "]
+        words = ["Sweet! ", "Awesome. ", "Great! ", "Thanks! ", "Ok, thank you! ", "Nice. "]
         word = words[randint(0, len(words)-1)]
 
         response = "" + word + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
@@ -380,18 +380,18 @@ class Chatbot:
       #self.give_rec = True
       if re.search(no_regex, input):
         responses = []
-        responses.append("No problem!")
-        responses.append("No worries!")
-        responses.append("Ok, thanks!")
+        responses.append("No problem!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
+        responses.append("No worries!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
+        responses.append("Ok, thanks!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
         return responses[randint(0, len(responses)-1)]
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quite'
+        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit'
       elif re.search(one_date_regex, input):
         self.date_range = [re.findall(one_date_regex, input)[0], 3000]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure). Use \'no\' to quite'
+        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure). Use \'no\' to quit'
       else:
         self.get_recommend_date = True
         self.get_recommend_genre = False
@@ -604,7 +604,9 @@ class Chatbot:
           return self.processMovieAndSentiment(negate, movie_index, input)
         else:
           self.no_sentiment = True
-          return self.getNoneResponse(movie_index)
+          response = self.getNoneResponse(movie_index)
+          if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+          return response
       else: # Unclear sentiment
         # Try to see if they are referencing previous shit
         # Meaning that we have not been able to extract sentiment. They could
