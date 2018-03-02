@@ -44,7 +44,7 @@ class Chatbot:
       self.name = 'moviebot'
       self.is_turbo = is_turbo
       self.is_repeat = False
-      self.skip_to_next = False
+      self.selection = False
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -115,218 +115,75 @@ class Chatbot:
       #############################################################################
 
       # User decides how to continue or quit the chatbot after recommendations are given
-      if self.is_repeat == True:
-        if input == '1':
-          return "Please type \":quit\""
-        elif input == '2':
-          self.is_repeat = False
-          self.numRatings += 3
-          return "Please tell me about another movie you've seen."
-        elif input == '3':
-          self.is_repeat = False
-          self.usr_rating_vec = []
-          return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
-        else:
-          return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
+      if self.is_repeat == True: return self.getRepeatResponse(input)
 
+      # Handle arbitrary input
+      response = self.getArbitraryResponse(input)
+      if response != None: return response
 
-      if self.is_turbo == True:
-        # CREATIVE SECTION
+      # Process movie title
+      temp = self.processTitle(input)
+      movie_tag = temp[0]
+      input = temp[1]
+      # Get the flag indicating success of process Title
+      movie_flag = movie_tag[1]
+      if movie_flag == -1: # No movies found
+          numResponses = 2
+          randInt = randint(1, numResponses)
+          if randInt == 1:
+            return "Hm I don't really want to talk about that right now. Let's go back to movies."
+          elif randInt == 2:
+            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+      elif movie_flag == 1: # Movie found
+          movie_title = movie_tag[0]
+          movie_indexes = self.isMovie(movie_title)
 
-        # Allow for user to enter up to 2 movies
-        movie_tag = self.processTitle(input)
-        movie_flag = movie_tag[1]
-        if movie_flag == -1: # No movies found
-          return "Sorry, I don't understand. Tell me about a movie that you have seen."
-          #emotion detection? means they are talking about something else other than movie
-        elif movie_flag == 1: # 1 movie found
-          movies = movie_tag[0]
-          movie_index = self.isMovie(movie)
-          sentiment = self.sentimentClass(input)
-          if sentiment == 'pos':
-            response = self.getPosResponse(movie_index)
-            self.usr_rating_vec.append((movie_index, 1))
-          elif sentiment == 'neg':
-            response = self.getNegResponse(movie_index)
-            self.usr_rating_vec.append((movie_index, -1))
-          elif sentiment == 'none':
-            response = self.getNoneResponse(movie)
-          else: # Unclear sentiment
-             response = self.getUnclearResponse(movie_index)
-        elif movie_flag == 2: # multiple movies found
-          movie1 = movies[0]
-          movie2 = movies[1]
-          movie_index1 = self.isMovie(movie1)
-          movie_index2 = self.isMovie(movie2)
+          if len(movie_indexes) != 0: # Good movie!
+            # Need to encorperate the sentiment
+            #self.usr_rating_vec.append((movie_index, 1))
+            #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
 
-          #if len(movie_index1) != 0
+            # We have received a valid movie so we have to extract sentiment,
+            # record the movie rating based on sentiment, and respond reflecting
+            # the sentiment.
 
-          andRegex = r'(?:both )?"' + movie1 + '".{0,20}?and.{0,20}?"' + movie2 + '"' # same sentiment
-          orRegex = r'(?:either |neither )?"' + movie1 + '".{0,20}?(?:or|nor).{0,20}?"' + movie2 + '"' # same sentiment?
-          butRegex = r'"' + movie1 + '".{0,20}?but.{0,20}?"' + movie2 + '"' # different sentiment?
+            sentiment = self.sentimentClass(input)
+            if sentiment == 'pos':
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getPosResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, 1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'str_pos':
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getStrPosResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'neg':
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getNegResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'str_neg': # Don't yet deal with changing the rating
+              movie_index = self.getMovieIndex(movie_indexes)
+              if movie_index != None:
+                response = self.getStrNegResponse(movie_index)
+                self.usr_rating_vec.append((movie_index, -1))
+              else: response = "Ok, tell me about about another movie."
+            elif sentiment == 'none':
+              response = self.getNoneResponse(movie_title)
+            else: # Unclear sentiment
+              response = self.getUnclearResponse(movie_title)
 
-          andEntities = re.findall(andRegex, input)
-          orEntities = re.findall(orRegex, input)
-          butEntities = re.findall(butRegex, input)
-
-          sentiment = self.sentimentClass(input)
-          # if sentiment == 'pos':
-          #   if len(andEntities) > 0:
-
-          #   movie_index = self.getMovieIndex(movie_indexes)
-          #   response = self.getPosResponse(movie_index)
-          #   self.usr_rating_vec.append((movie_index, 1))
-          # elif sentiment == 'neg':
-          #   movie_index = self.getMovieIndex(movie_indexes)
-          #   response = self.getNegResponse(movie_index)
-          #   self.usr_rating_vec.append((movie_index, -1))
-          # elif sentiment == 'none':
-          #   response = self.getNoneResponse(movie_title)
-          # else: # Unclear sentiment
-          #   response = self.getUnclearResponse(movie_title)
-
-          # if len(andEntities) > 0:
-
-          # elif len(orEntities > 0):
-          #   sentiment = self.sentimentClass
-          # elif len(butEntities > 0):
-          #   sentiment1 =
-          #   sentiment2 =
-
-        else: # more than 2 movies found
-          return "I'm sorry, please tell me about either one or two movies at a time. Go ahead."
-
-        response = 'processed %s in creative mode!!' % input
-
-
+            # Need to fix this, just for testing
+            #if len(self.usr_rating_vec) == 5:
+            #self.recommend(self.usr_rating_vec)
+          else: # Unknown movie
+            return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
       else:
-        # STARTER SECTION
-
-        # Arbitrary input regexes
-        input = input.lower()
-        q0 = r'hi|hello'
-        q2 = r'what(?:\'s | is )your name'
-        q4 = r'do you love me'
-        q6 = r'tell me a joke'
-        q1 = r'(?:how)?(\'s | is | are )(you|it)(?: doing| going)?(?: ok| well)?'
-        q3 = r'how(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
-        q5 = r'^no\.?$'
-        q10 = r'^can ([^?]*)(?:\?)?'
-        basicQ1 = r'^(can|what|where|why|how|are|aren\'t) ([^?]*)(?:\?)?'
-        basicQ2 = r'\?$'
-
-
-        r0 = re.findall(q0, input)
-        if len(r0) != 0: return "Hello! Tell me about a movie you've seen."
-        r2 = re.findall(q2, input)
-        if len(r2) != 0: return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
-        r4 = re.findall(q4, input)
-        if len(r4) != 0: return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
-        r1 = re.findall(q1, input)
-        if len(r1) != 0:
-          numResponses = 3
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "I am well, but I would be even better if you told me about a movie."
-          elif randInt == 2:
-            return "I'm fine. Is there a movie you can tell me about?"
-          elif randInt == 3:
-            return "I'm great! Can you tell me about a movie you have seen?"
-        r3 = re.findall(q3, input)
-        if len(r3) != 0: return "It has been good! Let's talk about some movies now."
-        r5 = re.findall(q5, input)
-        if len(r5) != 0: return "Yes, please."
-        r6 = re.findall(q6, input)
-        if len(r6) != 0: return "Haha very funny. I will if you tell me about a movie."
-        # r10 = re.findall(q10, input)
-        # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
-        rbasic1 = re.findall(basicQ1, input)
-        if len(rbasic1) != 0:
-          numResponses = 6
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
-          elif randInt == 2:
-            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-          elif randInt == 3:
-            return "I'll have to think about that. In the meantime, let's talk about some movies."
-          elif randInt >= 4 and randInt <= 6:
-            print(rbasic1)
-            print(rbasic1[0])
-            return "I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?"
-        rbasic2 = re.findall(basicQ2, input)
-        if len(rbasic2) != 0:
-          numResponses = 3
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
-          elif randInt == 2:
-            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-          elif randInt == 3:
-            return "I'll have to think about that. In the meantime, let's talk about some movies."
-        # Process movie title
-        temp = self.processTitle(input)
-        movie_tag = temp[0]
-        input = temp[1]
-        # Get the flag indicating success of process Title
-        movie_flag = movie_tag[1]
-        if movie_flag == -1: # No movies found
-            numResponses = 2
-            randInt = randint(1, numResponses)
-            if randInt == 1:
-              return "Hm I don't really want to talk about that right now. Let's go back to movies."
-            elif randInt == 2:
-              return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-        elif movie_flag == 1: # Movie found
-            movie_title = movie_tag[0]
-            movie_indexes = self.isMovie(movie_title)
-
-            if len(movie_indexes) != 0: # Good movie!
-              # Need to encorperate the sentiment
-              #self.usr_rating_vec.append((movie_index, 1))
-              #response = "Sentiment for " + movie + " is " + self.sentimentClass(input)
-
-              # We have received a valid movie so we have to extract sentiment,
-              # record the movie rating based on sentiment, and respond reflecting
-              # the sentiment.
-
-              sentiment = self.sentimentClass(input)
-              if sentiment == 'pos':
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getPosResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, 1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'str_pos':
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getStrPosResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, -1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'neg':
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getNegResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, -1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'str_neg': # Don't yet deal with changing the rating
-                movie_index = self.getMovieIndex(movie_indexes)
-                if movie_index != None:
-                  response = self.getStrNegResponse(movie_index)
-                  self.usr_rating_vec.append((movie_index, -1))
-                else: response = "Ok, tell me about about another movie."
-              elif sentiment == 'none':
-                response = self.getNoneResponse(movie_title)
-              else: # Unclear sentiment
-                response = self.getUnclearResponse(movie_title)
-
-              # Need to fix this, just for testing
-              #if len(self.usr_rating_vec) == 5:
-                #self.recommend(self.usr_rating_vec)
-            else: # Unknown movie
-              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
-        else:
-          return "Please tell me about one movie at a time. Go ahead."
+        return "Please tell me about one movie at a time. Go ahead."
 
       if (len(self.usr_rating_vec) == self.numRatings):
         movie_recommend = self.recommend(self.usr_rating_vec)
@@ -344,6 +201,82 @@ class Chatbot:
         return response + '\n' + recommend_response
 
       return response
+
+    def getRepeatResponse(self, input):
+      if input == '1':
+          return "Please type \":quit\""
+        elif input == '2':
+          self.is_repeat = False
+          self.numRatings += 3
+          return "Please tell me about another movie you've seen."
+        elif input == '3':
+          self.is_repeat = False
+          self.usr_rating_vec = []
+          return "Hello again! I'm going to give you some more movie recommendations. Please tell me about a movie you have seen."
+        else:
+          return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
+
+    def getArbitraryResponse(self, input):
+      input = input.lower()
+      q0 = r'hi|hello'
+      q2 = r'what(?:\'s | is )your name'
+      q4 = r'do you love me'
+      q6 = r'tell me a joke'
+      q1 = r'(?:how)?(\'s | is | are )(you|it)(?: doing| going)?(?: ok| well)?'
+      q3 = r'how(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
+      q5 = r'^no\.?$'
+      q10 = r'^can ([^?]*)(?:\?)?'
+      basicQ1 = r'^(can|what|where|why|how|are|aren\'t) ([^?]*)(?:\?)?'
+      basicQ2 = r'\?$'
+
+
+      r0 = re.findall(q0, input)
+      if len(r0) != 0: return "Hello! Tell me about a movie you've seen."
+      r2 = re.findall(q2, input)
+      if len(r2) != 0: return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
+      r4 = re.findall(q4, input)
+      if len(r4) != 0: return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
+      r1 = re.findall(q1, input)
+      if len(r1) != 0:
+        numResponses = 3
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "I am well, but I would be even better if you told me about a movie."
+        elif randInt == 2:
+          return "I'm fine. Is there a movie you can tell me about?"
+        elif randInt == 3:
+          return "I'm great! Can you tell me about a movie you have seen?"
+      r3 = re.findall(q3, input)
+      if len(r3) != 0: return "It has been good! Let's talk about some movies now."
+      r5 = re.findall(q5, input)
+      if len(r5) != 0: return "Yes, please."
+      r6 = re.findall(q6, input)
+      if len(r6) != 0: return "Haha very funny. I will if you tell me about a movie."
+      # r10 = re.findall(q10, input)
+      # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
+      rbasic1 = re.findall(basicQ1, input)
+      if len(rbasic1) != 0:
+        numResponses = 6
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
+        elif randInt == 2:
+          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+        elif randInt == 3:
+          return "I'll have to think about that. In the meantime, let's talk about some movies."
+        elif randInt >= 4 and randInt <= 6:
+          return "I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?"
+      rbasic2 = re.findall(basicQ2, input)
+      if len(rbasic2) != 0:
+        numResponses = 3
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
+        elif randInt == 2:
+          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+        elif randInt == 3:
+          return "I'll have to think about that. In the meantime, let's talk about some movies."
+      return None
 
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
@@ -746,7 +679,6 @@ class Chatbot:
                 else:
                     print bot_prompt + "Please enter a valid input."
             elif inpt == "next":
-                self.skip_to_next = True
                 return None
             elif len(inpt) != 0:
                 # Check if this is a movie name
