@@ -1171,7 +1171,6 @@ class Chatbot:
       Write here the description for your own chatbot!
       """
 
-
     #############################################################################
     # Auxiliary methods for the chatbot.                                        #
     #                                                                           #
