@@ -709,6 +709,7 @@ class Chatbot:
         self.quotationFound = False
 
         inpt = re.sub(r'[!.?:]', r'', inpt)
+        #print "Input:" + inpt
         temp2 = inpt.split()
         #print "INPUT: " + inpt
         inpt = inpt.lower()
@@ -729,8 +730,10 @@ class Chatbot:
                         #print "GOT HERE"
                         temp = ""
                         for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
-                            #print "INPUT" + str(inpt)
-                            if inpt.split()[i] == movie_title[j]:
+                            #print "INPUTINLOOP" +
+                            #TODO: remove punctuation from movie_title temporarily?
+                            temp_movie_title = re.sub(r'[!.?:]', r'', movie_title[j])
+                            if inpt.split()[i] == temp_movie_title:
                                 temp += " " + temp2[i]
                                 i += 1
                             else:
