@@ -156,11 +156,7 @@ class Chatbot:
         continue_response += '3. Restart with new ratings for new recommendations.'
         self.is_repeat = True
         self.give_rec = False
-<<<<<<< HEAD
         return response + '\n' + 'Here\'s what I\'ve got for you:\n' + self.getRec() + '\n' + continue_response
-=======
-        return response + '\n' + 'Here\'s what I got for you:\n' + self.getRec() + '\n' + continue_response
->>>>>>> jon
 
       # # Handle arbitrary input
       # arbResp = self.getArbitraryResponse(input)
@@ -763,14 +759,8 @@ class Chatbot:
         # Check exact match
         #print "Level 1 titlesearch"
         indices = []
-<<<<<<< HEAD
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel1Helper(inpt_title, v[0])]
-=======
-        indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
-        #print self.titles[indices[0]]
->>>>>>> jon
         return indices
 
     def isTitleInLevel1Helper(self, inpt_title, entry):
