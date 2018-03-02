@@ -191,6 +191,8 @@ class Chatbot:
             responses.append("Let's get back to talking about movies!")
             return responses[randint(0, len(responses)-1)]
           else:
+            arbResp = self.getArbitraryResponse(input)
+            if arbResp != None: return arbResp
             self.unknown_movie = True
             return self.noMovieResponse()
       elif movie_flag == 1: # Movie found
