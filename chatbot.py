@@ -123,8 +123,8 @@ class Chatbot:
       if self.is_repeat == True: return self.getRepeatResponse(input)
 
       # Handle arbitrary input
-      response = self.getArbitraryResponse(input)
-      if response != None: return response
+      arbResp = self.getArbitraryResponse(input)
+      if arbResp != None: return arbResp
 
       # Process movie title
       temp = self.processTitle(input)
@@ -136,9 +136,7 @@ class Chatbot:
           numResponses = 2
           randInt = randint(1, numResponses)
           if randInt == 1:
-            return "Hm I don't really want to talk about that right now. Let's go back to movies."
-          elif randInt == 2:
-            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+            return "I'm sorry, I'm not sure what you mean. Tell me about a movie."
       elif movie_flag == 1: # Movie found
           movie_title = movie_tag[0]
           movie_indexes = self.isMovie(movie_title)
@@ -151,7 +149,7 @@ class Chatbot:
             # We have received a valid movie so we have to extract sentiment,
             # record the movie rating based on sentiment, and respond reflecting
             # the sentiment.
-
+            response = ''
             sentiment = self.sentimentClass(input)
             if sentiment == 'pos':
               movie_index = self.getMovieIndex(movie_indexes)
@@ -212,7 +210,7 @@ class Chatbot:
         # Return our response plus our recommendation
         return response + '\n' + recommend_response
 
-    return response
+      return response
 
     def getRepeatResponse(self, input):
       if input == '1':
