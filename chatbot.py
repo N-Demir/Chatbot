@@ -41,7 +41,7 @@ class Chatbot:
     # `moviebot` is the default chatbot. Change it to your chatbot's name       #
     #############################################################################
     def __init__(self, is_turbo=False):
-      self.NUMBER_TILL_REC = 5
+      self.NUMBER_TILL_REC = 3
       self.name = 'moviebot'
 
       #flags
@@ -49,15 +49,28 @@ class Chatbot:
       self.is_repeat = False
       self.selection = False
       self.quotationFound = False
+      self.unkown_movie = False
+
+      # When a movie is talked about more than once
+      self.repeatedMovie = False
+      self.newSentiment = None
+      self.repeatedIndx = -1
 
       # Flags for previous referencing
-      self.no_sentiment = True
+      self.no_sentiment = False
       self.previous_sentiment = None
       self.previous_movie = None
 
+      # Flags for recommending movies
+      self.get_recommend_date = False
+      self.get_recommend_genre = False
+      self.date_range = None
+      self.give_rec = False
+      self.use_date_range = False
+
       self.sentiment = {}
       self.usr_rating_vec = []
-      self.numRatings = 5
+      self.numRatings = 3
       self.numRecs = 3
       #self.prevInput = None
       self.read_data()
@@ -125,7 +138,22 @@ class Chatbot:
       #############################################################################
 
       # User decides how to continue or quit the chatbot after recommendations are given
-      if self.is_repeat == True: return self.getRepeatResponse(input)
+      if self.is_repeat: return self.getRepeatResponse(input)
+
+      # Deal with repeated talking about movies
+      if self.repeatedMovie: return self.updateResponse(input)
+
+      # Get whether they want a date range for their rec
+      if self.get_recommend_date: response = self.recommend_date(input) 
+
+      # Give the recommendation!
+      if self.give_rec:
+        continue_response = 'Hope these recommendations help! Please choose one of the options below by typing 1, 2, or 3.\n'
+        continue_response += '1. Quit\n'
+        continue_response += '2. Add additional movie ratings for more recommendations.\n'
+        continue_response += '3. Restart with new ratings for new recommendations.'
+        self.is_repeat = True 
+        return response + '\n' + 'Here\'s what I got for you:\n' + self.getRec() + '\n' + continue_response
 
       # Handle arbitrary input
       arbResp = self.getArbitraryResponse(input)
@@ -139,12 +167,17 @@ class Chatbot:
       # Get the flag indicating success of process Title
       movie_flag = movie_tag[1]
       if movie_flag == -1: # No movies found
-          if self.no_sentiment: # Try to see if we can use previous info
+          if self.no_sentiment and self.sentimentForPreviousMention(old_input): # Try to see if we can use previous info
             # Function to check for previous movie reference
             sentiment = self.sentimentClass(old_input) # We have to worry maybe if they still have no sentiment
-            response = self.processMovieAndSentiment(sentiment, self.previous_movie)
+            response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
             self.no_sentiment = False
+          elif self.no_sentiment: 
+              return "Hm, Unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
+          elif self.unkown_movie:
+            return "Hey, lets chat about movies!"
           else:
+            self.unkown_movie = True
             return self.noMovieResponse()
       elif movie_flag == 1: # Movie found
 
@@ -153,7 +186,7 @@ class Chatbot:
 
           if len(movie_indexes) != 0: # Good movie!
             # Undo ceratin flags!
-            self.no_sentiment = False
+            self.unkown_movie = False
 
             # Need to encorperate the sentiment
             #self.usr_rating_vec.append((movie_index, 1))
@@ -165,8 +198,20 @@ class Chatbot:
             response = ''
             sentiment = self.sentimentClass(input)
             movie_index = self.getMovieIndex(movie_indexes)
-            if (movie_index != None):
-              response = self.processMovieAndSentiment(sentiment, movie_index)
+            # Check if movie index is already been seen
+            location_already_discussed = -1
+            for i in range(len(self.usr_rating_vec)):
+              if self.usr_rating_vec[i][0] == movie_index:
+                location_already_discussed = i
+                break
+
+            if (location_already_discussed != -1):
+              # Compare the sentiment
+              response = self.redundantInfo(sentiment, self.usr_rating_vec[i][2])
+              self.newSentiment = sentiment 
+              self.repeatedIndx = location_already_discussed
+            elif (movie_index != None):
+              response = self.processMovieAndSentiment(sentiment, movie_index, old_input)
             else:
               response = "Ok, tell me about another movie."
             '''
@@ -213,44 +258,149 @@ class Chatbot:
             #if len(self.usr_rating_vec) == 5:
             #self.recommend(self.usr_rating_vec)
           else: # Unknown movie
-            if self.no_sentiment: # Try to see if we can use previous info
+            if self.no_sentiment and self.sentimentForPreviousMention(old_input): # Try to see if we can use previous info
               # Function to check for previous movie reference
               sentiment = self.sentimentClass(old_input) # We have to worry maybe if they still have no sentiment
-              print old_input
-              response = self.processMovieAndSentiment(sentiment, self.previous_movie)
+              response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
               self.no_sentiment = False
+            elif self.no_sentiment: 
+              return "Hm, Unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
             else:
+              if self.unkown_movie:
+                return "Dang I can't seem to remember that movie either. Sorry about that! I promise I'll know the next one"
+              self.unkown_movie = True
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
       else:
         return "Please tell me about one movie at a time. Go ahead."
 
       print len(self.usr_rating_vec)
       if (len(self.usr_rating_vec) == self.numRatings):
-        movie_recommend = self.recommend(self.usr_rating_vec)
+        self.get_recommend_date = True
+
+        recommend_response = 'I think I am getting to know you a bit better and I want to blow you away with some movie recommendations. '
+        recommend_response += 'First though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
+
+        #movie_recommend = self.recommend(self.usr_rating_vec)
         # TODO: Make this a stand alone function
-        recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
-        recommend_response += movie_recommend
-        recommend_response += '\n'
-        recommend_response += 'Thank you for chatting with me today! Please choose one of the options below by typing 1, 2, or 3.\n'
-        recommend_response += '1. Quit\n'
-        recommend_response += '2. Add additional movie ratings for more recommendations.\n'
-        recommend_response += '3. Restart with new ratings for new recommendations.'
-        self.is_repeat = True
+        #recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
+        #recommend_response += movie_recommend
+        #recommend_response += '\n'
+        #recommend_response += 'Thank you for chatting with me today! Please choose one of the options below by typing 1, 2, or 3.\n'
+        #recommend_response += '1. Quit\n'
+        #recommend_response += '2. Add additional movie ratings for more recommendations.\n'
+        #recommend_response += '3. Restart with new ratings for new recommendations.'
+        #self.is_repeat = True
 
         # Return our response plus our recommendation
         return response + '\n' + recommend_response
 
       return response
 
-    def lookForPreviousMention(self, input):
-      it_regex = r'((?:^|[\W])[iI]t(?:$|[\W]))'
+    def getRec(self):
+      recommendations = self.recommend(self.usr_rating_vec)
+      # movie_to_recomend += str(i + 1) + ') ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
+      movies_to_recommend = ''
+      if self.use_date_range:
+        movie_count = 0
+        while movie_count < self.numRecs and len(recommendations) > 0:
+          movie = self.titles[heapq.heappop(recommendations)[1]][0]
+          date = re.findall(r'(\d\d\d\d)', movie)
+          if len(date) > 0:
+            date = int(date[0])
+          else:
+            date = 3001 # Out of max range
+          if date >= int(self.date_range[0]) and date <= int(self.date_range[1]):
+            print 'here'
+            movie_count += 1
+            movies_to_recommend += str(movie_count) + ') ' + movie + '\n'
+      else:
+        for i in range(self.numRecs):
+          movies_to_recommend += str(i + 1) + ') ' + self.titles[heapq.heappop(recommendations)[1]][0] + '\n'
+
+      return movies_to_recommend
+
+
+    def recommend_date(self, input):
+      no_regex = r'(?:^[Nn]o|^[Nn]ope)'
+      date_range_regex = r'(\d\d\d\d)-(\d\d\d\d)'
+      one_date_regex = r'(\d\d\d\d)\+'
+      self.get_recommend_date = False
+      self.give_rec = True
+      if re.search(no_regex, input):
+        return "No Problem!"
+      elif re.search(date_range_regex, input):
+        self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
+        self.use_date_range = True
+        return 'Awesome! We will take this into consideration.'
+      elif re.search(one_date_regex, input):
+        self.date_range = [re.findall(one_date_regex, input)[0], 3000]
+        self.use_date_range = True
+        return 'Awesome! We will take this into consideration.'
+      else:
+        self.get_recommend_date = True
+        self.give_rec = False
+        return "Sorry I didn't quite get that. Can you enter ex. (2000-2003 or 1995+ or no)"
+
+    def updateResponse(self, input):
+      yes_regex = r'(?:^[Yy]es|^I do )'
+      no_regex = r'(?:^[Nn]o|^[Nn]ope)'
+
+      # Check if they respond yes and want to update
+      if re.search(yes_regex, input):
+        if self.newSentiment == 'pos': 
+          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], 1, self.newSentiment)
+        elif self.newSentiment == 'neg': 
+          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], -1, self.newSentiment)
+        elif self.newSentiment == 'str_pos': 
+          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], 1, self.newSentiment)
+        elif self.newSentiment == 'str_neg': 
+          self.usr_rating_vec[self.repeatedIndx] = (self.usr_rating_vec[self.repeatedIndx][0], -1, self.newSentiment)
+
+        self.repeatedMovie = False
+
+        return "Perfect! I just updated that in my spreadsheet."
+      elif re.search(no_regex, input): # Check if they want to keep it as was
+        self.repeatedMovie = False
+        return "No worries. I agree with your first assessment!"
+      else: # Unclear answer
+        return "Sorry I am not quite sure if you would like me to update your preference?"
+
+
+    def redundantInfo(self, sentiment, old_sentiment):
+      if sentiment == old_sentiment or sentiment == 'none' or sentiment == 'unclear':
+        if old_sentiment == 'pos': return "Right, we talked about this movie earlier! You mentioned that liked this movie"
+        elif old_sentiment == 'neg': return "Right, we talked about this movie earlier! You mentioned that didn't like this movie"
+        elif old_sentiment == 'str_pos': return "Right, we talked about this movie earlier! You loved it!"
+        else: return "Right, we talked about this movie earlier! You hated it!"
+      else:
+        self.repeatedMovie = True
+        if old_sentiment == 'pos': return "Hm, earlier you mentioned that liked this movie. do you want to update your opinion?"
+        elif old_sentiment == 'neg': return "Interesting, earlier you said that you disliked this movie. do you want to update your opinion?"
+        elif old_sentiment == 'str_pos': return "I though you loved this movie? do you want me to update how you felt about this movie?"
+        else: return "I though you hated this movie? do you want me to update how you felt about this movie?"
+
+
+    def sentimentForPreviousMention(self, input):
+      it_regex = r'(?:^|[\W])[iI]t(?:$|[\W])'
       that_movie_regex = r'((?:^|[\W])[tT]hat movie(?:$|[\W]))'
 
       # Look for reference to previous said movie
-      if re.match(it_regex, input) or re.match(that_movie_regex, input):
+      if re.search(it_regex, input) or re.search(that_movie_regex, input):
         return True
 
       return False
+
+    def useSentimentFromPrevious(self, input):
+      opposite_regex = r'(?:^But not )'
+      same_begin_regex = r'(?:And | Also | Plus)'
+      same_in_regex = r'(?: same (.*?) that(?:$|\W)| similar (.*?) that(?:$|\W))'
+
+      if re.search(same_begin_regex, input) or re.search(same_in_regex, input):
+        return 'same'
+      elif re.search(opposite_regex, input):
+        return 'op'
+      else:
+        return 'UNK'
 
     def getRepeatResponse(self, input):
       if input == '1':
@@ -329,24 +479,48 @@ class Chatbot:
           return "I'll have to think about that. In the meantime, let's talk about some movies."
       return None
 
-    def processMovieAndSentiment(self, sentiment, movie_index):
+    def processMovieAndSentiment(self, sentiment, movie_index, input):
+      self.previous_movie = movie_index
       if sentiment == 'pos':
-        self.usr_rating_vec.append((movie_index, 1))
+        self.no_sentiment = False
+        self.usr_rating_vec.append((movie_index, 1, 'pos'))
+        self.previous_sentiment = 'pos'
         return self.getPosResponse(movie_index)
       elif sentiment == 'str_pos':
-        self.usr_rating_vec.append((movie_index, -1))
+        self.no_sentiment = False
+        self.usr_rating_vec.append((movie_index, 1, 'str_pos'))
+        self.previous_sentiment = 'str_pos'
         return self.getStrPosResponse(movie_index)
       elif sentiment == 'neg':
-        self.usr_rating_vec.append((movie_index, -1))
+        self.no_sentiment = False
+        self.usr_rating_vec.append((movie_index, -1, 'neg'))
+        self.previous_sentiment = 'neg'
         return self.getNegResponse(movie_index)
       elif sentiment == 'str_neg': # Don't yet deal with changing the rating
-        self.usr_rating_vec.append((movie_index, -1))
+        self.no_sentiment = False
+        self.usr_rating_vec.append((movie_index, -1, 'str_neg'))
+        self.previous_sentiment = 'str_neg'
         return self.getStrNegResponse(movie_index)
       elif sentiment == 'none':
-        self.previous_movie = movie_index
-        self.no_sentiment = True
-        return self.getNoneResponse(movie_index)
+        #self.previous_movie = movie_index
+        check_previous = self.useSentimentFromPrevious(input)
+        if (check_previous == 'same') and self.previous_sentiment != None: # Test edge case
+          return self.processMovieAndSentiment(self.previous_sentiment, movie_index, input)
+        elif(check_previous == 'op'):
+          negate = ''
+          if self.previous_sentiment == 'pos': negate = 'neg'
+          elif self.previous_sentiment == 'neg': negate = 'pos'
+          elif self.previous_sentiment == 'str_pos': negate = 'neg' # Do we keep same
+          elif self.previous_sentiment == 'str_neg': negate = 'pos'
+          return self.processMovieAndSentiment(negate, movie_index, input)
+        else:
+          self.no_sentiment = True
+          return self.getNoneResponse(movie_index)
       else: # Unclear sentiment
+        # Try to see if they are referencing previous shit
+        # Meaning that we have not been able to extract sentiment. They could
+        # now reference previous info
+        self.no_sentiment = True  
         return self.getUnclearResponse(movie_index)
 
     def getMovieIndex(self, movie_indexes):
@@ -396,7 +570,7 @@ class Chatbot:
         if randInt == 1:
             return "You liked \"" + self.titles[movie_index][0] + "\". Thank you! Tell me about another movie you have seen."
         elif randInt == 2:
-            return "Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". What about another movie?"
+            return "Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". Got it!"
 
         return "ISSUE - posresponse" #TODO:REMOVE
 
@@ -1099,12 +1273,12 @@ class Chatbot:
 
       # Return a string with the top three movies
       # Note: we pop from the heap, may want to add back to keep list of ratings
-      movie_to_recomend = ''
-      for i in range(self.numRecs):
-        movie_to_recomend += str(i + 1) + ') ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
+      #movie_to_recomend = ''
+      #for i in range(self.numRecs):
+       # movie_to_recomend += str(i + 1) + ') ' + self.titles[heapq.heappop(est_ratings)[1]][0] + '\n'
 
       # Remove the last \n
-      movie_to_recomend = movie_to_recomend[:-1]
+      #movie_to_recomend = movie_to_recomend[:-1]
 
 
       print "Recommend took", time.time() - start_time, "to run"
@@ -1116,8 +1290,8 @@ class Chatbot:
         movie_i = heapq.heappop(est_ratings)
         print '%s rated %f' % (self.titles[movie_i[1]][0], movie_i[0] * -1)
       '''
-
-      return movie_to_recomend
+      return est_ratings
+      #return movie_to_recomend
 
     def split_into_sentences(self, text):
         text = " " + text + "  "
