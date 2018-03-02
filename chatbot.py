@@ -425,12 +425,11 @@ class Chatbot:
 
         for title in self.titles:
             movie_title = title[0]
+            movie_title = self.removeArticles(movie_title)
 
-            #strip and Lowercase
-            movie_title = movie_title.lower()
+            #for word in inpt:
 
-            movie_title = re.sub(r' \(\d\d\d\d\)', "", movie_title)
-            movie_title = re.sub(r'^(the |an |a )', "", movie_title)
+
 
             #print "Cur title after stripping: " + movie_title
 
@@ -589,7 +588,7 @@ class Chatbot:
         print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeArticles(inpt_title) in self.removeArticles(v[0])]
+                    if self.removeArticles(v[0]).startswith(self.removeArticles(inpt_title))]
         return indices
 
     def removeArticles(self, movie_title):
@@ -650,12 +649,6 @@ class Chatbot:
             indices = self.isTitleInLevel4(movie_title)
             if len(indices) == 0:
                 indices = self.isTitleInLevel5(movie_title)
-            """
-            if len(indices) == 0:
-                indices = self.isTitleInLevel3(movie_title)
-                if len(indices) == 0:
-                    indices = self.isTitleInLevel4(movie_title)
-            """
 
         # SPELLCHECK
 
