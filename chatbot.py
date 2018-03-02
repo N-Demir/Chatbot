@@ -40,6 +40,7 @@ class Chatbot:
     #############################################################################
     # `moviebot` is the default chatbot. Change it to your chatbot's name       #
     #############################################################################
+    
     def __init__(self, is_turbo=False):
       self.NUMBER_TILL_REC = 5
       self.name = 'moviebot'
@@ -114,6 +115,7 @@ class Chatbot:
 
       return greeting_message
 
+
     def goodbye(self):
       """chatbot goodbye message"""
       #############################################################################
@@ -171,10 +173,6 @@ class Chatbot:
         self.is_repeat = True
         self.give_rec = False
         return response + '\n' + 'Here\'s what I\'ve got for you:\n' + self.getRec() + '\n' + continue_response
-
-      # # Handle arbitrary input
-      # arbResp = self.getArbitraryResponse(input)
-      # if arbResp != None: return arbResp
 
       # Process movie title
       temp = self.processTitle(input)
@@ -282,21 +280,11 @@ class Chatbot:
         recommend_response = responses[randint(1, len(responses)-1)]
         recommend_response += 'First, though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
 
-        #movie_recommend = self.recommend(self.usr_rating_vec)
-        # TODO: Make this a stand alone function
-        #recommend_response = 'I have learned a lot from your movie preferences. Here are a couple suggestions for movies you may like\n'
-        #recommend_response += movie_recommend
-        #recommend_response += '\n'
-        #recommend_response += 'Thank you for chatting with me today! Please choose one of the options below by typing 1, 2, or 3.\n'
-        #recommend_response += '1. Quit\n'
-        #recommend_response += '2. Add additional movie ratings for more recommendations.\n'
-        #recommend_response += '3. Restart with new ratings for new recommendations.'
-        #self.is_repeat = True
-
         # Return our response plus our recommendation
         return response + '\n' + recommend_response
 
       return response
+
 
     def getRec(self):
       recommendations = self.recommend(self.usr_rating_vec)
@@ -343,6 +331,7 @@ class Chatbot:
           movies_to_recommend += str(i + 1) + ') ' + self.titles[heapq.heappop(recommendations)[1]][0] + '\n'
       return movies_to_recommend
 
+
     def spellCheckFeedback(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
       yes_regex = r'(?:^[Yy]es|^I did )'
@@ -384,6 +373,7 @@ class Chatbot:
         #self.give_rec = False
         return "Sorry, I didn't quite get that. Please enter a response like one of the following formats: 2000-2003, 1995+, no"
 
+
     def recommend_genre(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
       self.recommend_genre = False
@@ -424,6 +414,7 @@ class Chatbot:
       else: # Unclear answer
         return "Sorry, I am not quite sure if you would like me to update your preference?"
 
+
     def redundantInfo(self, sentiment, old_sentiment):
       if sentiment == old_sentiment or sentiment == 'none' or sentiment == 'unclear':
         if old_sentiment == 'pos': return "Right, we talked about this movie earlier! You mentioned that you liked this movie."
@@ -437,6 +428,7 @@ class Chatbot:
         elif old_sentiment == 'str_pos': return "I though you loved this movie, do you want me to update how you feel about this movie?"
         else: return "I though you hated this movie, do you want me to update how you feel about this movie?"
 
+
     def sentimentForPreviousMention(self, input):
       it_regex = r'(?:^|[\W])[iI]t(?:$|[\W])'
       that_movie_regex = r'((?:^|[\W])[tT]hat movie(?:$|[\W]))'
@@ -444,6 +436,7 @@ class Chatbot:
       if re.search(it_regex, input) or re.search(that_movie_regex, input):
         return True
       return False
+
 
     def useSentimentFromPrevious(self, input):
       opposite_regex = r'(?:^But not )'
@@ -456,6 +449,7 @@ class Chatbot:
         return 'op'
       else:
         return 'UNK'
+
 
     def getRepeatResponse(self, input):
       if input == '1':
@@ -471,6 +465,7 @@ class Chatbot:
           return "Great! Let's explore some new movies. Just like before, what are some movies I can base my recommendation off of?"
       else:
           return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
+
 
     def getArbitraryResponse(self, input):
       input = input.lower()
@@ -533,6 +528,7 @@ class Chatbot:
         return responses[randint(1, len(responses)-1)]
       return None
 
+
     def processMovieAndSentiment(self, sentiment, movie_index, input):
       self.previous_movie = movie_index
       response = ''
@@ -586,6 +582,7 @@ class Chatbot:
         self.no_sentiment = True
         return self.getUnclearResponse(movie_index)
 
+
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
           #TODO: GET STuck in while loop asking for choice
@@ -594,6 +591,7 @@ class Chatbot:
           else: return None
       else:
           return movie_indexes[0]
+
 
     ###########################################################
     ######                   RESPONSES                   ######
@@ -612,7 +610,6 @@ class Chatbot:
       addRequests.append(" Tell me about another movie you have seen.")
       addRequests.append(" Is there another movie you can tell me about?")
       return addRequests[randint(1, len(addRequests)-1)]
-
 
     def noMovieResponse(self):
       responses = []
@@ -700,6 +697,7 @@ class Chatbot:
           #TODO: DO SOMETHING WITH THIS
           return ((entities, 2), inpt)
 
+
     def findNonQuotationTitles(self, inpt):
         # DOES NOT NEED FIRST LETTER CAPS, IS THAT OKAY?
         punctuations = '!.?'
@@ -742,21 +740,6 @@ class Chatbot:
         return max(entities, key=len)
 
 
-        """
-        # TODO: REMOVE? Don't worry about multiple sentences?
-        sentences = self.split_into_sentences(inpt)
-        if len(sentences) == 0:
-            sentences = [inpt]
-
-        for sentence in sentences:
-            words = sentence.split()
-
-            for i in range(len(words), 0, -1):
-                #TODO: FILL OUT
-
-        print str(sentences)
-        """
-
     def edit_distance(self, true_word, query, max_dist):
       # If length of titles differ more than max_dist than return max_dist + 1
       if abs(len(true_word) - len(query)) > max_dist:
@@ -781,6 +764,7 @@ class Chatbot:
           edit_dist_M[i][j] = min(cost_del, cost_ins, cost_sub)
 
       return edit_dist_M[len(true_word)][len(query)]
+
 
     def spellCheck(self, query):
       # Indexes to suggest
@@ -867,6 +851,7 @@ class Chatbot:
 
       return list(set(indices_2))
 
+
     def isTitleInLevel1(self, inpt_title):
         self.DONOTTOUCHME_TOY_STORY = False
         # Check exact match
@@ -885,7 +870,6 @@ class Chatbot:
             if self.removeArticles(inpt_title) == self.removeArticles(title):
                 return True
         return False
-
 
     def isTitleInLevel2(self, inpt_title):
         # Check but with dates irrelevent
@@ -1179,26 +1163,6 @@ class Chatbot:
       binarized_matrix = [[0 if i == 0 else -1 if i - threshold <= 0 else 1 for i in line] for line in self.ratings]
       self.ratings = binarized_matrix
 
-      #TODO: test harness. REMOVE
-      """
-      for i in range(len(self.ratings)):
-          for j in range(len(self.ratings[i])):
-              original = self.ratings[i][j]
-              binarized = binarized_matrix[i][j]
-              #print "Original: " + str(original) + " Binarized: " + str(binarized)
-              if original == 0:
-                  if binarized != 0:
-                      print "0 - MISTAKE"
-
-              if original == 3:
-                  if binarized != -1:
-                      print "3 - MISTAKE"
-
-              if original == 3.5:
-                  if binarized != 1:
-                      print "1 - MISTAKE"
-      """
-
     def stemLexicon(self):
       stemmedLex = {}
       for word in self.sentiment:
@@ -1361,50 +1325,6 @@ class Chatbot:
       # TODO: Implement a recommendation function that takes a user vector u
       # and outputs a list of movies recommended by the chatbot
 
-
-      # TODO: Remove old implementation
-      '''
-      # Pre-calcute vector lengths for movies rated by user
-      rated_vec_lengths = [np.linalg.norm(self.ratings[i]) for i in rated_movies]
-
-      # Later to speed up we can pre load the movie rows of things we already rated
-
-      # Time testing
-      start_time = time.time()
-
-      # Estimated user ratings
-      est_ratings = []
-      # Try with heap
-      for i in range(len(self.titles)):
-        # Only consider movies not already rated by u
-        if not i in rated_movies:
-          # Get the movie-vec from the matrix
-          movie_vec = self.ratings[i]
-          # Pre compute movie_vec length
-          movie_vec_len = np.linalg.norm(movie_vec)
-
-          est_rating = 0
-          # Loop over the movies rated by u and use item-item collab filtering
-          for inx, user_rating in enumerate(u):
-            # Get the vector for the users movie
-            usr_movie_vec = self.ratings[user_rating[0]]
-            # Users rating
-            rating = user_rating[1]
-
-            # Estimate the rating of movie i
-            est_rating += self.distance(movie_vec, movie_vec_len, usr_movie_vec, rated_vec_lengths[inx]) * rating
-
-          # Add new estimated rating
-          #est_ratings.append((i, est_rating))
-          # Invert rating for putting into heap
-          heapq.heappush(est_ratings, (est_rating * -1, i))
-      '''
-
-      # Sort the estimated rating in reverse order
-      #sorted_movies = sorted(est_ratings, key=lambda movie_rating:movie_rating[1], reverse=True) # Sort by rating
-
-
-
       # Assume you is a sparse vector of the form
       # [(movie index, movie rating), ...]
 
@@ -1451,7 +1371,6 @@ class Chatbot:
       # Remove the last \n
       #movie_to_recomend = movie_to_recomend[:-1]
 
-
       print "Recommend took", time.time() - start_time, "to run"
 
       '''
@@ -1491,6 +1410,7 @@ class Chatbot:
         sentences = sentences[:-1]
         sentences = [s.strip() for s in sentences]
         return sentences
+
     #############################################################################
     # 4. Debug info                                                             #
     #############################################################################
@@ -1501,7 +1421,6 @@ class Chatbot:
       # evaluators
       debug_info = 'debug info'
       return debug_info
-
 
     #############################################################################
     # 5. Write a description for your chatbot here!                             #
