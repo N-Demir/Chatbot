@@ -955,7 +955,7 @@ class Chatbot:
 
     def askForSelection(self, movie_indexes):
         bot_prompt = "\001\033[96m\002%s> \001\033[0m\002" % self.name
-        print bot_prompt + "I know of more than one movie with that name. Which one were you referring to?"
+        print bot_prompt + "Sorry, which movie are you referring to?"
         for i, movie_index in enumerate(movie_indexes):
             print str(i + 1) + ") " + self.titles[movie_index][0]
         print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
@@ -975,11 +975,25 @@ class Chatbot:
                 return None
             elif len(inpt) != 0:
                 # Check if this is a movie name
-                temp = self.isMovie(inpt)
-                if len(temp) == 1:
-                    return movie_indexes[0]
-                elif len(temp) == 0:
+                temp = []
+                for index in movie_indexes:
+                    print "title: " + self.titles[index][0]
+                    if self.removeArticles(self.titles[index][0]).startswith(self.removeArticles(inpt)):
+                        temp.append(index)
+                movie_indexes = temp
+                if len(movie_indexes) > 1:
+                    print bot_prompt + "Could you help me narrow it down more please?"
+                    for i, movie_index in enumerate(movie_indexes):
+                        print str(i + 1) + ") " + self.titles[movie_index][0]
+                elif len(movie_indexes) == 0:
                     print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
+                else:
+                    return movie_indexes[0]
+                # temp = self.isMovie(inpt)
+                # if len(temp) == 1:
+                #     return movie_indexes[0]
+                # elif len(temp) == 0:
+                #     print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
             # elif inpt == "more":
             #     print bot_prompt + "I know of more than one movie with the name \"" + inpt + "\". Which one were you referring to?"
             #     for i, movie_index in enumerate(temp):
