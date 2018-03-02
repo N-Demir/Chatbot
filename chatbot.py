@@ -189,7 +189,7 @@ class Chatbot:
             responses = []
             responses.append("Hey, let's chat about movies!")
             responses.append("Let's get back to talking about movies!")
-            return responses[randint(1, len(responses)-1)]
+            return responses[randint(0, len(responses)-1)]
           else:
             self.unknown_movie = True
             return self.noMovieResponse()
@@ -265,7 +265,7 @@ class Chatbot:
                 if arbResp != None: return arbResp
                 return "Darn, I can't seem to remember that movie. Sorry about that! I promise I'll know the next one."
               self.unknown_movie = True
-              return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
+              return "Unfortunately I have never seen that movie, but I would love to hear about other movies that you have seen."
       else:
         return "Please tell me about one movie at a time. Go ahead."
 
@@ -279,7 +279,7 @@ class Chatbot:
         responses.append('Get ready for the big movie recommendations reveal! ')
         responses.append('Almost ready to give you your recommendations! ')
         responses.append('Now I think I have a good sense of some movies you would love. ')
-        recommend_response = responses[randint(1, len(responses)-1)]
+        recommend_response = responses[randint(0, len(responses)-1)]
         recommend_response += 'First, though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
 
         # Return our response plus our recommendation
@@ -360,7 +360,7 @@ class Chatbot:
         responses.append("No problem!")
         responses.append("No worries!")
         responses.append("Ok, thanks!")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
@@ -385,7 +385,7 @@ class Chatbot:
         responses.append("No problem!")
         responses.append("No worries!")
         responses.append("Ok, thanks!")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
       else: # Assume input is genre!
         self.genre = input
         self.use_genre = True
@@ -500,7 +500,7 @@ class Chatbot:
         responses.append("I am well, but I would be even better if you told me about a movie.")
         responses.append("I'm fine. Is there a movie you can tell me about?")
         responses.append("I'm great! Can you tell me about a movie you have seen?")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
       r3 = re.findall(q3, input)
       if len(r3) != 0:
         return "It has been good! Let's talk about some movies now."
@@ -509,7 +509,7 @@ class Chatbot:
         return "Yes, please."
       r6 = re.findall(q6, input)
       if len(r6) != 0:
-        return self.jokes[randint(0, len(self.jokes))]
+        return self.jokes[randint(0, len(self.jokes) - 1)]
       # r10 = re.findall(q10, input)
       # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
       rbasic1 = re.findall(basicQ1, input)
@@ -521,14 +521,14 @@ class Chatbot:
         responses.append("I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?")
         responses.append("I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?")
         responses.append("I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
       rbasic2 = re.findall(basicQ2, input)
       if len(rbasic2) != 0:
         responses = []
         responses.append("Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?")
         responses.append("Enough questions, let's get to the movies! Can you tell about one you have seen?")
         responses.append("I'll have to think about that. In the meantime, let's talk about some movies.")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
       return None
 
 
@@ -612,14 +612,14 @@ class Chatbot:
       addRequests.append(" Can you tell me about another movie?")
       addRequests.append(" Tell me about another movie you have seen.")
       addRequests.append(" Is there another movie you can tell me about?")
-      return addRequests[randint(1, len(addRequests)-1)]
+      return addRequests[randint\(0, len(addRequests)-1)]
 
     def noMovieResponse(self):
       responses = []
       responses.append("I'm sorry, I'm not sure what you mean. Tell me about a movie.")
       responses.append("Sorry, I don't quite understand. Tell me about a movie that you have seen.")
       responses.append("Let's get back to movies - I'd love to hear your opinion on one.")
-      return responses[randint(1, len(responses)-1)]
+      return responses[randint(0, len(responses)-1)]
 
     def getStrPosResponse(self, movie_index):
       responses = []
@@ -628,35 +628,35 @@ class Chatbot:
       responses.append("You loved \"" + self.titles[movie_index][0] + "\"!")
       responses.append("\"" + self.titles[movie_index][0] + "\" is a fantastic movie!!")
       responses.append("You were a huge fan of \"" + self.titles[movie_index][0] + "\"!")
-      return responses[randint(1, len(responses)-1)]
+      return responses[randint(0, len(responses)-1)]
 
     def getStrNegResponse(self, movie_index):
       responses = []
       responses.append("So you really disliked \"" + self.titles[movie_index][0] + "\".")
       responses.append("You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up.")
       responses.append("I see you really weren't a fan of \"" + self.titles[movie_index][0] + "\".")
-      return responses[randint(1, len(responses)-1)]
+      return responses[randint(0, len(responses)-1)]
 
     def getPosResponse(self, movie_index):
         responses = []
         responses.append("You liked \"" + self.titles[movie_index][0] + "\". Thank you!")
         responses.append("Ok, you enjoyed \"" + self.titles[movie_index][0] + "\".")
         responses.append("Great! I'm glad you liked \"" + self.titles[movie_index][0] + "\".")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
 
     def getNegResponse(self, movie_index):
         responses = []
         responses.append("You did not like " + self.titles[movie_index][0] + ". Thank you!")
         responses.append("Ok, you disliked \"" + self.titles[movie_index][0] + "\".")
         responses.append("I'm sorry you did not enjoy \"" + self.titles[movie_index][0] + "\".")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
 
     def getNoneResponse(self, movie_index):
         responses = []
         responses.append("Ok, thank you! Tell me your opinion on \"" + self.titles[movie_index][0] + "\".")
         responses.append("What did you think about \"" + self.titles[movie_index][0] + "\"?")
         responses.append("Did you like or dislike \"" + self.titles[movie_index][0] + "\"?")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
         #TODO: REMEMBER PREVIOUS THING
 
     def getUnclearResponse(self, movie_index):
@@ -664,7 +664,7 @@ class Chatbot:
         responses.append("I'm sorry, I'm not quite sure if you liked \"" + self.titles[movie_index][0] + "\" Tell me more about \"" + self.titles[movie_index][0] + "\".")
         responses.append("I'm sorry, I can't quite tell what your opinion is on \"" + self.titles[movie_index][0] + "\". Can you tell me more?")
         responses.append("I'm not certain about your opinion on \"" + self.titles[movie_index][0] + "\". Could you tell me more about it?")
-        return responses[randint(1, len(responses)-1)]
+        return responses[randint(0, len(responses)-1)]
 
     ###########################################################
     ######                 END RESPONSES                 ######
