@@ -212,7 +212,7 @@ class Chatbot:
         q3 = r'how(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
         q5 = r'^no\.?$'
         q10 = r'^can ([^?]*)(?:\?)?'
-        basicQ1 = r'^(what|where|why|how|are|aren\'t)'
+        basicQ1 = r'^(can|what|where|why|how|are|aren\'t) ([^?]*)(?:\?)?'
         basicQ2 = r'\?$'
 
 
@@ -238,17 +238,32 @@ class Chatbot:
         if len(r5) != 0: return "Yes, please."
         r6 = re.findall(q6, input)
         if len(r6) != 0: return "Haha very funny. I will if you tell me about a movie."
-        r10 = re.findall(q10, input)
-        if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
+        # r10 = re.findall(q10, input)
+        # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
         rbasic1 = re.findall(basicQ1, input)
-        rbasic2 = re.findall(basicQ2, input)
-        if len(rbasic1) != 0 or len(rbasic2) != 0:
-          numResponses = 2
+        if len(rbasic1) != 0:
+          numResponses = 6
           randInt = randint(1, numResponses)
           if randInt == 1:
             return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
           elif randInt == 2:
             return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+          elif randInt == 3:
+            return "I'll have to think about that. In the meantime, let's talk about some movies."
+          elif randInt >= 4 and randInt <= 6:
+            print(rbasic1)
+            print(rbasic1[0])
+            return "I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?"
+        rbasic2 = re.findall(basicQ2, input)
+        if len(rbasic2) != 0:
+          numResponses = 3
+          randInt = randint(1, numResponses)
+          if randInt == 1:
+            return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
+          elif randInt == 2:
+            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+          elif randInt == 3:
+            return "I'll have to think about that. In the meantime, let's talk about some movies."
         # Process movie title
         temp = self.processTitle(input)
         movie_tag = temp[0]
@@ -256,7 +271,12 @@ class Chatbot:
         # Get the flag indicating success of process Title
         movie_flag = movie_tag[1]
         if movie_flag == -1: # No movies found
-            return "Sorry, I don't understand. Tell me about a movie that you have seen."
+            numResponses = 2
+            randInt = randint(1, numResponses)
+            if randInt == 1:
+              return "Hm I don't really want to talk about that right now. Let's go back to movies."
+            elif randInt == 2:
+              return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
         elif movie_flag == 1: # Movie found
             movie_title = movie_tag[0]
             movie_indexes = self.isMovie(movie_title)
