@@ -48,7 +48,7 @@ class Chatbot:
       self.is_repeat = False
       self.selection = False
       self.quotationFound = False
-      self.unkown_movie = False
+      self.unknown_movie = False
 
       # When a movie is talked about more than once
       self.repeatedMovie = False
@@ -150,11 +150,12 @@ class Chatbot:
         continue_response += '2. Add additional movie ratings for more recommendations.\n'
         continue_response += '3. Restart with new ratings for new recommendations.'
         self.is_repeat = True
-        return response + '\n' + 'Here\'s what I got for you:\n' + self.getRec() + '\n' + continue_response
+        self.give_rec = False
+        return response + '\n' + 'Here\'s what I\'ve got for you:\n' + self.getRec() + '\n' + continue_response
 
-      # Handle arbitrary input
-      arbResp = self.getArbitraryResponse(input)
-      if arbResp != None: return arbResp
+      # # Handle arbitrary input
+      # arbResp = self.getArbitraryResponse(input)
+      # if arbResp != None: return arbResp
 
       # Process movie title
       temp = self.processTitle(input)
@@ -170,11 +171,17 @@ class Chatbot:
             response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
             self.no_sentiment = False
           elif self.no_sentiment:
-              return "Hm, Unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
-          elif self.unkown_movie:
-            return "Hey, lets chat about movies!"
+              return "Hm, unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
+          elif self.unknown_movie:
+            # Handle arbitrary input
+            arbResp = self.getArbitraryResponse(input)
+            if arbResp != None: return arbResp
+            responses = []
+            responses.append("Hey, let's chat about movies!")
+            responses.append("Let's get back to talking about movies!")
+            return responses[randint(1, len(responses)-1)]
           else:
-            self.unkown_movie = True
+            self.unknown_movie = True
             return self.noMovieResponse()
       elif movie_flag == 1: # Movie found
           movie_title = movie_tag[0]
@@ -182,7 +189,7 @@ class Chatbot:
 
           if len(movie_indexes) != 0: # Good movie!
             # Undo ceratin flags!
-            self.unkown_movie = False
+            self.unknown_movie = False
 
             # Need to encorperate the sentiment
             #self.usr_rating_vec.append((movie_index, 1))
@@ -260,21 +267,30 @@ class Chatbot:
               response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
               self.no_sentiment = False
             elif self.no_sentiment:
-              return "Hm, Unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
+              return "Hm, unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
             else:
-              if self.unkown_movie:
-                return "Dang I can't seem to remember that movie either. Sorry about that! I promise I'll know the next one"
-              self.unkown_movie = True
+              if self.unknown_movie:
+                # Handle arbitrary input
+                arbResp = self.getArbitraryResponse(input)
+                if arbResp != None: return arbResp
+                return "Darn, I can't seem to remember that movie. Sorry about that! I promise I'll know the next one."
+              self.unknown_movie = True
               return "Unfortunately I have never seen that movie. I would love to hear about other movies that you have seen."
       else:
         return "Please tell me about one movie at a time. Go ahead."
 
-      print len(self.usr_rating_vec)
+      #print len(self.usr_rating_vec)
       if (len(self.usr_rating_vec) == self.numRatings):
         self.get_recommend_date = True
 
-        recommend_response = 'I think I am getting to know you a bit better and I want to blow you away with some movie recommendations. '
-        recommend_response += 'First though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
+        responses = []
+        responses.append('I think I am getting to know you a bit better, and I want to blow you away with some amazing movie recommendations. ')
+        responses.append('Ok, I am ready to give you some movie recommendations! ')
+        responses.append('Get ready for the big movie recommendations reveal! ')
+        responses.append('Almost ready to give you your recommendations! ')
+        responses.append('Now I think I have a good sense of some movies you would love. ')
+        recommend_response = responses[randint(1, len(responses)-1)]
+        recommend_response += 'First, though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
 
         #movie_recommend = self.recommend(self.usr_rating_vec)
         # TODO: Make this a stand alone function
@@ -321,7 +337,11 @@ class Chatbot:
       self.get_recommend_date = False
       self.give_rec = True
       if re.search(no_regex, input):
-        return "No Problem!"
+        responses = []
+        responses.append("No problem!")
+        responses.append("No worries!")
+        responses.append("Ok, thanks!")
+        return responses[randint(1, len(responses)-1)]
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
@@ -333,7 +353,7 @@ class Chatbot:
       else:
         self.get_recommend_date = True
         self.give_rec = False
-        return "Sorry I didn't quite get that. Can you enter ex. (2000-2003 or 1995+ or no)"
+        return "Sorry, I didn't quite get that. Please enter a response like one of the following formats: 2000-2003, 1995+, no"
 
     def updateResponse(self, input):
       yes_regex = r'(?:^[Yy]es|^I do )'
@@ -352,25 +372,25 @@ class Chatbot:
 
         self.repeatedMovie = False
 
-        return "Perfect! I just updated that in my spreadsheet."
+        return "Got it, thanks! I just updated your opinion. Let's hear about another movie."
       elif re.search(no_regex, input): # Check if they want to keep it as was
         self.repeatedMovie = False
-        return "No worries. I agree with your first assessment!"
+        return "Sounds good, I agree with your first assessment! What's next?"
       else: # Unclear answer
-        return "Sorry I am not quite sure if you would like me to update your preference?"
+        return "Sorry, I am not quite sure if you would like me to update your preference?"
 
     def redundantInfo(self, sentiment, old_sentiment):
       if sentiment == old_sentiment or sentiment == 'none' or sentiment == 'unclear':
-        if old_sentiment == 'pos': return "Right, we talked about this movie earlier! You mentioned that liked this movie"
-        elif old_sentiment == 'neg': return "Right, we talked about this movie earlier! You mentioned that didn't like this movie"
+        if old_sentiment == 'pos': return "Right, we talked about this movie earlier! You mentioned that you liked this movie."
+        elif old_sentiment == 'neg': return "Right, we talked about this movie earlier! You mentioned that you didn't like this movie."
         elif old_sentiment == 'str_pos': return "Right, we talked about this movie earlier! You loved it!"
         else: return "Right, we talked about this movie earlier! You hated it!"
       else:
         self.repeatedMovie = True
-        if old_sentiment == 'pos': return "Hm, earlier you mentioned that liked this movie. do you want to update your opinion?"
-        elif old_sentiment == 'neg': return "Interesting, earlier you said that you disliked this movie. do you want to update your opinion?"
-        elif old_sentiment == 'str_pos': return "I though you loved this movie? do you want me to update how you felt about this movie?"
-        else: return "I though you hated this movie? do you want me to update how you felt about this movie?"
+        if old_sentiment == 'pos': return "Hm, earlier you mentioned that you liked this movie. Do you want to change your opinion?"
+        elif old_sentiment == 'neg': return "Interesting, earlier you said that you disliked this movie. Do you want to change your opinion?"
+        elif old_sentiment == 'str_pos': return "I though you loved this movie, do you want me to update how you feel about this movie?"
+        else: return "I though you hated this movie, do you want me to update how you feel about this movie?"
 
     def sentimentForPreviousMention(self, input):
       it_regex = r'(?:^|[\W])[iI]t(?:$|[\W])'
@@ -398,12 +418,12 @@ class Chatbot:
       elif input == '2':
           self.is_repeat = False
           self.numRatings += 3
-          return "Please tell me about another movie you've seen."
+          return "Ok, let's continue! Please tell me about another movie you've seen."
       elif input == '3':
           self.is_repeat = False
           self.usr_rating_vec = []
           self.numRatings = self.NUMBER_TILL_REC
-          return "Sweet! Let's explore some new movies. Just like before, what are some movies I can base my recommendation off of?"
+          return "Great! Let's explore some new movies. Just like before, what are some movies I can base my recommendation off of?"
       else:
           return "I'm sorry, I don't understand your input. Please enter a number 1, 2, or 3."
 
@@ -411,6 +431,7 @@ class Chatbot:
       input = input.lower()
       q0 = r'^hi|hello'
       q2 = r'what(?:\'s | is )your name'
+      q7 = r'who are you'
       q4 = r'do you love me'
       q6 = r'tell me a joke'
       q1 = r'(?:how)?(\'s | is | are )(you|it)(?: doing| going)?(?: ok| well)?'
@@ -424,7 +445,8 @@ class Chatbot:
       if len(r0) != 0:
         return "Hello! Tell me about a movie you've seen."
       r2 = re.findall(q2, input)
-      if len(r2) != 0:
+      r7 = re.findall(q7, input)
+      if len(r2) != 0 or len(r7) != 0:
         return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
       r4 = re.findall(q4, input)
       if len(r4) != 0:
@@ -770,7 +792,7 @@ class Chatbot:
 
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
-        print "Level 1 titlesearch"
+        #print "Level 1 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
@@ -778,7 +800,7 @@ class Chatbot:
 
     def isTitleInLevel2(self, inpt_title):
         # Check but with dates irrelevent
-        print "Level 2 titlesearch"
+        #print "Level 2 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeDate(self.removeArticles(inpt_title)) ==
@@ -787,7 +809,7 @@ class Chatbot:
 
     def isTitleInLevel3(self, inpt_title):
         # account for subtitles
-        print "Level 3 titlesearch"
+        #print "Level 3 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) ==
@@ -796,7 +818,7 @@ class Chatbot:
 
     def isTitleInLevel4(self, inpt_title):
         # account for sequels as well
-        print "Level 4 titlesearch"
+        #print "Level 4 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) ==
@@ -807,8 +829,7 @@ class Chatbot:
         # All bets are off, just substring
         if self.quotationFound == True:
             return []
-
-        print "Level 5 titlesearch"
+        #print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(v[0]).startswith(self.removeArticles(inpt_title))]
@@ -865,7 +886,7 @@ class Chatbot:
     def isMovie(self, movie_title):
         # Search for query as substring of movie title
         # TODO: This does not quite work ex. search for "The Little Mermaid (1989)"
-        print "Movie: " + movie_title
+        #print "Movie: " + movie_title
         indices = self.isTitleInLevel1(movie_title)
         if len(indices) == 0:
             indices = self.isTitleInLevel2(movie_title)
@@ -1049,7 +1070,7 @@ class Chatbot:
       temp = []
       negate = False
       for word in inputString:
-          print word
+          #print word
           if word in self.negations:
               temp.append(word)
               if negate:
@@ -1075,7 +1096,7 @@ class Chatbot:
       for word in inputString:
         # Should we include strong sentiment with not?
         if "NOT_" in word:
-            print word
+            #print word
 
             word = word.replace("NOT_", "")
             word = self.stem(word)
@@ -1108,7 +1129,7 @@ class Chatbot:
               # intensifiers double word score
               added_sent = 1
               if self.sentiment[word] == 'pos':
-                print "pos: %s" % (word)
+                #print "pos: %s" % (word)
                 if word in self.strong_pos:
                   #added_sent += 2
                   strongPosCount += 1
@@ -1116,7 +1137,7 @@ class Chatbot:
                 posCount += added_sent
                 strongPosCount += intensifier_count
               elif self.sentiment[word] == 'neg':
-                print "neg: %s" % (word)
+                #print "neg: %s" % (word)
                 if word in self.strong_neg:
                   #added_sent += 2
                   strongNegCount += 1
