@@ -611,7 +611,7 @@ class Chatbot:
         print "Level 1 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
-                    if isTitleInLevel1Helper(inpt_title, v[0])]
+                    if self.isTitleInLevel1Helper(inpt_title, v[0])]
         return indices
 
     def isTitleInLevel1Helper(self, inpt_title, entry):
@@ -628,16 +628,14 @@ class Chatbot:
         print "Level 2 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
-                    if self.removeDate(self.removeArticles(inpt_title)) ==
-                       self.removeDate(self.removeArticles(v[0]))]
+                    if self.isTitleInLevel2Helper(inpt_title, v[0])]
         return indices
 
     def isTitleInLevel2Helper(self, inpt_title, entry):
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             print "Title: " + title
-            if self.removeDate(self.removeArticles(inpt_title)) ==
-               self.removeDate(self.removeArticles(title)):
+            if self.removeDate(self.removeArticles(inpt_title)) == self.removeDate(self.removeArticles(title)):
                 return True
         return False
 
@@ -653,8 +651,7 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             print "Title: " + title
-            if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) ==
-               self.removeAfterColon(self.removeDate(self.removeArticles(title))):
+            if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) == self.removeAfterColon(self.removeDate(self.removeArticles(title))):
                 return True
         return False
 
@@ -670,8 +667,7 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             print "Title: " + title
-            if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) ==
-               self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(title)))):
+            if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) == self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(title)))):
                 return True
         return False
 
@@ -690,7 +686,7 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             print "Title: " + title
-            if if self.removeArticles(v[0]).startswith(self.removeArticles(title)):
+            if self.removeArticles(v[0]).startswith(self.removeArticles(title)):
                 return True
         return False
 
