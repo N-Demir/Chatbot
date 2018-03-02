@@ -203,67 +203,9 @@ class Chatbot:
         # STARTER SECTION
 
         # Arbitrary input regexes
-        input = input.lower()
-        q0 = r'hi|hello'
-        q2 = r'what(?:\'s | is )your name'
-        q4 = r'do you love me'
-        q6 = r'tell me a joke'
-        q1 = r'(?:how)?(\'s | is | are )(you|it)(?: doing| going)?(?: ok| well)?'
-        q3 = r'how(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
-        q5 = r'^no\.?$'
-        q10 = r'^can ([^?]*)(?:\?)?'
-        basicQ1 = r'^(can|what|where|why|how|are|aren\'t) ([^?]*)(?:\?)?'
-        basicQ2 = r'\?$'
+        response = self.getArbitraryResponse(input)
+        if response != None: return response
 
-
-        r0 = re.findall(q0, input)
-        if len(r0) != 0: return "Hello! Tell me about a movie you've seen."
-        r2 = re.findall(q2, input)
-        if len(r2) != 0: return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
-        r4 = re.findall(q4, input)
-        if len(r4) != 0: return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
-        r1 = re.findall(q1, input)
-        if len(r1) != 0:
-          numResponses = 3
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "I am well, but I would be even better if you told me about a movie."
-          elif randInt == 2:
-            return "I'm fine. Is there a movie you can tell me about?"
-          elif randInt == 3:
-            return "I'm great! Can you tell me about a movie you have seen?"
-        r3 = re.findall(q3, input)
-        if len(r3) != 0: return "It has been good! Let's talk about some movies now."
-        r5 = re.findall(q5, input)
-        if len(r5) != 0: return "Yes, please."
-        r6 = re.findall(q6, input)
-        if len(r6) != 0: return "Haha very funny. I will if you tell me about a movie."
-        # r10 = re.findall(q10, input)
-        # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
-        rbasic1 = re.findall(basicQ1, input)
-        if len(rbasic1) != 0:
-          numResponses = 6
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
-          elif randInt == 2:
-            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-          elif randInt == 3:
-            return "I'll have to think about that. In the meantime, let's talk about some movies."
-          elif randInt >= 4 and randInt <= 6:
-            print(rbasic1)
-            print(rbasic1[0])
-            return "I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?"
-        rbasic2 = re.findall(basicQ2, input)
-        if len(rbasic2) != 0:
-          numResponses = 3
-          randInt = randint(1, numResponses)
-          if randInt == 1:
-            return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
-          elif randInt == 2:
-            return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-          elif randInt == 3:
-            return "I'll have to think about that. In the meantime, let's talk about some movies."
         # Process movie title
         temp = self.processTitle(input)
         movie_tag = temp[0]
@@ -344,6 +286,68 @@ class Chatbot:
         return response + '\n' + recommend_response
 
       return response
+
+    def getArbitraryResponse(self, input):
+      input = input.lower()
+      q0 = r'hi|hello'
+      q2 = r'what(?:\'s | is )your name'
+      q4 = r'do you love me'
+      q6 = r'tell me a joke'
+      q1 = r'(?:how)?(\'s | is | are )(you|it)(?: doing| going)?(?: ok| well)?'
+      q3 = r'how(?:\'s | is | has | was )your (?:day|night|evening|morning|afternoon)'
+      q5 = r'^no\.?$'
+      q10 = r'^can ([^?]*)(?:\?)?'
+      basicQ1 = r'^(can|what|where|why|how|are|aren\'t) ([^?]*)(?:\?)?'
+      basicQ2 = r'\?$'
+
+
+      r0 = re.findall(q0, input)
+      if len(r0) != 0: return "Hello! Tell me about a movie you've seen."
+      r2 = re.findall(q2, input)
+      if len(r2) != 0: return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
+      r4 = re.findall(q4, input)
+      if len(r4) != 0: return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
+      r1 = re.findall(q1, input)
+      if len(r1) != 0:
+        numResponses = 3
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "I am well, but I would be even better if you told me about a movie."
+        elif randInt == 2:
+          return "I'm fine. Is there a movie you can tell me about?"
+        elif randInt == 3:
+          return "I'm great! Can you tell me about a movie you have seen?"
+      r3 = re.findall(q3, input)
+      if len(r3) != 0: return "It has been good! Let's talk about some movies now."
+      r5 = re.findall(q5, input)
+      if len(r5) != 0: return "Yes, please."
+      r6 = re.findall(q6, input)
+      if len(r6) != 0: return "Haha very funny. I will if you tell me about a movie."
+      # r10 = re.findall(q10, input)
+      # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
+      rbasic1 = re.findall(basicQ1, input)
+      if len(rbasic1) != 0:
+        numResponses = 6
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
+        elif randInt == 2:
+          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+        elif randInt == 3:
+          return "I'll have to think about that. In the meantime, let's talk about some movies."
+        elif randInt >= 4 and randInt <= 6:
+          return "I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?"
+      rbasic2 = re.findall(basicQ2, input)
+      if len(rbasic2) != 0:
+        numResponses = 3
+        randInt = randint(1, numResponses)
+        if randInt == 1:
+          return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
+        elif randInt == 2:
+          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
+        elif randInt == 3:
+          return "I'll have to think about that. In the meantime, let's talk about some movies."
+      return None
 
     def getMovieIndex(self, movie_indexes):
       if len(movie_indexes) > 1:
