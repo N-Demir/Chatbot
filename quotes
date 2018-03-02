@@ -1,0 +1,28 @@
+
+  Welcome to Stanford CS124
+     _______  _______         ___
+    |       ||   _   |       |   |
+    |    _  ||  |_|  | ____  |   |___
+    |   |_| ||       ||____| |    _  |
+    |    ___||       |       |   | | |
+    |   |    |   _   |       |   |_| |
+    |___|    |__| |__|       |_______|
+     _______  __   __  _______  _______  _______  _______  _______  __
+    |       ||  | |  ||   _   ||       ||  _    ||       ||       ||  |
+    |       ||  |_|  ||  |_|  ||_     _|| |_|   ||   _   ||_     _||  |
+    |       ||       ||       |  |   |  |       ||  | |  |  |   |  |  |
+    |      _||       ||       |  |   |  |  _   | |  |_|  |  |   |  |__|
+    |     |_ |   _   ||   _   |  |   |  | |_|   ||       |  |   |   __
+    |_______||__| |__||__| |__|  |___|  |_______||_______|  |___|  |__|
+
+
+      
+
+      Your task is to implement the chatbot as detailed in the PA6 instructions.
+      Remember: in the starter mode, movie names will come in quotation marks and
+      expressions of sentiment will be simple!
+      Write here the description for your own chatbot!
+      
+[96mmoviebot> [0mHi! I'm moviebot! I'm going to recommend a movie to you. 
+First I will ask you about your taste in movies. Tell me about a movie that you have seen.
+> 

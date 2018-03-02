@@ -24,7 +24,6 @@ from random import randint
 
 from PorterStemmer import PorterStemmer
 
-
 # IGNORE THIS STUFF
 caps = "([A-Z])"
 prefixes = "(Mr|St|Mrs|Ms|Dr)[.]"
@@ -76,7 +75,6 @@ class Chatbot:
       self.p = PorterStemmer()
       self.stemLexicon()
       self.binarize()
-
 
       self.negations = open("data/negations.txt", "r").read().splitlines()
       self.punctuations = open('data/punctuation.txt', "r").read().splitlines()
@@ -179,7 +177,6 @@ class Chatbot:
             self.unkown_movie = True
             return self.noMovieResponse()
       elif movie_flag == 1: # Movie found
-
           movie_title = movie_tag[0]
           movie_indexes = self.isMovie(movie_title)
 
@@ -315,9 +312,7 @@ class Chatbot:
       else:
         for i in range(self.numRecs):
           movies_to_recommend += str(i + 1) + ') ' + self.titles[heapq.heappop(recommendations)[1]][0] + '\n'
-
       return movies_to_recommend
-
 
     def recommend_date(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
@@ -364,7 +359,6 @@ class Chatbot:
       else: # Unclear answer
         return "Sorry I am not quite sure if you would like me to update your preference?"
 
-
     def redundantInfo(self, sentiment, old_sentiment):
       if sentiment == old_sentiment or sentiment == 'none' or sentiment == 'unclear':
         if old_sentiment == 'pos': return "Right, we talked about this movie earlier! You mentioned that liked this movie"
@@ -378,15 +372,12 @@ class Chatbot:
         elif old_sentiment == 'str_pos': return "I though you loved this movie? do you want me to update how you felt about this movie?"
         else: return "I though you hated this movie? do you want me to update how you felt about this movie?"
 
-
     def sentimentForPreviousMention(self, input):
       it_regex = r'(?:^|[\W])[iI]t(?:$|[\W])'
       that_movie_regex = r'((?:^|[\W])[tT]hat movie(?:$|[\W]))'
-
       # Look for reference to previous said movie
       if re.search(it_regex, input) or re.search(that_movie_regex, input):
         return True
-
       return False
 
     def useSentimentFromPrevious(self, input):
@@ -975,8 +966,6 @@ class Chatbot:
             titles[i] = re.sub(r'\s+', ' ', titles[i])
             titles[i] = titles[i].strip()
 
-
-
     def move_article_to_front(self, v):
         movie_title = v
         date = re.findall(r'\(\d\d\d\d\)', movie_title)
@@ -984,8 +973,6 @@ class Chatbot:
             date = date[0]
         else:
             date = ""
-
-
         if re.search(r'.*, The \(\d\d\d\d\)', movie_title):
             movie_title = re.sub(r', The \(\d\d\d\d\)', " " + date, movie_title)
             movie_title = "The " + movie_title
@@ -995,7 +982,6 @@ class Chatbot:
         elif re.search(r'.*, A \(\d\d\d\d\)', movie_title):
             movie_title = re.sub(r', A \(\d\d\d\d\)', " " + date, movie_title)
             movie_title = "A " + movie_title
-
         return movie_title
 
     def binarize(self):
