@@ -406,7 +406,9 @@ class Chatbot:
             #TODO: Remove punctuations?
 
             for i, word in enumerate(inpt.split()):
-                if word.istitle() and movie_title[0] == word:
+                print inpt
+                if movie_title[0] == word:
+                    print "GOT HERE"
                     temp = ""
                     for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
                         #print "INPUT" + str(inpt)
