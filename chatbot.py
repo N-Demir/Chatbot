@@ -1034,11 +1034,11 @@ class Chatbot:
 
     def askForSelection(self, movie_indexes):
         bot_prompt = "\001\033[96m\002%s> \001\033[0m\002" % self.name
-       #print bot_prompt + "Sorry, which movie are you referring to?"
+        print bot_prompt + "Sorry, which movie are you referring to?"
         for i, movie_index in enumerate(movie_indexes):
-           #print str(i + 1) + ") " + self.titles[movie_index][0]
-       #print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
-       #print "If the movie you are looking for is not listed above, please type \"next\"."
+           print str(i + 1) + ") " + self.titles[movie_index][0]
+        print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
+        print "If the movie you are looking for is not listed above, please type \"next\"."
 
         while True:
             inpt = raw_input("> ")
@@ -1046,10 +1046,10 @@ class Chatbot:
                 #TODO IS THIS BUG FREE??
                 index = int(inpt)
                 if index >= 1 and index <= len(movie_indexes):
-                   #print movie_indexes[index - 1]
+                   print movie_indexes[index - 1]
                     return movie_indexes[index - 1]
                 else:
-                   #print bot_prompt + "Please enter a valid input."
+                   print bot_prompt + "Please enter a valid input."
             elif inpt == "next":
                 return None
             elif len(inpt) != 0:
@@ -1059,15 +1059,16 @@ class Chatbot:
                    #print "title: " + self.titles[index][0]
                     if self.removeArticles(self.titles[index][0]).startswith(self.removeArticles(inpt)):
                         temp.append(index)
-                movie_indexes = temp
-                if len(movie_indexes) > 1:
-                   #print bot_prompt + "Could you help me narrow it down more please?"
-                    for i, movie_index in enumerate(movie_indexes):
-                       #print str(i + 1) + ") " + self.titles[movie_index][0]
-                elif len(movie_indexes) == 0:
-                   #print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
+
+                if len(temp) > 1:
+                   print bot_prompt + "Could you help me narrow it down more please?"
+                    for i, movie_index in enumerate(temp):
+                       print str(i + 1) + ") " + self.titles[movie_index][0]
+                    movie_indexes = temp
+                elif len(temp) == 0:
+                   print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
                 else:
-                    return movie_indexes[0]
+                    return temp[0]
                 # temp = self.isMovie(inpt)
                 # if len(temp) == 1:
                 #     return movie_indexes[0]
@@ -1080,7 +1081,7 @@ class Chatbot:
             #    #print "Please tell me a number from 1 to " + str(len(temp)) + " or the movie name."
             #     movie_indexes = temp
             else:
-               #print bot_prompt + "Please enter a valid input."
+               print bot_prompt + "Please enter a valid input."
 
     #############################################################################
     # 3. Movie Recommendation helper functions                                  #
