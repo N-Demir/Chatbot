@@ -242,51 +242,49 @@ class Chatbot:
 
 
       r0 = re.findall(q0, input)
-      if len(r0) != 0: return "Hello! Tell me about a movie you've seen."
+      if len(r0) != 0:
+        return "Hello! Tell me about a movie you've seen."
       r2 = re.findall(q2, input)
-      if len(r2) != 0: return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
+      if len(r2) != 0:
+        return "My name is " + self.name + ". Now what is a movie you have an opinion about?"
       r4 = re.findall(q4, input)
-      if len(r4) != 0: return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
+      if len(r4) != 0:
+        return "Yes, I love everyone. Now I know there are some movies you love - tell me about one."
       r1 = re.findall(q1, input)
       if len(r1) != 0:
-        numResponses = 3
-        randInt = randint(1, numResponses)
-        if randInt == 1:
-          return "I am well, but I would be even better if you told me about a movie."
-        elif randInt == 2:
-          return "I'm fine. Is there a movie you can tell me about?"
-        elif randInt == 3:
-          return "I'm great! Can you tell me about a movie you have seen?"
+        responses = []
+        responses.append("I am well, but I would be even better if you told me about a movie.")
+        responses.append("I'm fine. Is there a movie you can tell me about?")
+        responses.append("I'm great! Can you tell me about a movie you have seen?")
+        return responses[randint(1, len(responses)-1)]
       r3 = re.findall(q3, input)
-      if len(r3) != 0: return "It has been good! Let's talk about some movies now."
+      if len(r3) != 0:
+        return "It has been good! Let's talk about some movies now."
       r5 = re.findall(q5, input)
-      if len(r5) != 0: return "Yes, please."
+      if len(r5) != 0:
+        return "Yes, please."
       r6 = re.findall(q6, input)
-      if len(r6) != 0: return "Haha very funny. I will if you tell me about a movie."
+      if len(r6) != 0:
+        return "Haha very funny. I will if you tell me about a movie."
       # r10 = re.findall(q10, input)
       # if len(r10) != 0: return "I don't know, can " + r10[0] + "?"
       rbasic1 = re.findall(basicQ1, input)
       if len(rbasic1) != 0:
-        numResponses = 6
-        randInt = randint(1, numResponses)
-        if randInt == 1:
-          return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
-        elif randInt == 2:
-          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-        elif randInt == 3:
-          return "I'll have to think about that. In the meantime, let's talk about some movies."
-        elif randInt >= 4 and randInt <= 6:
-          return "I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?"
+        responses = []
+        responses.append("Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?")
+        responses.append("Enough questions, let's get to the movies! Can you tell about one you have seen?")
+        responses.append("I'll have to think about that. In the meantime, let's talk about some movies.")
+        responses.append("I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?")
+        responses.append("I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?")
+        responses.append("I don't know, " + str(rbasic1[0][0]) + " " + str(rbasic1[0][1]) + "?")
+        return responses[randint(1, len(responses)-1)]
       rbasic2 = re.findall(basicQ2, input)
       if len(rbasic2) != 0:
-        numResponses = 3
-        randInt = randint(1, numResponses)
-        if randInt == 1:
-          return "Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?"
-        elif randInt == 2:
-          return "Enough questions, let's get to the movies! Can you tell about one you have seen?"
-        elif randInt == 3:
-          return "I'll have to think about that. In the meantime, let's talk about some movies."
+        responses = []
+        responses.append("Hey, I'm the one asking the questions here! What is your opinion on a movie you have seen?")
+        responses.append("Enough questions, let's get to the movies! Can you tell about one you have seen?")
+        responses.append("I'll have to think about that. In the meantime, let's talk about some movies.")
+        return responses[randint(1, len(responses)-1)]
       return None
 
     def processMovieAndSentiment(self, input, movie_indexes):
@@ -330,72 +328,54 @@ class Chatbot:
     ######                   RESPONSES                   ######
     ###########################################################
     def getStrPosResponse(self, movie_index):
-      NUM_POS_RESPONSES = 2
-      randInt = randint(1, NUM_POS_RESPONSES)
-
-      if randInt == 1:
-          return "Awesome, you really liked \"" + self.titles[movie_index][0] + "\"! What are some other movies you have seen."
-      elif randInt == 2:
-          return "Great choice! That is an amazing movie. \"" + self.titles[movie_index][0] + "\". What about another movie?"
-
-      return "ISSUE - posresponse" #TODO:REMOV
+      responses = []
+      responses.append("Awesome, you really liked \"" + self.titles[movie_index][0] + "\"! What are some other movies you have seen.")
+      responses.append("Great choice! That is an amazing movie. \"" + self.titles[movie_index][0] + "\". What about another movie?")
+      responses.append("" + self.titles[movie_index][0] + " is a fantastic movie! Let's hear about another one.")
+      return responses[randint(1, len(responses)-1)]
+      return "ISSUE - posresponse" #TODO:REMOVE
 
     def getStrNegResponse(self, movie_index):
-      NUM_POS_RESPONSES = 2
-      randInt = randint(1, NUM_POS_RESPONSES)
-
-      if randInt == 1:
-          return "So you really disliked \"" + self.titles[movie_index][0] + "\". I'd love to here about other movies you have seen."
-      elif randInt == 2:
-          return "You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opinion about?"
-
-      return "ISSUE - posresponse" #TODO:REMOV
+      responses = []
+      responses.append("So you really disliked \"" + self.titles[movie_index][0] + "\". I'd love to here about other movies you have seen.")
+      responses.append("You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opinion about?")
+      responses.append("I see you really weren't a fan of \"" + self.titles[movie_index][0] + "\". Can you tell me about another movie?")
+      return responses[randint(1, len(responses)-1)]
+      return "ISSUE - posresponse" #TODO:REMOVE
 
     def getPosResponse(self, movie_index):
-        NUM_POS_RESPONSES = 2
-        randInt = randint(1, NUM_POS_RESPONSES)
-
-        if randInt == 1:
-            return "You liked \"" + self.titles[movie_index][0] + "\". Thank you! Tell me about another movie you have seen."
-        elif randInt == 2:
-            return "Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". What about another movie?"
-
+        responses = []
+        responses.append("You liked \"" + self.titles[movie_index][0] + "\". Thank you! Tell me about another movie you have seen.")
+        responses.append("Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". What about another movie?")
+        responses.append("Great! I'm glad you liked \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
+        return responses[randint(1, len(responses)-1)]
         return "ISSUE - posresponse" #TODO:REMOVE
 
     def getNegResponse(self, movie_index):
-        NUM_NEG_RESPONSES = 2
-        randInt = randint(1, NUM_NEG_RESPONSES)
-
-        if randInt == 1:
-            return "You did not like " + self.titles[movie_index][0] + ". Thank you! Tell me about another movie you have seen."
-        elif randInt == 2:
-            return "Ok, you disliked \"" + self.titles[movie_index][0] + "\". What about another movie?" #TODO: fill out
-
+        responses = []
+        responses.append("You did not like " + self.titles[movie_index][0] + ". Thank you! Tell me about another movie you have seen.")
+        responses.append("Ok, you disliked \"" + self.titles[movie_index][0] + "\". What about another movie?")
+        responses.append("I'm sorry you did not enjoy \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
+        return responses[randint(1, len(responses)-1)]
         return "ISSUE - negresponse" #TODO:REMOVE
 
     def getNoneResponse(self, movie_index):
-        NUM_NONE_RESPONSES = 2
-        randInt = randint(1, NUM_NONE_RESPONSES)
-
-        if randInt == 1:
-            return "Ok, thank you! Tell me your opinion on \"" + self.titles[movie_index][0] + "\"."
-        elif randInt == 2:
-            return "What did you think about \"" + self.titles[movie_index][0] + "\"?" #TODO: fill out
-
-
+        responses = []
+        responses.append("Ok, thank you! Tell me your opinion on \"" + self.titles[movie_index][0] + "\".")
+        responses.append("What did you think about \"" + self.titles[movie_index][0] + "\"?")
+        responses.append("Did you like or dislike " + self.titles[movie_index][0] + "\"?")
+        return responses[randint(1, len(responses)-1)]
         #TODO: REMEMBER PREVIOUS THING
         return "ISSUE - noneResponse"
 
     def getUnclearResponse(self, movie_index):
-        NUM_UNCLEAR_RESPONSES = 2
-        randInt = randint(1, NUM_UNCLEAR_RESPONSES)
-
-        if randInt == 1:
-            return "I'm sorry, I'm not quite sure if you liked \"" + self.titles[movie_index][0] + "\" Tell me more about \"" + self.titles[movie_index][0] + "\"."
-        elif randInt == 2:
-            return "I'm sorry, I can't quite tell what your opinion is on \"" + self.titles[movie_index][0] + "\". Can you tell me more?" #TODO: fill out
-
+        responses = []
+        responses.append("I'm sorry, I'm not quite sure if you liked \"" + self.titles[movie_index][0] + "\" Tell me more about \"" + self.titles[movie_index][0] + "\".")
+        responses.append("I'm sorry, I can't quite tell what your opinion is on \"" + self.titles[movie_index][0] + "\". Can you tell me more?")
+        responses.append("I'm not certain about your opinion on \"" + self.titles[movie_index][0] + "\". Could you tell me more about it?")
+        return responses[randint(1, len(responses)-1)]
         return "ISSUE - unclearResponse" #TODO:REMOVE
+
     ###########################################################
     ######                 END RESPONSES                 ######
     ###########################################################
