@@ -38,7 +38,7 @@ class Chatbot:
     #############################################################################
     # `moviebot` is the default chatbot. Change it to your chatbot's name       #
     #############################################################################
-    
+
     def __init__(self, is_turbo=False):
       self.NUMBER_TILL_REC = 5
       self.name = 'moviebot'
@@ -1035,7 +1035,7 @@ class Chatbot:
         bot_prompt = "\001\033[96m\002%s> \001\033[0m\002" % self.name
         print bot_prompt + "Sorry, which movie are you referring to?"
         for i, movie_index in enumerate(movie_indexes):
-           print str(i + 1) + ") " + self.titles[movie_index][0]
+            print str(i + 1) + ") " + self.titles[movie_index][0]
         print "Please tell me a number from 1 to " + str(len(movie_indexes)) + " or the movie name."
         print "If the movie you are looking for is not listed above, please type \"next\"."
 
@@ -1045,7 +1045,7 @@ class Chatbot:
                 #TODO IS THIS BUG FREE??
                 index = int(inpt)
                 if index >= 1 and index <= len(movie_indexes):
-                   print movie_indexes[index - 1]
+                    #print movie_indexes[index - 1]
                     return movie_indexes[index - 1]
                 else:
                    print bot_prompt + "Please enter a valid input."
@@ -1060,10 +1060,10 @@ class Chatbot:
                         temp.append(index)
 
                 if len(temp) > 1:
-                   print bot_prompt + "Could you help me narrow it down more please?"
+                    print bot_prompt + "Could you help me narrow it down more please?"
                     for i, movie_index in enumerate(temp):
-                       print str(i + 1) + ") " + self.titles[movie_index][0]
-                    movie_indexes = temp
+                        print str(i + 1) + ") " + self.titles[movie_index][0]
+                        movie_indexes = temp
                 elif len(temp) == 0:
                    print bot_prompt + "Sorry, I don't know the movie \"" + inpt + "\""
                 else:
@@ -1116,9 +1116,9 @@ class Chatbot:
                     alternate_titles[j] = re.sub(r'a\.k\.a\. ', "", alternate_titles[j])
                     # Move article to the front
                     articles = re.findall(r', (\w{0,4})$', alternate_titles[j])
-                    if len(articles) > 1:
+                    #if len(articles) > 1:
                        #print "Problem, length not 1 of articles: " + str(articles)
-                    elif len(articles) != 0:
+                    if len(articles) != 0:
                         #print "GOT HEREEE"
                         alternate_titles[j] = re.sub(r', (\w{0,4})$', "", alternate_titles[j])
                         alternate_titles[j] = articles[0] + " " + alternate_titles[j]
