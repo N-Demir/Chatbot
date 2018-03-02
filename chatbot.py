@@ -5,13 +5,13 @@
 # v.1.0.2
 # Original Python code by Ignacio Cases (@cases)
 #
-#TODOS: Remember what people said about previous movies, Fine grain sentiment?
-# Add regex to negation file, if multiple choices pop up from isMovie ask user
+#TODOS: Remember what people said about previous movies
+# TODO ND: Allow toy story to have options
 #Dones:
-######################################################################
-import csv
+#####################################################################import csv
 import math
 import re
+import csv
 
 # For time testing
 import time
@@ -457,7 +457,7 @@ class Chatbot:
                     for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
                         #print "INPUT" + str(inpt)
                         if inpt.split()[i] == movie_title[j]:
-                            temp += " " + movie_title[j]
+                            temp += " " + temp2[i]
                             i += 1
                         else:
                             break
