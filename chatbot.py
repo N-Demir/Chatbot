@@ -42,9 +42,13 @@ class Chatbot:
     #############################################################################
     def __init__(self, is_turbo=False):
       self.name = 'moviebot'
+
+      #flags
       self.is_turbo = is_turbo
       self.is_repeat = False
       self.selection = False
+      self.quotationFound = False
+
       self.sentiment = {}
       self.usr_rating_vec = []
       self.numRatings = 5
@@ -393,8 +397,10 @@ class Chatbot:
     def findNonQuotationTitles(self, inpt):
         # DOES NOT NEED FIRST LETTER CAPS, IS THAT OKAY?
         punctuations = '''!-[]{};:'"\,<>./?@#$%^&*_~'''
+        self.quotationFound = False
 
-        #inpt = inpt.lower()
+        temp2 = inpt.split()
+        inpt = inpt.lower()
         entities = []
 
         for title in self.titles:
@@ -406,9 +412,12 @@ class Chatbot:
             #TODO: Remove punctuations?
 
             for i, word in enumerate(inpt.split()):
-                print inpt
-                if movie_title[0] == word:
-                    print "GOT HERE"
+                #print inpt
+                #print str(word[0])
+                #print str(word[0].isupper())
+                #print str(temp2)
+                if temp2[i][0].isupper() and movie_title[0] == word.lower():
+                    #print "GOT HERE"
                     temp = ""
                     for j in range(0, min(len(movie_title), len(inpt.split()) - i)):
                         #print "INPUT" + str(inpt)
@@ -434,6 +443,8 @@ class Chatbot:
 
         if len(entities) == 0:
             return ""
+
+        self.quotationFound = True
         return max(entities, key=len)
 
 
@@ -585,6 +596,9 @@ class Chatbot:
 
     def isTitleInLevel5(self, inpt_title):
         # All bets are off, just substring
+        if self.quotationFound == True:
+            return []
+
         print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.titles)
@@ -657,7 +671,7 @@ class Chatbot:
 
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
-        if len(indices) == 0:
+        if self.quotationFound == False and len(indices) == 0:
           indices = self.spellCheck(movie_title)
 
         return indices
