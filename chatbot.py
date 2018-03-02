@@ -472,7 +472,6 @@ class Chatbot:
 
 
     def getArbitraryResponse(self, input):
-      print "INPUT" + input
       input = input.lower()
       q0 = r'^hi|hello'
       q2 = r'what(?:\'s | is )your name'
