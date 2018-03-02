@@ -708,7 +708,7 @@ class Chatbot:
         punctuations = '!.?'
         self.quotationFound = False
 
-        inpt = re.sub(r'[!.?]', r'', inpt)
+        inpt = re.sub(r'[!.?:]', r'', inpt)
         temp2 = inpt.split()
         #print "INPUT: " + inpt
         inpt = inpt.lower()
