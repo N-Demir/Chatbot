@@ -61,12 +61,9 @@ class Chatbot:
       self.previous_sentiment = None
       self.previous_movie = None
       self.spellChecking = False
-<<<<<<< HEAD
       self.DONOTTOUCHME_TOY_STORY = False
-=======
       self.spellCheckPerformed1 = False # flag for confirmation of movie title
       self.spellCheckPerformed2 = False # flag for yes/no from user
->>>>>>> emilia
 
       # Flags for recommending movies
       self.get_recommend_date = False
@@ -223,10 +220,10 @@ class Chatbot:
             # Check if movie is correct spelling
             if self.spellCheckPerformed1:
               title = self.titles[movie_index][0]
+              self.spellCheckPerformed1 = False
               self.spellCheckPerformed2 = True
               return "Did you mean the movie \"" + title + "\"?"
-            elif self.spellCheckPerformed2:
-              spellCheckPerformed1 = False
+            if self.spellCheckPerformed2:
               yes_regex = r'(?:^[Yy]es|^[Yy]ep)'
               yes = re.findall(yes_regex, input)
               if len(yes) != 0:
@@ -1018,7 +1015,7 @@ class Chatbot:
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
         if self.quotationFound == False and len(indices) == 0 and not self.spellChecking:
-          self.spellCheckPerformed = True
+          self.spellCheckPerformed1 = True
           self.spellChecking = True
           indices = self.spellCheck(movie_title)
 
