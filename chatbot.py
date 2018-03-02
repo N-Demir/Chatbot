@@ -513,22 +513,31 @@ class Chatbot:
 
       # Try removing the year from query and title!
       #query = re.sub(r'\(\d\d\d\d\)', "", movie_title)
-      #query = self.
+      query = self.removeArticles(query)
+      query = self.removeDate(query)
+
+      query_words = re.findall(r'\w+', query.lower())
+      #query_words = query.lower().split()
 
       # Maximum edit distance stuff
-      max_edit = len(re.findall(r'\w+', movie_title))
+      #max_edit = len(re.findall(r'\w+', query))
+      max_edit = len(query_words)
       max_edit_word = 2
       # Try going word by word through a title and make sure at max one edit away!
-      query_words = re.findall(r'\w+', movie_title.lower())
       # Keep track of all possible titles substrings that are correct spellings
       correct_spellings = set()
 
       for i, v in enumerate(self.titles):
         # Handle removing the final date plus any An|The|A that is at very end
-        test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
+        #test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
+        test_title = self.removeArticles(v[0].lower())
+        test_title = self.removeDate(test_title)
 
         # Break the tital into individual words
         title_words = re.findall(r'\w+', test_title)
+        #title_words = test_title.split()
+        # Includes punction and stuff
+        #title_actual = test_title.split()
 
         # Allow up to one error per word
         # Only consider words in length of query (i.e. allows for disambiguoizing)
@@ -541,6 +550,8 @@ class Chatbot:
           for x in range(len(query_words)):
             # Add the title word to our built up substring
             title_substring += title_words[x] + ' '
+            #print title_actual
+            #title_substring += title_actual[x] + ' '
             distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
             total_error += distance
             if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
@@ -555,15 +566,15 @@ class Chatbot:
             indices.append(i)
 
       indices_2 = []
-      for possible_titles in correct_spellings:
-        indices_3 = self.isTitleInLevel1(movie_title)
-        if len(indices) == 0:
-            indices_3 = self.isTitleInLevel4(movie_title)
+      for possible_title in correct_spellings:
+        indices_3 = self.isTitleInLevel1(possible_title)
+        if len(indices_3) == 0:
+            indices_3 = self.isTitleInLevel4(possible_title)
         indices_2.extend(indices_3)
 
       print "Spell check", time.time() - start_time, "to run"
 
-      return indices_2
+      return list(set(indices_2))
 
     def isTitleInLevel1(self, inpt_title):
         # Check exact match
@@ -605,7 +616,7 @@ class Chatbot:
         # All bets are off, just substring
         print "Level 5 titlesearch"
         indices = []
-        indices = [i for i, v in enumerate(self.title)
+        indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(inpt_title) in self.removeArticles(v[0])]
         return indices
 
@@ -659,7 +670,7 @@ class Chatbot:
         if len(indices) == 0:
             indices = self.isTitleInLevel4(movie_title)
             if len(indices) == 0:
-                indices = self.isTitleinLevel5(movie_title)
+                indices = self.isTitleInLevel5(movie_title)
             """
             if len(indices) == 0:
                 indices = self.isTitleInLevel3(movie_title)
@@ -672,53 +683,6 @@ class Chatbot:
         # If no substrings found try checking for miss-spelling
         # Try maybe to allow for different versions of the movie?
         if len(indices) == 0:
-          '''
-          # Set the max edit distance to be one edit per word
-          # TODO: consider different strategies
-
-          start_time = time.time()
-          # Find movie titles that are max edit distance or less away
-          #indices = [i for i, v in enumerate(self.titles) if self.edit_distance(v[0].lower(), movie_title, max_edit) <= max_edit]
-
-          # Try removing the year from query and title!
-          movie_title = re.sub(r'\(\d\d\d\d\)', "", movie_title)
-
-          # Maximum edit distance stuff
-          max_edit = len(re.findall(r'\w+', movie_title))
-          max_edit_word = 2
-          # Try going word by word through a title and make sure at max one edit away!
-          query_words = re.findall(r'\w+', movie_title.lower())
-          for i, v in enumerate(self.titles):
-            # Handle removing the final date plus any An|The|A that is at very end
-            test_title = re.sub(r'((, an \(\d\d\d\d\))|(, the \(\d\d\d\d\))|(, a \(\d\d\d\d\))|(\(\d\d\d\d\)))$', "", v[0].lower())
-
-            # Try removing 'the', 'an', 'a'
-            # Make this specific Be careful with an in the middle!
-            #test_title = re.sub(r'(, an )|(, the )|(, a )', "", test_title)
-
-            title_words = re.findall(r'\w+', test_title)
-
-            # Allow up to one error per word
-            # Only consider words in length of query (i.e. allows for disambiguoizing)
-            #if len(query_words) == len(title_words):
-            if len(query_words) <= len(title_words):
-              acceptable_error = True
-              total_error = 0
-              #for x in range(len(title_words)):
-              for x in range(len(query_words)):
-                distance = self.edit_distance(title_words[x], query_words[x], max_edit_word)
-                total_error += distance
-                if (distance > max_edit_word or (total_error > max_edit)):# and max_edit != 1)):
-                  if title_words[x] == 'Scream': print 'here'
-                  acceptable_error = False
-                  break
-
-              # Add the word if has one error per word
-              if acceptable_error:
-                indices.append(i)
-
-          print "Spell check", time.time() - start_time, "to run"
-          '''
           indices = self.spellCheck(movie_title)
 
         return indices
