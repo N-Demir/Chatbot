@@ -74,6 +74,7 @@ class Chatbot:
       self.usr_rating_vec = []
       self.numRatings = 5
       self.numRecs = 3
+      self.movie_count = 0
       self.read_data()
       self.p = PorterStemmer()
       self.stemLexicon()
@@ -176,7 +177,7 @@ class Chatbot:
             response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
             self.no_sentiment = False
           elif self.no_sentiment:
-              return "Hm, unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
+              return "Hm, unfortunately I still can't tell how you feel about \"" + self.titles[self.previous_movie][0] + "\". Could you fill me in?"
           elif self.unknown_movie:
             # Handle arbitrary input
             arbResp = self.getArbitraryResponse(input)
@@ -232,7 +233,7 @@ class Chatbot:
               response = self.processMovieAndSentiment(sentiment, self.previous_movie, old_input)
               self.no_sentiment = False
             elif self.no_sentiment:
-              return "Hm, unfortunately I still can't tell how you feel about " + self.titles[self.previous_movie][0] + " could you fill me in?"
+              return "Hm, unfortunately I still can't tell how you feel about \"" + self.titles[self.previous_movie][0] + "\". Could you fill me in?"
             else:
               if self.unknown_movie:
                 # Handle arbitrary input
@@ -455,26 +456,35 @@ class Chatbot:
 
     def processMovieAndSentiment(self, sentiment, movie_index, input):
       self.previous_movie = movie_index
+      response = ''
       if sentiment == 'pos':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, 1, 'pos'))
         self.previous_sentiment = 'pos'
-        return self.getPosResponse(movie_index)
+        response = self.getPosResponse(movie_index)
+        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        return response
       elif sentiment == 'str_pos':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, 1, 'str_pos'))
         self.previous_sentiment = 'str_pos'
-        return self.getStrPosResponse(movie_index)
+        response = self.getStrPosResponse(movie_index)
+        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        return response
       elif sentiment == 'neg':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, -1, 'neg'))
         self.previous_sentiment = 'neg'
-        return self.getNegResponse(movie_index)
+        response = self.getNegResponse(movie_index)
+        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        return response
       elif sentiment == 'str_neg': # Don't yet deal with changing the rating
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, -1, 'str_neg'))
         self.previous_sentiment = 'str_neg'
-        return self.getStrNegResponse(movie_index)
+        response = self.getStrNegResponse(movie_index)
+        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        return response
       elif sentiment == 'none':
         #self.previous_movie = movie_index
         check_previous = self.useSentimentFromPrevious(input)
@@ -509,6 +519,22 @@ class Chatbot:
     ###########################################################
     ######                   RESPONSES                   ######
     ###########################################################
+
+    def getAddRequest(self):
+      addRequests = []
+      addRequests.append(" What are some other movies you have seen?")
+      addRequests.append(" What about another movie?")
+      addRequests.append(" What's next?")
+      addRequests.append(" Let's hear about another one.")
+      addRequests.append(" Tell me about another one!")
+      addRequests.append(" I'd love to here about other movies you have seen.")
+      addRequests.append(" Any other movies you have an opinion about?")
+      addRequests.append(" Can you tell me about another movie?")
+      addRequests.append(" Tell me about another movie you have seen.")
+      addRequests.append(" Is there another movie you can tell me about?")
+      return addRequests[randint(1, len(addRequests)-1)]
+
+
     def noMovieResponse(self):
       responses = []
       responses.append("I'm sorry, I'm not sure what you mean. Tell me about a movie.")
@@ -518,30 +544,32 @@ class Chatbot:
 
     def getStrPosResponse(self, movie_index):
       responses = []
-      responses.append("Awesome, you really liked \"" + self.titles[movie_index][0] + "\"! What are some other movies you have seen.")
-      responses.append("Great choice! That is an amazing movie. \"" + self.titles[movie_index][0] + "\". What about another movie?")
-      responses.append("" + self.titles[movie_index][0] + " is a fantastic movie! Let's hear about another one.")
+      responses.append("Awesome, you really liked \"" + self.titles[movie_index][0] + "\"!")
+      responses.append("Great choice! That is an amazing movie. \"" + self.titles[movie_index][0] + "\".")
+      responses.append("You loved \"" + self.titles[movie_index][0] + "\"!")
+      responses.append("\"" + self.titles[movie_index][0] + "\" is a fantastic movie!!")
+      responses.append("You were a huge fan of \"" + self.titles[movie_index][0] + "\"!")
       return responses[randint(1, len(responses)-1)]
 
     def getStrNegResponse(self, movie_index):
       responses = []
-      responses.append("So you really disliked \"" + self.titles[movie_index][0] + "\". I'd love to here about other movies you have seen.")
-      responses.append("You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up. Any other movies you have an opinion about?")
-      responses.append("I see you really weren't a fan of \"" + self.titles[movie_index][0] + "\". Can you tell me about another movie?")
+      responses.append("So you really disliked \"" + self.titles[movie_index][0] + "\".")
+      responses.append("You hated \"" + self.titles[movie_index][0] + "\"! Thanks for the heads up.")
+      responses.append("I see you really weren't a fan of \"" + self.titles[movie_index][0] + "\".")
       return responses[randint(1, len(responses)-1)]
 
     def getPosResponse(self, movie_index):
         responses = []
-        responses.append("You liked \"" + self.titles[movie_index][0] + "\". Thank you! Tell me about another movie you have seen.")
-        responses.append("Ok, you enjoyed \"" + self.titles[movie_index][0] + "\". What about another movie?")
-        responses.append("Great! I'm glad you liked \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
+        responses.append("You liked \"" + self.titles[movie_index][0] + "\". Thank you!")
+        responses.append("Ok, you enjoyed \"" + self.titles[movie_index][0] + "\".")
+        responses.append("Great! I'm glad you liked \"" + self.titles[movie_index][0] + "\".")
         return responses[randint(1, len(responses)-1)]
 
     def getNegResponse(self, movie_index):
         responses = []
-        responses.append("You did not like " + self.titles[movie_index][0] + ". Thank you! Tell me about another movie you have seen.")
-        responses.append("Ok, you disliked \"" + self.titles[movie_index][0] + "\". What about another movie?")
-        responses.append("I'm sorry you did not enjoy \"" + self.titles[movie_index][0] + "\". Is there another movie you can tell me about?")
+        responses.append("You did not like " + self.titles[movie_index][0] + ". Thank you!")
+        responses.append("Ok, you disliked \"" + self.titles[movie_index][0] + "\".")
+        responses.append("I'm sorry you did not enjoy \"" + self.titles[movie_index][0] + "\".")
         return responses[randint(1, len(responses)-1)]
 
     def getNoneResponse(self, movie_index):
