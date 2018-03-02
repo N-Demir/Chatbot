@@ -331,6 +331,9 @@ class Chatbot:
       else:
         for i in range(self.numRecs):
           movies_to_recommend += str(i + 1) + ') ' + self.titles[heapq.heappop(recommendations)[1]][0] + '\n'
+      # Re-set flags
+      self.use_genre = False
+      self.use_date_range = False
       return movies_to_recommend
 
 
@@ -383,7 +386,8 @@ class Chatbot:
         responses.append("No problem!")
         responses.append("No worries!")
         responses.append("Ok, thanks!")
-        return responses[randint(0, len(responses)-1)]
+        self.use_date_range = False
+        return responses[randint(0, len(responses)-1)] + '\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quite'
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
@@ -408,6 +412,7 @@ class Chatbot:
         responses.append("No problem!")
         responses.append("No worries!")
         responses.append("Ok, thanks!")
+        self.use_genre = False
         return responses[randint(0, len(responses)-1)]
       else: # Assume input is genre!
         self.genre = input
