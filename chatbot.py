@@ -771,16 +771,17 @@ class Chatbot:
       self.titles, self.ratings = ratings()
       reader = csv.reader(open('data/sentiment.txt', 'rb'))
       self.sentiment = dict(reader)
-
       #self.move_article_to_front(self.titles)
       for i,v in enumerate(self.titles):
-          self.titles[i] = self.move_article_to_front(v[0])
+          self.titles[i][0] = self.move_article_to_front(v[0])
 
       self.custom_titles = self.titles
+      self.custom_titles = self.scope_movie_titles(self.custom_titles)
 
     def scope_movie_titles(self, titles):
         for i,v in enumerate(titles):
             date = re.findall(r'\(\d\d\d\d\)', v[0])
+            print str(v)
             alternate_titles = re.findall(r'\(([^\d]+.*)\)', v[0])
             for title, i in enumerate(alternate_titles):
                 # Get rid of a.k.a
@@ -800,11 +801,22 @@ class Chatbot:
                     alternate_titles[i] += " " + date[0]
 
             # fix original name
-            titles[i] = re.sub(r'\(.*\)', '', titles[i])
-            titles[i] = re.sub(r'\s+', ' ', titles[i])
-            titles[i] = titles[i].strip()
+            titles[i][0] = re.sub(r'\(.*\)', '', titles[i][0])
+            titles[i][0] = re.sub(r'\s+', ' ', titles[i][0])
+            titles[i][0] = titles[i][0].strip()
 
+            titles[i][0] = self.move_article_to_front(titles[i][0])
+            titles[i][0] = titles[i][0].strip()
+            if len(date) != 0:
+                print "HIIIII"
+                titles[i][0] = "(" + titles[i][0] + " " + date[0] + ")"
+            else:
+                titles[i][0] = "(" + titles[i][0] + ")"
 
+            for title in alternate_titles:
+                titles[i][0] += title
+            #print "TITLE:" + titles[i]
+        return titles
 
     def move_article_to_front(self, v):
         movie_title = v
