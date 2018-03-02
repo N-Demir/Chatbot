@@ -60,8 +60,8 @@ class Chatbot:
       self.no_sentiment = False
       self.previous_sentiment = None
       self.previous_movie = None
-
       self.spellChecking = False
+      self.DONOTTOUCHME_TOY_STORY = False
 
       # Flags for recommending movies
       self.get_recommend_date = False
@@ -225,7 +225,7 @@ class Chatbot:
               response = self.processMovieAndSentiment(sentiment, movie_index, old_input)
             else:
               response = "Ok, tell me about another movie."
-        
+
           else: # Unknown movie
             if self.no_sentiment and self.sentimentForPreviousMention(old_input): # Try to see if we can use previous info
               # Function to check for previous movie reference
@@ -606,6 +606,7 @@ class Chatbot:
           entity = self.findNonQuotationTitles(inpt)
           if len(entity) != 0:
               temp = entity
+              print "Movie: " + temp
               if re.search(r'\(.*\)', temp):
                   temp = re.sub(r'\(.*\)', "", temp)
               inpt = re.sub(temp, "", inpt)
@@ -788,8 +789,9 @@ class Chatbot:
       return list(set(indices_2))
 
     def isTitleInLevel1(self, inpt_title):
+        self.DONOTTOUCHME_TOY_STORY = False
         # Check exact match
-        #print "Level 1 titlesearch"
+        print "Level 1 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel1Helper(inpt_title, v[0])]
@@ -799,6 +801,8 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             #print "Title: " + title
+            if self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(inpt_title)))) == self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(title)))):
+                self.DONOTTOUCHME_TOY_STORY = True
             if self.removeArticles(inpt_title) == self.removeArticles(title):
                 return True
         return False
@@ -806,7 +810,9 @@ class Chatbot:
 
     def isTitleInLevel2(self, inpt_title):
         # Check but with dates irrelevent
-        #print "Level 2 titlesearch"
+        if self.DONOTTOUCHME_TOY_STORY == True:
+            return []
+        print "Level 2 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel2Helper(inpt_title, v[0])]
@@ -822,7 +828,9 @@ class Chatbot:
 
     def isTitleInLevel3(self, inpt_title):
         # account for subtitles
-        #print "Level 3 titlesearch"
+        if self.DONOTTOUCHME_TOY_STORY == True:
+            return []
+        print "Level 3 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel3Helper(inpt_title, v[0])]
@@ -832,13 +840,14 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             #print "Title: " + title
-            if self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title))) == self.removeAfterColon(self.removeDate(self.removeArticles(title))):
+            if self.removeSubtitle(self.removeDate(self.removeArticles(inpt_title))) == self.removeSubtitle(self.removeDate(self.removeArticles(title))):
                 return True
         return False
 
     def isTitleInLevel4(self, inpt_title):
         # account for sequels as well
-        #print "Level 4 titlesearch"
+        #    return []
+        print "Level 4 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel4Helper(inpt_title, v[0])]
@@ -848,7 +857,7 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             #print "Title: " + title
-            if self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(inpt_title)))) == self.removeSequel(self.removeAfterColon(self.removeDate(self.removeArticles(title)))):
+            if self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(inpt_title)))) == self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(title)))):
                 return True
         return False
 
@@ -856,7 +865,7 @@ class Chatbot:
         # All bets are off, just substring
         if self.quotationFound == True:
             return []
-        #print "Level 5 titlesearch"
+        print "Level 5 titlesearch"
         indices = []
         indices = [i for i, v in enumerate(self.custom_titles)
                     if self.isTitleInLevel5Helper(inpt_title, v[0])]
@@ -899,8 +908,8 @@ class Chatbot:
 
         return movie_title
 
-    def removeAfterColon(self, movie_title):
-        colon_regex = r'^(.*?):.*'
+    def removeSubtitle(self, movie_title):
+        colon_regex = r'^(.*?)(?:(?::.*)|(?:and.*))'
         if re.search(colon_regex, movie_title):
             movie_title = re.findall(colon_regex, movie_title)[0]
             #print "Movie title after colon: " + movie_title
@@ -911,7 +920,7 @@ class Chatbot:
     def removeSequel(self, movie_title):
         # M?(CM|D?C?C?C? |CD)(XC |XL |L?X?X?X?)(V?I?I?I? |IV |IX)
         #TODO: FILL OUT SEQUELS
-        sequel_regex = r'(.*) (?:and|\d|i|ii|iii|iv|v|vi|vii|viii|ix|x|xi|xii|xiii)$'
+        sequel_regex = r'(.*) (?:\d|(?:m?(?:cm|d?c?c?c?|cd)(?:xc|xl|l?x?x?x?)(?:v?i?i?i?|iv|ix)))$'
         if re.search(sequel_regex, movie_title):
             movie_title = re.findall(sequel_regex, movie_title)[0]
             #print "Movie title after sequel: " + movie_title
