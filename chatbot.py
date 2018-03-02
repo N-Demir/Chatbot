@@ -175,6 +175,7 @@ class Chatbot:
 
       # Process movie title
       temp = self.processTitle(input)
+      print "Temp: " + str(temp)
       movie_tag = temp[0]
       old_input = input
       input = temp[1]
@@ -258,10 +259,10 @@ class Chatbot:
             elif self.no_sentiment:
               return "Hm, unfortunately I still can't tell how you feel about \"" + self.titles[self.previous_movie][0] + "\". Could you fill me in?"
             else:
+              # Handle arbitrary input
+              arbResp = self.getArbitraryResponse(input)
+              if arbResp != None: return arbResp
               if self.unknown_movie:
-                # Handle arbitrary input
-                arbResp = self.getArbitraryResponse(input)
-                if arbResp != None: return arbResp
                 return "Darn, I can't seem to remember that movie. Sorry about that! I promise I'll know the next one."
               self.unknown_movie = True
               return "Unfortunately I have never seen that movie, but I would love to hear about other movies that you have seen."
@@ -470,6 +471,9 @@ class Chatbot:
 
     def getArbitraryResponse(self, input):
       input = input.lower()
+      input = re.sub(r'[!.?]', r'', input)
+      print "input: " + input
+
       q0 = r'^hi|hello'
       q2 = r'what(?:\'s | is )your name'
       q7 = r'who are you'
@@ -881,7 +885,7 @@ class Chatbot:
         titles = re.findall("<>(.*?)</>", entry)
         for title in titles:
             #print "Title: " + title
-            if self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(inpt_title)))) == self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(title)))):
+            if self.removeArticles(inpt_title) == self.removeSequel(self.removeSubtitle(self.removeDate(self.removeArticles(title)))):
                 self.DONOTTOUCHME_TOY_STORY = True
             if self.removeArticles(inpt_title) == self.removeArticles(title):
                 return True
