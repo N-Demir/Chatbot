@@ -59,7 +59,6 @@ class Chatbot:
       self.usr_rating_vec = []
       self.numRatings = 5
       self.numRecs = 3
-      #self.prevInput = None
       self.read_data()
       self.p = PorterStemmer()
       self.stemLexicon()
@@ -412,7 +411,6 @@ class Chatbot:
     ######                 END RESPONSES                 ######
     ###########################################################
 
-
     def processTitle(self, inpt):
         # TODO: Expand to allow for no quotation marks
         # movies should be clearly in quotations and match our database
@@ -509,7 +507,6 @@ class Chatbot:
 
         print str(sentences)
         """
-
 
     def edit_distance(self, true_word, query, max_dist):
       # If length of titles differ more than max_dist than return max_dist + 1
