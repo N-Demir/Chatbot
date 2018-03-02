@@ -774,7 +774,7 @@ class Chatbot:
 
       #self.move_article_to_front(self.titles)
       for i,v in enumerate(self.titles):
-          self.titles[i] = self.move_article_to_front(v)
+          self.titles[i] = self.move_article_to_front(v[0])
 
       self.custom_titles = self.titles
 
@@ -812,7 +812,6 @@ class Chatbot:
         if len(date) != 0:
             date = date[0]
         else:
-            print movie_title
             date = ""
 
 
