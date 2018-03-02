@@ -786,6 +786,7 @@ class Chatbot:
         indices = []
         indices = [i for i, v in enumerate(self.titles)
                     if self.removeArticles(inpt_title) == self.removeArticles(v[0])]
+        #print self.titles[indices[0]]
         return indices
 
     def isTitleInLevel2(self, inpt_title):
