@@ -569,8 +569,6 @@ class Chatbot:
         self.usr_rating_vec.append((movie_index, .5, 'pos'))
         self.previous_sentiment = 'pos'
         response = self.getPosResponse(movie_index)
-        print("VEC LENGTH: " + str(len(self.usr_rating_vec)))
-        print("NUMBER_TILL_REC: " + str(self.NUMBER_TILL_REC))
         if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'str_pos':
@@ -1519,13 +1517,16 @@ class Chatbot:
           through a series of matrix calculations (where movie i is normalized in a vector
           and we have a matrix with the normalized user-rated movies).
         - Explicitly confirms spell check with user to make sure it's what they intended.
-        - Integrated multiple extras together. Spell checking works with foreign titles and alternative
-        titles. Non quotation mark titles also work with foreign titles and alternative titles.
-        - The non quotation movie title extraction has been polished to give back very few if any false positives
-        - We remember past movie titles and extensively query if user's feelings towards the movies change
-        as conversation goes on.
-        - Polished user experiences
-        - Tells a variety of jokes when prompted (You should try this out! :D) (Hint: Tell me a joke)
+        - Integrated multiple extras together. Spell checking works with foreign titles and
+          alternative titles. Non quotation mark titles also work with foreign titles and
+          alternative titles.
+        - The non quotation movie title extraction has been polished to give back very few if
+          any false positives.
+        - We remember past movie titles and extensively query if user's feelings towards the
+          movies change as conversation goes on.
+        - Polished user experiences.
+        - Tells a variety of jokes when prompted. (You should try this out! :D)
+          (Hint: Tell me a joke)
       """
 
     #############################################################################
