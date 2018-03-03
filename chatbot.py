@@ -275,7 +275,7 @@ class Chatbot:
 
         responses = []
         responses.append('I think I am getting to know you a bit better, and I want to blow you away with some amazing movie recommendations. ')
-        responses.append('Ok, I am ready to give you some movie recommendations! ')
+        responses.append('Alright, I am ready to give you some movie recommendations! ')
         responses.append('Get ready for the big movie recommendations reveal! ')
         responses.append('Almost ready to give you your recommendations! ')
         responses.append('Now I think I have a good sense of some movies you would love. ')
@@ -331,6 +331,9 @@ class Chatbot:
       else:
         for i in range(self.numRecs):
           movies_to_recommend += str(i + 1) + ') ' + self.titles[heapq.heappop(recommendations)[1]][0] + '\n'
+      # Re-set flags
+      self.use_genre = False
+      self.use_date_range = False
       return movies_to_recommend
 
 
@@ -340,7 +343,30 @@ class Chatbot:
 
       self.spellCheckPerformed2 = False
       if re.match(yes_regex, input):
-        return "Sweet!\n" + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
+
+        words = ["Sweet! ", "Awesome. ", "Thanks! ", "Ok, thank you! ", "Nice. "]
+        word = words[randint(0, len(words)-1)]
+
+        response = "" + word + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
+
+        # Add recommendation if enough ratings
+        if (len(self.usr_rating_vec) == self.numRatings):
+          self.get_recommend_date = True
+
+          responses = []
+          responses.append('I think I am getting to know you a bit better, and I want to blow you away with some amazing movie recommendations. ')
+          responses.append('Alright, I am ready to give you some movie recommendations! ')
+          responses.append('Get ready for the big movie recommendations reveal! ')
+          responses.append('Almost ready to give you your recommendations! ')
+          responses.append('Now I think I have a good sense of some movies you would love. ')
+          recommend_response = responses[randint(0, len(responses)-1)]
+          recommend_response += 'First, though, would you like movies from a specific time period? e.g. ranges (2000-2005 or 2000+ or no).'
+
+          response += '\n' + recommend_response
+        # Return our response plus our recommendation
+        return response
+        
       elif re.match(no_regex, input):
         return "Oops sorry for misunderstanding your query. Hopefully I'll understand the next movie better!"
       else:
@@ -357,18 +383,18 @@ class Chatbot:
       #self.give_rec = True
       if re.search(no_regex, input):
         responses = []
-        responses.append("No problem!")
-        responses.append("No worries!")
-        responses.append("Ok, thanks!")
+        responses.append("No problem!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
+        responses.append("No worries!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
+        responses.append("Ok, thanks!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
         return responses[randint(0, len(responses)-1)]
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quite'
+        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit'
       elif re.search(one_date_regex, input):
         self.date_range = [re.findall(one_date_regex, input)[0], 3000]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure). Use \'no\' to quite'
+        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure). Use \'no\' to quit'
       else:
         self.get_recommend_date = True
         self.get_recommend_genre = False
@@ -378,18 +404,19 @@ class Chatbot:
 
     def recommend_genre(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
-      self.recommend_genre = False
+      self.get_recommend_genre = False
       self.give_rec = True
       if re.search(no_regex, input):
         responses = []
         responses.append("No problem!")
         responses.append("No worries!")
         responses.append("Ok, thanks!")
+        self.use_genre = False
         return responses[randint(0, len(responses)-1)]
       else: # Assume input is genre!
         self.genre = input
         self.use_genre = True
-        return "Perfect! We can look for movies in this genre"
+        return "Perfect! We can look for movies in this genre."
 
 
     def updateResponse(self, input):
@@ -542,28 +569,30 @@ class Chatbot:
         self.usr_rating_vec.append((movie_index, .5, 'pos'))
         self.previous_sentiment = 'pos'
         response = self.getPosResponse(movie_index)
-        if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
+        print("VEC LENGTH: " + str(len(self.usr_rating_vec)))
+        print("NUMBER_TILL_REC: " + str(self.NUMBER_TILL_REC))
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'str_pos':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, 1, 'str_pos'))
         self.previous_sentiment = 'str_pos'
         response = self.getStrPosResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'neg':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, -.5, 'neg'))
         self.previous_sentiment = 'neg'
         response = self.getNegResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'str_neg': # Don't yet deal with changing the rating
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, -1, 'str_neg'))
         self.previous_sentiment = 'str_neg'
         response = self.getStrNegResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'none':
         #self.previous_movie = movie_index
@@ -579,7 +608,9 @@ class Chatbot:
           return self.processMovieAndSentiment(negate, movie_index, input)
         else:
           self.no_sentiment = True
-          return self.getNoneResponse(movie_index)
+          response = self.getNoneResponse(movie_index)
+          if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
+          return response
       else: # Unclear sentiment
         # Try to see if they are referencing previous shit
         # Meaning that we have not been able to extract sentiment. They could
