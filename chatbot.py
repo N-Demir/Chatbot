@@ -175,7 +175,7 @@ class Chatbot:
 
       # Process movie title
       temp = self.processTitle(input)
-      print "Temp: " + str(temp)
+      #print "Temp: " + str(temp)
       movie_tag = temp[0]
       old_input = input
       input = temp[1]
@@ -499,7 +499,7 @@ class Chatbot:
     def getArbitraryResponse(self, input):
       input = input.lower()
       input = re.sub(r'[!.?]', r'', input)
-      print "input: " + input
+      #print "input: " + input
 
       q0 = r'^hi|hello'
       q2 = r'what(?:\'s | is )your name'
@@ -1429,7 +1429,7 @@ class Chatbot:
       # Remove the last \n
       #movie_to_recomend = movie_to_recomend[:-1]
 
-      print "Recommend took", time.time() - start_time, "to run"
+      #print "Recommend took", time.time() - start_time, "to run"
 
       '''
       ##print top 50
