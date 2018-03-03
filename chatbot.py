@@ -1527,6 +1527,10 @@ class Chatbot:
         - Polished user experiences.
         - Tells a variety of jokes when prompted. (You should try this out! :D)
           (Hint: Tell me a joke)
+        - I think we put a lot of work into giving the user the best responses in a variety
+          of situations! Hopefully that shows in your tests!
+
+          Thank you!!
       """
 
     #############################################################################
