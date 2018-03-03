@@ -366,7 +366,7 @@ class Chatbot:
           response += '\n' + recommend_response
         # Return our response plus our recommendation
         return response
-        
+
       elif re.match(no_regex, input):
         return "Oops sorry for misunderstanding your query. Hopefully I'll understand the next movie better!"
       else:
@@ -1490,6 +1490,7 @@ class Chatbot:
       Welcome to our chatbot!
       We implemented the following creative features from the rubric:
         - Identifying movies without quotation marks or perfect capitalization
+            -> First letter of movie title does need to capitalized however
         - Fine-grained sentiment extraction
         - Spell-checking movie titles
         - Disambiguating movie titles for series and year ambiguities
@@ -1518,7 +1519,13 @@ class Chatbot:
           through a series of matrix calculations (where movie i is normalized in a vector
           and we have a matrix with the normalized user-rated movies).
         - Explicitly confirms spell check with user to make sure it's what they intended.
-        - Tells a variety of jokes when prompted.
+        - Integrated multiple extras together. Spell checking works with foreign titles and alternative
+        titles. Non quotation mark titles also work with foreign titles and alternative titles.
+        - The non quotation movie title extraction has been polished to give back very few if any false positives
+        - We remember past movie titles and extensively query if user's feelings towards the movies change
+        as conversation goes on.
+        - Polished user experiences
+        - Tells a variety of jokes when prompted (You should try this out! :D) (Hint: Tell me a joke)
       """
 
     #############################################################################
