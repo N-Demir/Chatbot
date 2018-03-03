@@ -383,18 +383,18 @@ class Chatbot:
       #self.give_rec = True
       if re.search(no_regex, input):
         responses = []
-        responses.append("No problem!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
-        responses.append("No worries!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
-        responses.append("Ok, thanks!\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit")
+        responses.append("No problem!\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\".")
+        responses.append("No worries!\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\".")
+        responses.append("Ok, thanks!\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\".")
         return responses[randint(0, len(responses)-1)]
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure) use \'no\' to quit'
+        return 'Awesome! We will take this into consideration.\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\"."'
       elif re.search(one_date_regex, input):
         self.date_range = [re.findall(one_date_regex, input)[0], 3000]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIs there a particular genre that you want e.g. (adventure). Use \'no\' to quit'
+        return 'Awesome! We will take this into consideration.\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\"."'
       else:
         self.get_recommend_date = True
         self.get_recommend_genre = False
@@ -1499,7 +1499,8 @@ class Chatbot:
         - Alternate/foreign titles
       We also implemented some "other features," described below.
         - Gives user the option to specify a range of dates for the recommendations.
-        - Gives user the option to choose a specific genre for the recommendations.
+        - Gives user the option to choose a specific genre for the recommendations. Assumes
+          user enters valid genre or "no".
         - Gives user a selection of movies to choose from if the input movie detected is
           part of a series.
         - Detects redundant input movies and update the user's rating if a different
