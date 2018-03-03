@@ -86,12 +86,12 @@ class Chatbot:
       self.stemLexicon()
       self.binarize()
 
-      self.negations = open("data/negations.txt", "r").read().splitlines()
-      self.punctuations = open('data/punctuation.txt', "r").read().splitlines()
-      self.strong_neg = open('data/strong_neg_words.txt', "r").read().splitlines()
-      self.strong_pos = open('data/strong_pos_words.txt', "r").read().splitlines()
-      self.intensifiers = open('data/intensifiers.txt', "r").read().splitlines()
-      self.jokes = open('data/jokes.txt', "r").read().splitlines()
+      self.negations = open("deps/negations.txt", "r").read().splitlines()
+      self.punctuations = open('deps/punctuation.txt', "r").read().splitlines()
+      self.strong_neg = open('deps/strong_neg_words.txt', "r").read().splitlines()
+      self.strong_pos = open('deps/strong_pos_words.txt', "r").read().splitlines()
+      self.intensifiers = open('deps/intensifiers.txt', "r").read().splitlines()
+      self.jokes = open('deps/jokes.txt', "r").read().splitlines()
       self.stemPos_Neg_Words()
 
 
@@ -383,18 +383,18 @@ class Chatbot:
       #self.give_rec = True
       if re.search(no_regex, input):
         responses = []
-        responses.append("No problem!\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\".")
-        responses.append("No worries!\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\".")
-        responses.append("Ok, thanks!\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\".")
+        responses.append("No problem!\nIf there is a particular genre that you want, e.g. (adventure), please enter it. Otherwise, enter \"no\".")
+        responses.append("No worries!\nIf there is a particular genre that you want, e.g. (adventure), please enter it. Otherwise, enter \"no\".")
+        responses.append("Ok, thanks!\nIf there is a particular genre that you want, e.g. (adventure), please enter it. Otherwise, enter \"no\".")
         return responses[randint(0, len(responses)-1)]
       elif re.search(date_range_regex, input):
         self.date_range = [re.findall(date_range_regex, input)[0][0], re.findall(date_range_regex, input)[0][1]]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\"."'
+        return 'Awesome! We will take this into consideration.\nIf there is a particular genre that you want, e.g. (adventure), please enter it. Otherwise, enter \"no\"."'
       elif re.search(one_date_regex, input):
         self.date_range = [re.findall(one_date_regex, input)[0], 3000]
         self.use_date_range = True
-        return 'Awesome! We will take this into consideration.\nIf there is a particular genre that you want, e.g. (adventure), enter it, otherwise enter \"no\"."'
+        return 'Awesome! We will take this into consideration.\nIf there is a particular genre that you want, e.g. (adventure), please enter it. Otherwise, enter \"no\"."'
       else:
         self.get_recommend_date = True
         self.get_recommend_genre = False
