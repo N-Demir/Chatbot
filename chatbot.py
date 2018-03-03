@@ -344,11 +344,11 @@ class Chatbot:
       self.spellCheckPerformed2 = False
       if re.match(yes_regex, input):
 
-        words = ["Sweet! ", "Awesome. ", "Great! ", "Thanks! ", "Ok, thank you! ", "Nice. "]
+        words = ["Sweet! ", "Awesome. ", "Thanks! ", "Ok, thank you! ", "Nice. "]
         word = words[randint(0, len(words)-1)]
 
         response = "" + word + self.processMovieAndSentiment(self.spell_check_sent, self.spell_check_index, self.spell_check_input)
-        if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
 
         # Add recommendation if enough ratings
         if (len(self.usr_rating_vec) == self.numRatings):
@@ -404,7 +404,7 @@ class Chatbot:
 
     def recommend_genre(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
-      self.recommend_genre = False
+      self.get_recommend_genre = False
       self.give_rec = True
       if re.search(no_regex, input):
         responses = []
@@ -416,7 +416,7 @@ class Chatbot:
       else: # Assume input is genre!
         self.genre = input
         self.use_genre = True
-        return "Perfect! We can look for movies in this genre"
+        return "Perfect! We can look for movies in this genre."
 
 
     def updateResponse(self, input):
@@ -571,28 +571,28 @@ class Chatbot:
         response = self.getPosResponse(movie_index)
         print("VEC LENGTH: " + str(len(self.usr_rating_vec)))
         print("NUMBER_TILL_REC: " + str(self.NUMBER_TILL_REC))
-        if len(self.usr_rating_vec) < self.NUMBER_TILL_REC: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'str_pos':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, 1, 'str_pos'))
         self.previous_sentiment = 'str_pos'
         response = self.getStrPosResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'neg':
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, -.5, 'neg'))
         self.previous_sentiment = 'neg'
         response = self.getNegResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'str_neg': # Don't yet deal with changing the rating
         self.no_sentiment = False
         self.usr_rating_vec.append((movie_index, -1, 'str_neg'))
         self.previous_sentiment = 'str_neg'
         response = self.getStrNegResponse(movie_index)
-        if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+        if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
         return response
       elif sentiment == 'none':
         #self.previous_movie = movie_index
@@ -609,7 +609,7 @@ class Chatbot:
         else:
           self.no_sentiment = True
           response = self.getNoneResponse(movie_index)
-          if len(self.usr_rating_vec) < self.numRecs: response += self.getAddRequest()
+          if len(self.usr_rating_vec) < self.numRatings: response += self.getAddRequest()
           return response
       else: # Unclear sentiment
         # Try to see if they are referencing previous shit
