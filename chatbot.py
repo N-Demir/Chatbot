@@ -404,7 +404,7 @@ class Chatbot:
 
     def recommend_genre(self, input):
       no_regex = r'(?:^[Nn]o|^[Nn]ope)'
-      self.recommend_genre = False
+      self.get_recommend_genre = False
       self.give_rec = True
       if re.search(no_regex, input):
         responses = []
